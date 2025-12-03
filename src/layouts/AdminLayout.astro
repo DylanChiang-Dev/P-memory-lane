@@ -1,0 +1,101 @@
+---
+import "../styles/global.css";
+import { Header } from "../components/layout/Header";
+
+interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <script is:inline>
+            if (
+                localStorage.theme === "dark" ||
+                (!("theme" in localStorage) &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches)
+            ) {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+        </script>
+    </head>
+    <body
+        class="min-h-screen flex bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300"
+    >
+        <!-- Sidebar -->
+        <aside
+            class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-white/5 hidden md:flex flex-col z-50"
+        >
+            <div
+                class="p-6 flex items-center gap-3 border-b border-zinc-200 dark:border-white/5"
+            >
+                <div
+                    class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold"
+                >
+                    M
+                </div>
+                <span
+                    class="font-bold text-xl text-zinc-900 dark:text-white tracking-tight"
+                    >Memory Lane</span
+                >
+            </div>
+
+            <nav class="flex-1 p-4 space-y-2">
+                <a
+                    href="/admin"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 font-medium"
+                >
+                    <span>📊</span> 概覽
+                </a>
+                <a
+                    href="/admin/habits"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                >
+                    <span>💪</span> 習慣管理
+                </a>
+                <a
+                    href="/admin/media"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                >
+                    <span>🎬</span> 媒體庫
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-zinc-200 dark:border-white/5">
+                <a
+                    href="/"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                >
+                    <span>⬅️</span> 返回首頁
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 min-h-screen">
+            <!-- Mobile Header -->
+            <div
+                class="md:hidden p-4 flex items-center justify-between bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/5"
+            >
+                <span class="font-bold text-lg text-zinc-900 dark:text-white"
+                    >Memory Lane Admin</span
+                >
+                <a href="/" class="text-sm text-zinc-500">Back</a>
+            </div>
+
+            <div class="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+                <slot />
+            </div>
+        </main>
+    </body>
+</html>

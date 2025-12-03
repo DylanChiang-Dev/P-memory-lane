@@ -1,0 +1,75 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { HabitTracker } from "../components/habits/HabitTracker";
+import { MediaRow } from "../components/media/MediaRow";
+
+// Fetch data for the current year
+const currentYear = new Date().getFullYear();
+---
+
+<Layout title="記憶巷弄">
+    <div class="space-y-16 pb-20">
+        <!-- Hero Section -->
+        <section
+            class="text-center space-y-6 py-12 relative px-4 overflow-hidden"
+        >
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] bg-teal-500/20 blur-[80px] md:blur-[120px] rounded-full pointer-events-none"
+            >
+            </div>
+            <h1
+                class="text-4xl md:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-white relative z-10"
+            >
+                設計你的 <span class="text-gradient-primary">生活</span>
+            </h1>
+            <p
+                class="text-sm md:text-lg text-zinc-400 max-w-2xl mx-auto relative z-10 px-4"
+            >
+                追蹤習慣，收藏美好。用最優雅的方式記錄生活點滴。
+            </p>
+        </section>
+
+        <!-- Habits Section -->
+        <section id="habits" class="px-4 md:px-0">
+            <HabitTracker initialYear={currentYear} client:load />
+        </section>
+
+        <!-- Media Library Section -->
+        <section id="media" class="space-y-12 px-4 md:px-0">
+            <div class="flex items-center gap-4 mb-8">
+                <h2
+                    class="text-2xl font-bold text-zinc-900 dark:text-white flex items-center gap-2"
+                >
+                    <span class="w-1 h-6 bg-teal-500 rounded-full"></span>
+                    媒體庫
+                </h2>
+                <div class="h-px bg-zinc-200 dark:bg-white/10 flex-grow"></div>
+            </div>
+
+            <MediaRow
+                title="最近看過的電影"
+                type="movie"
+                moreLink="/movies"
+                client:load
+            />
+            <MediaRow
+                title="正在追的劇集"
+                type="tv"
+                moreLink="/tv"
+                client:load
+            />
+            <MediaRow
+                title="閱讀清單"
+                type="book"
+                moreLink="/books"
+                client:load
+            />
+            <MediaRow
+                title="遊戲收藏"
+                type="game"
+                moreLink="/games"
+                client:load
+            />
+        </section>
+    </div>
+</Layout>
