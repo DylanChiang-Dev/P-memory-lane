@@ -170,29 +170,42 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
 // Helpers
 function getItemTitle(item: any, type: string) {
     if (!item) return '';
-    if (type === 'movie') return item.title;
-    if (type === 'tv' || type === 'documentary') return item.name;
-    if (type === 'anime') return item.title?.native || item.title?.romaji || item.title?.english || item.name || item.title;
-    if (type === 'book') return item.volumeInfo?.title || item.title;
-    if (type === 'game') return item.name;
-    if (type === 'podcast') return item.collectionName || item.title;
-    return item.title || item.name || 'Untitled';
+
+    // Handle string title first
+    if (typeof item.title === 'string') return item.title;
+
+    // Handle anime title object
+    if (type === 'anime' && item.title && typeof item.title === 'object') {
+        return item.title.native || item.title.romaji || item.title.english || item.name || '';
+    }
+
+    // Handle book volumeInfo
+    if (type === 'book' && item.volumeInfo?.title) return item.volumeInfo.title;
+
+    // Handle podcast collectionName
+    if (type === 'podcast') return item.collectionName || item.title || '';
+
+    // Default: try name, then title
+    return item.name || item.title || 'Untitled';
 }
 
 function getItemImage(item: any, type: string) {
     if (!item) return '/placeholder.png';
 
+    // Check unified cover_url field first (set by api.ts data flatten)
+    if (item.cover_url) return item.cover_url;
+
     if (type === 'movie' || type === 'documentary' || type === 'tv') {
         if (item.poster_path) return item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w200${item.poster_path}`;
-        return item.cover_url || item.image || '/placeholder.png';
+        return item.image || '/placeholder.png';
     }
-    if (type === 'anime') return item.coverImage?.large || item.coverImage?.medium || item.cover_url || '/placeholder.png';
-    if (type === 'book') return item.volumeInfo?.imageLinks?.thumbnail || item.cover_url || item.image || '/placeholder.png';
+    if (type === 'anime') return item.coverImage?.large || item.coverImage?.medium || '/placeholder.png';
+    if (type === 'book') return item.volumeInfo?.imageLinks?.thumbnail || item.image_url || '/placeholder.png';
     if (type === 'game') {
         if (item.cover?.image_id) return getIGDBImageUrl(item.cover.image_id);
-        return item.background_image || item.cover_url || '/placeholder.png';
+        return item.background_image || '/placeholder.png';
     }
-    if (type === 'podcast') return item.artworkUrl600 || item.artworkUrl100 || item.artwork_url || item.cover_url || '/placeholder.png';
+    if (type === 'podcast') return item.artworkUrl600 || item.artworkUrl100 || item.artwork_url || '/placeholder.png';
 
-    return item.cover_url || item.image || '/placeholder.png';
+    return item.image || '/placeholder.png';
 }

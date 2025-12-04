@@ -172,8 +172,39 @@ export async function fetchMediaItems(type: MediaType, status?: string) {
                 }
 
                 if (details) {
-                    // Merge details but preserve critical user fields (id, status)
-                    return { ...item, ...details, id: item.id, status: item.status };
+                    // Flatten nested objects from external APIs
+                    let flatDetails: any = { ...details };
+
+                    // Handle anime title object
+                    if (type === 'anime' && details.title && typeof details.title === 'object') {
+                        flatDetails.title = details.title.native || details.title.romaji || details.title.english || item.title;
+                    }
+                    // Handle anime coverImage object
+                    if (type === 'anime' && details.coverImage) {
+                        flatDetails.cover_url = details.coverImage.large || details.coverImage.medium;
+                        delete flatDetails.coverImage;
+                    }
+                    // Handle book volumeInfo object
+                    if (type === 'books' && details.volumeInfo) {
+                        flatDetails.title = details.volumeInfo.title || item.title;
+                        flatDetails.cover_url = details.volumeInfo.imageLinks?.thumbnail;
+                        flatDetails.authors = details.volumeInfo.authors;
+                        flatDetails.published_date = details.volumeInfo.publishedDate;
+                        delete flatDetails.volumeInfo;
+                    }
+                    // Handle game cover object
+                    if (type === 'games' && details.cover && typeof details.cover === 'object') {
+                        flatDetails.cover_url = flatDetails.cover_url || getIGDBImageUrl(details.cover.image_id);
+                        delete flatDetails.cover;
+                    }
+                    // Handle podcast artwork
+                    if (type === 'podcasts') {
+                        flatDetails.title = details.collectionName || item.title;
+                        flatDetails.cover_url = details.artworkUrl600 || details.artworkUrl100 || item.artwork_url;
+                    }
+
+                    // Merge details but preserve critical user fields (id, status, my_rating)
+                    return { ...item, ...flatDetails, id: item.id, status: item.status, my_rating: item.my_rating };
                 }
             } catch (e) {
                 console.error('Failed to enrich item:', item, e);
