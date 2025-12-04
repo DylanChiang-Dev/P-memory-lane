@@ -95,7 +95,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }
                     gutterSize={4}
                     transformDayElement={(element, value, index) => {
                         if (!value || value.value === 0) {
-                            return React.cloneElement(element, { style: { fill: '#27272a', rx: 2 } });
+                            // Use light gray for light mode, dark gray for dark mode
+                            return React.cloneElement(element, {
+                                style: { rx: 2 },
+                                className: 'fill-zinc-200 dark:fill-zinc-800'
+                            });
                         }
                         const intensity = getIntensity(value);
                         // @ts-ignore
