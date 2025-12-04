@@ -117,7 +117,7 @@ export const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({
                             <MediaCard
                                 key={item.id}
                                 item={item}
-                                mediaType={mediaType}
+                                type={getSingularType(mediaType)}
                                 viewMode={viewMode}
                             />
                         ))}
@@ -127,3 +127,16 @@ export const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({
         </div>
     );
 };
+
+function getSingularType(pluralType: string): any {
+    const map: Record<string, string> = {
+        'movies': 'movie',
+        'tv-shows': 'tv',
+        'books': 'book',
+        'games': 'game',
+        'podcasts': 'podcast',
+        'documentaries': 'documentary',
+        'anime': 'anime'
+    };
+    return map[pluralType] || pluralType;
+}
