@@ -163,9 +163,9 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                     {/* View All Card */}
                     <a
                         href={moreLink}
-                        className="flex-shrink-0 w-[140px] md:w-[160px] aspect-[2/3] rounded-xl border-2 border-dashed border-zinc-800 flex flex-col items-center justify-center gap-2 text-zinc-600 hover:text-white hover:border-zinc-600 hover:bg-zinc-900/50 transition-all cursor-pointer snap-start"
+                        className="flex-shrink-0 w-[140px] md:w-[160px] aspect-[2/3] rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 text-zinc-500 dark:text-zinc-600 hover:text-zinc-800 dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all cursor-pointer snap-start"
                     >
-                        <div className="p-3 bg-zinc-800 rounded-full">
+                        <div className="p-3 bg-zinc-200 dark:bg-zinc-800 rounded-full">
                             <ArrowRight size={20} />
                         </div>
                         <span className="text-sm font-medium">查看更多</span>
