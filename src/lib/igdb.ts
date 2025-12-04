@@ -29,12 +29,7 @@ export async function searchIGDB(query: string): Promise<IGDBGameResult[]> {
         return [];
     }
 
-    console.log('IGDB Search:', {
-        url: `${BASE_URL}/games`,
-        clientId: credentials.clientId,
-        tokenPrefix: credentials.accessToken.substring(0, 5) + '...',
-        tokenLength: credentials.accessToken.length
-    });
+
 
     try {
         const response = await fetch(`${BASE_URL}/games`, {

@@ -15,19 +15,7 @@ export const APISettings: React.FC = () => {
             try {
                 // Try to fetch from backend first
                 const settings = await fetchUserSettings();
-                let currentConfig = settings && settings.api_keys ? settings.api_keys : apiConfigManager.getConfig();
-
-                // FORCE FIX: Replace known invalid token
-                if (currentConfig.igdb_access_token === 'x2pdmmdlmuqy1i380kr8ezq7vg2xp4') {
-                    console.log('Detected invalid token, forcing update...');
-                    currentConfig = {
-                        ...currentConfig,
-                        igdb_access_token: 'o96j83dm2bx02p59jb3l2f5wm7jx5i'
-                    };
-                    // Save the fix immediately
-                    apiConfigManager.saveConfig(currentConfig);
-                }
-
+                const currentConfig = settings && settings.api_keys ? settings.api_keys : apiConfigManager.getConfig();
                 setConfig(currentConfig);
 
                 if (settings && settings.api_keys) {
@@ -36,17 +24,7 @@ export const APISettings: React.FC = () => {
                 }
             } catch (err) {
                 console.error('Failed to load settings:', err);
-                let localConfig = apiConfigManager.getConfig();
-
-                // FORCE FIX: Replace known invalid token (local fallback)
-                if (localConfig.igdb_access_token === 'x2pdmmdlmuqy1i380kr8ezq7vg2xp4') {
-                    localConfig = {
-                        ...localConfig,
-                        igdb_access_token: 'o96j83dm2bx02p59jb3l2f5wm7jx5i'
-                    };
-                    apiConfigManager.saveConfig(localConfig);
-                }
-
+                const localConfig = apiConfigManager.getConfig();
                 setConfig(localConfig);
             } finally {
                 setLoading(false);
