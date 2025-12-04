@@ -89,14 +89,14 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
                                 'bg-blue-500': habit.id === 'reading',
                                 'bg-green-500': habit.id === 'duolingo',
                             })}></div>
-                            <h2 className="text-2xl font-bold text-white">{habit.label}</h2>
+                            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">{habit.label}</h2>
                         </div>
 
                         <StatsCard stats={currentStats} />
 
                         <div className="bento-card p-4 md:p-6 overflow-hidden">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-zinc-200">年度熱力圖</h3>
+                                <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-200">年度熱力圖</h3>
                                 <div className="text-xs text-zinc-500 font-mono">{initialYear}</div>
                             </div>
                             <Heatmap data={currentHeatmap} year={initialYear} color={habit.color} />

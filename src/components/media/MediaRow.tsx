@@ -126,13 +126,13 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
     return (
         <div className="space-y-4 py-4">
             <div className="flex items-center justify-between px-4 md:px-0">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                     <span className={`w-1 h-5 rounded-full ${colorMap[type]}`}></span>
                     {title}
                 </h2>
                 <a
                     href={moreLink}
-                    className="group flex items-center gap-1 text-sm font-medium text-zinc-500 hover:text-white transition-colors"
+                    className="group flex items-center gap-1 text-sm font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors"
                 >
                     更多
                     <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />

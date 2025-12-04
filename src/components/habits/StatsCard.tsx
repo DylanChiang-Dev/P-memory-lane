@@ -15,7 +15,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
                 </div>
                 <p className="text-sm font-medium text-zinc-500">總天數</p>
                 <div>
-                    <p className="text-3xl font-bold text-white tracking-tight">{stats.total_days}</p>
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">{stats.total_days}</p>
                     <p className="text-xs text-zinc-500 mt-1">今年活躍天數</p>
                 </div>
             </div>
@@ -26,7 +26,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
                 </div>
                 <p className="text-sm font-medium text-zinc-500">總時長</p>
                 <div>
-                    <p className="text-3xl font-bold text-white tracking-tight">{Math.round(stats.total_minutes / 60)}<span className="text-sm text-zinc-600 ml-1">小時</span></p>
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">{Math.round(stats.total_minutes / 60)}<span className="text-sm text-zinc-600 ml-1">小時</span></p>
                     <p className="text-xs text-zinc-500 mt-1">{stats.total_minutes} 分鐘</p>
                 </div>
             </div>
@@ -37,7 +37,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
                 </div>
                 <p className="text-sm font-medium text-zinc-500">當前連續</p>
                 <div>
-                    <p className="text-3xl font-bold text-white tracking-tight">{stats.current_streak}</p>
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">{stats.current_streak}</p>
                     <p className="text-xs text-zinc-500 mt-1">當前連續天數</p>
                 </div>
             </div>
@@ -48,7 +48,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
                 </div>
                 <p className="text-sm font-medium text-zinc-500">最佳連續</p>
                 <div>
-                    <p className="text-3xl font-bold text-white tracking-tight">{stats.longest_streak}</p>
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">{stats.longest_streak}</p>
                     <p className="text-xs text-zinc-500 mt-1">最長連續天數</p>
                 </div>
             </div>
