@@ -1,4 +1,5 @@
-export const API_BASE_URL = "https://pyqapi.3331322.xyz";
+// Use relative path in development to leverage proxy, or full URL in production if needed
+export const API_BASE_URL = import.meta.env.DEV ? "" : "https://pyqapi.3331322.xyz";
 
 interface AuthResponse {
     user: { id: number; username: string };
@@ -28,6 +29,8 @@ export const auth = {
         if (typeof window === 'undefined') return;
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        // Dispatch custom event to notify AuthManager
+        window.dispatchEvent(new CustomEvent('auth:logout'));
     },
 
     isAuthenticated() {

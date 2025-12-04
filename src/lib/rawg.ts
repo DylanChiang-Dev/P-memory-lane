@@ -1,4 +1,5 @@
-const RAWG_API_KEY = import.meta.env.VITE_RAWG_API_KEY;
+import { apiConfigManager } from './apiConfig';
+
 const BASE_URL = 'https://api.rawg.io/api';
 
 export interface RAWGGameResult {
@@ -24,8 +25,10 @@ export interface RAWGResponse {
 }
 
 export async function searchRAWG(query: string): Promise<RAWGGameResult[]> {
+    const RAWG_API_KEY = apiConfigManager.getRAWGKey();
+
     if (!RAWG_API_KEY) {
-        console.warn('RAWG API Key is missing. Please set VITE_RAWG_API_KEY in your .env file.');
+        console.warn('RAWG API Key is missing. Please configure it in /admin/settings.');
         return [];
     }
 
@@ -43,5 +46,20 @@ export async function searchRAWG(query: string): Promise<RAWGGameResult[]> {
     } catch (error) {
         console.error('Error searching RAWG:', error);
         return [];
+    }
+}
+
+export async function getGameDetails(id: number): Promise<RAWGGameResult | null> {
+    const RAWG_API_KEY = apiConfigManager.getRAWGKey();
+    if (!RAWG_API_KEY) return null;
+
+    try {
+        const response = await fetch(`${BASE_URL}/games/${id}?key=${RAWG_API_KEY}`);
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching RAWG game details:', error);
+        return null;
     }
 }

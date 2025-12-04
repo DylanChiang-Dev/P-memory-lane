@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaLibraryPage } from "../components/media/MediaLibraryPage";
+---
+
+<Layout title="书籍 - 记忆巷弄">
+    <MediaLibraryPage
+        client:load
+        mediaType="books"
+        title="书籍"
+        description="读过的所有书籍"
+    />
+</Layout>

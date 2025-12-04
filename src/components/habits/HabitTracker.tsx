@@ -19,7 +19,7 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
         duolingo: { stats: Stats; heatmap: Activity[] };
     } | null>(null);
 
-    const loadData = async () => {
+    const loadData = async (retry = true) => {
         setLoading(true);
         try {
             const [
@@ -41,7 +41,12 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
                 duolingo: { stats: duolingoStats, heatmap: duolingoData },
             });
         } catch (error) {
-            if (error instanceof Error && error.message === 'Unauthorized') return;
+            if (error instanceof Error && error.message === 'Unauthorized' && retry) {
+                // Token was likely invalid and cleared by fetchWithAuth
+                // Retry once to fetch as public user
+                await loadData(false);
+                return;
+            }
             console.error('Failed to load habit data', error);
         } finally {
             setLoading(false);

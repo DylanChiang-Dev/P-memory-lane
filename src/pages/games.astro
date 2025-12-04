@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaLibraryPage } from "../components/media/MediaLibraryPage";
+---
+
+<Layout title="游戏 - 记忆巷弄">
+    <MediaLibraryPage
+        client:load
+        mediaType="games"
+        title="游戏"
+        description="玩过的所有游戏"
+    />
+</Layout>

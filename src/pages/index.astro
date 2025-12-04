@@ -50,26 +50,39 @@ const currentYear = new Date().getFullYear();
                 title="最近看過的電影"
                 type="movie"
                 moreLink="/movies"
-                client:load
+                client:only="react"
             />
             <MediaRow
                 title="正在追的劇集"
                 type="tv"
                 moreLink="/tv"
-                client:load
+                client:only="react"
             />
             <MediaRow
                 title="閱讀清單"
                 type="book"
                 moreLink="/books"
-                client:load
+                client:only="react"
             />
             <MediaRow
                 title="遊戲收藏"
                 type="game"
                 moreLink="/games"
-                client:load
+                client:only="react"
             />
+            <MediaRow
+                title="播客清单"
+                type="podcast"
+                moreLink="/podcasts"
+                client:only="react"
+            />
+            <MediaRow
+                title="節目"
+                type="documentary"
+                moreLink="/documentaries"
+                client:only="react"
+            />
+            <MediaRow title="动画" type="anime" moreLink="/anime" client:load />
         </section>
     </div>
 </Layout>

@@ -5,7 +5,7 @@ import { fetchMediaItems } from '../../lib/api';
 
 interface MediaRowProps {
     title: string;
-    type: 'movie' | 'tv' | 'book' | 'game';
+    type: 'movie' | 'tv' | 'book' | 'game' | 'podcast' | 'documentary' | 'anime';
     moreLink: string;
 }
 
@@ -14,20 +14,33 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
     const [items, setItems] = useState<MediaItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
-        const loadData = async () => {
+        const loadData = async (retry = true) => {
             setLoading(true);
+            setError(null);
             try {
                 // Map frontend type to API type
-                const apiType = type === 'movie' ? 'movies' :
-                    type === 'tv' ? 'tv-shows' :
-                        type === 'book' ? 'books' : 'games';
+                const apiType =
+                    type === 'movie' ? 'movies' :
+                        type === 'tv' ? 'tv-shows' :
+                            type === 'book' ? 'books' :
+                                type === 'game' ? 'games' :
+                                    type === 'podcast' ? 'podcasts' :
+                                        type === 'documentary' ? 'documentaries' :
+                                            'anime';
 
                 const data = await fetchMediaItems(apiType);
                 setItems(data);
-            } catch (error) {
-                if (error instanceof Error && error.message === 'Unauthorized') return;
-                console.error('Failed to load media items', error);
+            } catch (err) {
+                if (err instanceof Error && err.message === 'Unauthorized' && retry) {
+                    // Token was likely invalid and cleared by fetchWithAuth
+                    // Retry once to fetch as public user
+                    await loadData(false);
+                    return;
+                }
+                console.error('Failed to load media items', err);
             } finally {
                 setLoading(false);
             }
@@ -35,6 +48,33 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
 
         loadData();
     }, [type]);
+
+    // Retry logic for auth race conditions
+    useEffect(() => {
+        if (!loading && items.length === 0) {
+            const timer = setTimeout(() => {
+                const token = localStorage.getItem('access_token');
+                if (token) {
+                    // Retry fetching if we have a token but got no items (likely 401 or network error)
+                    fetchMediaItems(
+                        type === 'movie' ? 'movies' :
+                            type === 'tv' ? 'tv-shows' :
+                                type === 'book' ? 'books' :
+                                    type === 'game' ? 'games' :
+                                        type === 'podcast' ? 'podcasts' :
+                                            type === 'documentary' ? 'documentaries' :
+                                                'anime'
+                    ).then(data => {
+                        if (data.length > 0) {
+                            setItems(data);
+                            setError(null);
+                        }
+                    });
+                }
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, items.length, type]);
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollRef.current) {
@@ -57,18 +97,37 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
         );
     }
 
+    // Color mapping for different media types
+    const colorMap = {
+        movie: 'bg-blue-500',
+        tv: 'bg-purple-500',
+        book: 'bg-emerald-500',
+        game: 'bg-orange-500',
+        podcast: 'bg-pink-500',
+        documentary: 'bg-amber-500',
+        anime: 'bg-rose-500',
+    };
+
     if (items.length === 0) {
-        return null; // Don't show empty rows
+        // Show header even if empty, so it doesn't disappear
+        return (
+            <div className="space-y-4 py-4 opacity-50">
+                <div className="flex items-center justify-between px-4 md:px-0">
+                    <h2 className="text-xl font-bold text-zinc-500 flex items-center gap-2">
+                        <span className={`w-1 h-5 rounded-full ${colorMap[type]} grayscale`}></span>
+                        {title}
+                    </h2>
+                </div>
+                <div className="px-4 md:px-0 text-sm text-zinc-500">暂无內容</div>
+            </div>
+        );
     }
 
     return (
         <div className="space-y-4 py-4">
             <div className="flex items-center justify-between px-4 md:px-0">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <span className={`w-1 h-5 rounded-full ${type === 'movie' ? 'bg-blue-500' :
-                        type === 'tv' ? 'bg-purple-500' :
-                            type === 'book' ? 'bg-emerald-500' : 'bg-orange-500'
-                        }`}></span>
+                    <span className={`w-1 h-5 rounded-full ${colorMap[type]}`}></span>
                     {title}
                 </h2>
                 <a
@@ -96,7 +155,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     {items.map((item) => (
-                        <div key={item.id} className="snap-start flex-shrink-0">
+                        <div key={item.id} className="snap-start flex-shrink-0 w-[140px] md:w-[160px]">
                             <MediaCard item={item} type={type} />
                         </div>
                     ))}

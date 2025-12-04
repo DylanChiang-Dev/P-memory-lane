@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaLibraryPage } from "../components/media/MediaLibraryPage";
+---
+
+<Layout title="節目 - 记忆巷弄">
+    <MediaLibraryPage
+        client:load
+        mediaType="documentaries"
+        title="節目"
+        description="看过的综艺、访谈节目"
+    />
+</Layout>

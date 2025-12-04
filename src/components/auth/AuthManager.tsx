@@ -18,7 +18,12 @@ export const AuthManager: React.FC = () => {
 
         // Listen for storage events (in case of logout in another tab)
         window.addEventListener('storage', checkAuth);
-        return () => window.removeEventListener('storage', checkAuth);
+        // Listen for 401 logout event
+        window.addEventListener('auth:logout', checkAuth);
+        return () => {
+            window.removeEventListener('storage', checkAuth);
+            window.removeEventListener('auth:logout', checkAuth);
+        };
     }, []);
 
     const handleLoginSuccess = () => {

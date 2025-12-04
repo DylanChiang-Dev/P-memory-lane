@@ -273,6 +273,81 @@
   }
   ```
 
+### 4.5 播客 (Podcasts)
+
+#### 获取列表
+- **URL**: `/api/library/podcasts`
+- **Method**: `GET`
+
+#### 添加播客
+- **URL**: `/api/library/podcasts`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "podcast_id": "abc123",     // Listen Notes ID or custom ID
+    "title": "播客标题",
+    "host": "主播名",
+    "rss_feed": "https://...",
+    "my_rating": 9.0,
+    "episodes_listened": 10,
+    "total_episodes": 100,
+    "status": "listening"       // listening/completed/dropped/plan_to_listen
+  }
+  ```
+
+### 4.6 纪录片 (Documentaries)
+
+#### 获取列表
+- **URL**: `/api/library/documentaries`
+- **Method**: `GET`
+
+#### 添加纪录片
+- **URL**: `/api/library/documentaries`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "tmdb_id": 12345,           // 使用TMDB作为数据源
+    "my_rating": 8.5,
+    "my_review": "评价内容",
+    "status": "watched",         // want_to_watch/watching/watched
+    "release_date": "2020-01-01",
+    "completed_date": "2024-01-15"
+  }
+  ```
+
+### 4.7 动画 (Anime)
+
+#### 获取列表
+- **URL**: `/api/library/anime`
+- **Method**: `GET`
+
+#### 添加动画
+- **URL**: `/api/library/anime`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "anime_id": 9999,           // MyAnimeList or Anilist ID
+    "my_rating": 10.0,
+    "episodes_watched": 12,
+    "total_episodes": 24,
+    "status": "watching",        // watching/completed/dropped/plan_to_watch/on_hold
+    "first_air_date": "2023-04-01"
+  }
+  ```
+
+#### 更新观看进度
+- **URL**: `/api/library/anime/{id}/progress`
+- **Method**: `PATCH`
+- **Body**:
+  ```json
+  {
+    "episodes_watched": 13
+  }
+  ```
+
 ---
 
 ## 5. 每日打卡 (Daily Activities)

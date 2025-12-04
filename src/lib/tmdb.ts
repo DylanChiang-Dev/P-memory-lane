@@ -1,4 +1,5 @@
-const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+import { apiConfigManager } from './apiConfig';
+
 const BASE_URL = 'https://api.themoviedb.org/3';
 
 export interface TMDBResult {
@@ -21,8 +22,10 @@ export interface TMDBResponse {
 }
 
 export async function searchTMDB(query: string, type: 'movie' | 'tv' | 'multi' = 'multi'): Promise<TMDBResult[]> {
+    const TMDB_API_KEY = apiConfigManager.getTMDBKey();
+
     if (!TMDB_API_KEY) {
-        console.warn('TMDB API Key is missing. Please set VITE_TMDB_API_KEY in your .env file.');
+        console.warn('TMDB API Key is missing. Please configure it in /admin/settings.');
         return [];
     }
 
@@ -42,6 +45,29 @@ export async function searchTMDB(query: string, type: 'movie' | 'tv' | 'multi' =
     } catch (error) {
         console.error('Error searching TMDB:', error);
         return [];
+    }
+}
+
+// Search for TV shows (variety, talk show, reality) instead of documentaries
+export const searchDocumentaries = async (query: string): Promise<TMDBResult[]> => {
+    // Search TV shows - genre IDs: 10767 (Talk), 10764 (Reality), 10763 (News)
+    // Also include general TV search since Chinese variety shows may not have these genres
+    return await searchTMDB(query, 'tv');
+};
+
+export async function getTMDBDetails(id: number, type: 'movie' | 'tv'): Promise<TMDBResult | null> {
+    const TMDB_API_KEY = apiConfigManager.getTMDBKey();
+    if (!TMDB_API_KEY) return null;
+
+    try {
+        const response = await fetch(
+            `${BASE_URL}/${type}/${id}?api_key=${TMDB_API_KEY}&language=zh-TW`
+        );
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching TMDB details for ${type} ${id}:`, error);
+        return null;
     }
 }
 

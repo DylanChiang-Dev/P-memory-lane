@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Loader2, Film, Tv, Book, Gamepad2, Plus } from 'lucide-react';
-import { searchTMDB, getTMDBImageUrl, type TMDBResult } from '../../lib/tmdb';
+import { Search, X, Loader2, Film, Tv, Book, Gamepad2, Plus, Mic, Video, Clapperboard } from 'lucide-react';
+import { searchTMDB, getTMDBImageUrl, searchDocumentaries, type TMDBResult } from '../../lib/tmdb';
 import { searchGoogleBooks, getGoogleBookImageUrl, type GoogleBookResult } from '../../lib/googleBooks';
-import { searchRAWG, type RAWGGameResult } from '../../lib/rawg';
+import { searchIGDB, getIGDBImageUrl, type IGDBGameResult } from '../../lib/igdb';
+import { searchPodcasts, type ITunesPodcastResult } from '../../lib/itunes';
+import { searchAnime, type AnilistResult } from '../../lib/anilist';
 import { clsx } from 'clsx';
 
-type SearchType = 'movie' | 'tv' | 'book' | 'game';
+type SearchType = 'movie' | 'tv' | 'book' | 'game' | 'podcast' | 'documentary' | 'anime';
 
 interface SearchDialogProps {
     isOpen: boolean;
@@ -48,7 +50,16 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         data = await searchGoogleBooks(debouncedQuery);
                         break;
                     case 'game':
-                        data = await searchRAWG(debouncedQuery);
+                        data = await searchIGDB(debouncedQuery);
+                        break;
+                    case 'podcast':
+                        data = await searchPodcasts(debouncedQuery);
+                        break;
+                    case 'documentary':
+                        data = await searchDocumentaries(debouncedQuery);
+                        break;
+                    case 'anime':
+                        data = await searchAnime(debouncedQuery);
                         break;
                 }
                 setResults(data);
@@ -66,7 +77,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="w-full max-w-3xl bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="w-full max-w-4xl bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
 
                 {/* Header */}
                 <div className="p-4 border-b border-white/5 flex items-center gap-4">
@@ -84,12 +95,15 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                     </button>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex border-b border-white/5 bg-zinc-900/50">
+                {/* Tabs - Scrollable for mobile */}
+                <div className="flex border-b border-white/5 bg-zinc-900/50 overflow-x-auto no-scrollbar">
                     <TabButton active={type === 'movie'} onClick={() => setType('movie')} icon={<Film size={16} />} label="電影" />
                     <TabButton active={type === 'tv'} onClick={() => setType('tv')} icon={<Tv size={16} />} label="劇集" />
                     <TabButton active={type === 'book'} onClick={() => setType('book')} icon={<Book size={16} />} label="書籍" />
                     <TabButton active={type === 'game'} onClick={() => setType('game')} icon={<Gamepad2 size={16} />} label="遊戲" />
+                    <TabButton active={type === 'podcast'} onClick={() => setType('podcast')} icon={<Mic size={16} />} label="播客" />
+                    <TabButton active={type === 'documentary'} onClick={() => setType('documentary')} icon={<Video size={16} />} label="節目" />
+                    <TabButton active={type === 'anime'} onClick={() => setType('anime')} icon={<Clapperboard size={16} />} label="動畫" />
                 </div>
 
                 {/* Results */}
@@ -102,7 +116,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {results.map((item) => (
                                 <ResultItem
-                                    key={item.id}
+                                    key={item.id || item.collectionId}
                                     item={item}
                                     type={type}
                                     onSelect={() => onSelect(item, type)}
@@ -128,7 +142,7 @@ const TabButton = ({ active, onClick, icon, label }: any) => (
     <button
         onClick={onClick}
         className={clsx(
-            "flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium transition-colors border-b-2",
+            "flex-1 py-3 px-4 flex items-center justify-center gap-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap min-w-[80px]",
             active ? "text-white border-indigo-500 bg-white/5" : "text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-white/5"
         )}
     >
@@ -147,6 +161,7 @@ const ResultItem = ({ item, type, onSelect }: { item: any, type: SearchType, onS
             subtitle = movie.release_date?.split('-')[0] || 'Unknown Year';
             rating = movie.vote_average ? movie.vote_average.toFixed(1) : null;
             break;
+        case 'documentary':
         case 'tv':
             const tv = item as TMDBResult;
             title = tv.name;
@@ -162,17 +177,38 @@ const ResultItem = ({ item, type, onSelect }: { item: any, type: SearchType, onS
             rating = book.volumeInfo.averageRating;
             break;
         case 'game':
-            const game = item as RAWGGameResult;
+            const game = item as IGDBGameResult;
             title = game.name;
-            image = game.background_image || '';
-            subtitle = game.released?.split('-')[0] || 'Unknown Year';
-            rating = game.rating;
+            image = getIGDBImageUrl(game.cover?.image_id, 'cover_big');
+            subtitle = game.first_release_date ? new Date(game.first_release_date * 1000).getFullYear().toString() : 'Unknown Year';
+            rating = game.total_rating ? (game.total_rating / 10).toFixed(1) : null;
+            break;
+        case 'podcast':
+            const podcast = item as ITunesPodcastResult;
+            title = podcast.collectionName;
+            image = podcast.artworkUrl600;
+            subtitle = podcast.artistName;
+            rating = null;
+            break;
+        case 'anime':
+            const anime = item as AnilistResult;
+            title = anime.title?.native || anime.title?.english || anime.title?.romaji || 'Unknown Title';
+            image = anime.coverImage?.large || anime.coverImage?.medium || '';
+            subtitle = `${anime.startDate?.year || 'Unknown'} · ${anime.episodes || '?'} 集`;
+            rating = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
             break;
     }
 
     return (
         <div className="flex gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer border border-transparent hover:border-white/10" onClick={onSelect}>
-            <img src={image} alt={title} className="w-16 h-24 object-cover rounded-lg bg-zinc-800" />
+            <img
+                src={image || '/placeholder.png'}
+                alt={title}
+                className="w-16 h-24 object-cover rounded-lg bg-zinc-800 shrink-0"
+                onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.png';
+                }}
+            />
             <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <h4 className="font-medium text-white truncate">{title}</h4>
                 <p className="text-sm text-zinc-500 truncate">{subtitle}</p>
@@ -195,5 +231,8 @@ function getTypeName(type: SearchType) {
         case 'tv': return '劇集';
         case 'book': return '書籍';
         case 'game': return '遊戲';
+        case 'podcast': return '播客';
+        case 'documentary': return '節目';
+        case 'anime': return '動畫';
     }
 }

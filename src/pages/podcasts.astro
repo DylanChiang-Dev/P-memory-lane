@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaLibraryPage } from "../components/media/MediaLibraryPage";
+---
+
+<Layout title="播客 - 记忆巷弄">
+    <MediaLibraryPage
+        client:load
+        mediaType="podcasts"
+        title="播客"
+        description="听过的所有播客节目"
+    />
+</Layout>

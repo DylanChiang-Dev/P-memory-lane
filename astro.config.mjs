@@ -4,5 +4,22 @@ import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react(), tailwind()]
+  integrations: [react(), tailwind()],
+  vite: {
+    server: {
+      proxy: {
+        '/api': {
+          target: 'https://pyqapi.3331322.xyz',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/igdb-proxy': {
+          target: 'https://api.igdb.com/v4',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/igdb-proxy/, ''),
+          secure: true,
+        }
+      }
+    }
+  }
 });

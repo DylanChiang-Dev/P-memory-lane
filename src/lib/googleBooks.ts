@@ -44,7 +44,19 @@ export async function searchGoogleBooks(query: string): Promise<GoogleBookResult
 }
 
 export function getGoogleBookImageUrl(link: string | undefined): string {
-    if (!link) return '/placeholder-book.png';
+    if (!link) return '/placeholder.png';
     // Google Books image links are often http, upgrade to https
     return link.replace('http://', 'https://');
+}
+
+export async function getBookDetails(id: string): Promise<GoogleBookResult | null> {
+    try {
+        const response = await fetch(`${BASE_URL}/${id}`);
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching Google Book details:', error);
+        return null;
+    }
 }
