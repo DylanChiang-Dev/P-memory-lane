@@ -150,6 +150,7 @@ export const MediaTable: React.FC = () => {
                     my_rating: data.rating,
                     status: data.status,
                     review: data.review,
+                    my_review: data.review, // Alias for backend compatibility
                     completed_date: data.date,
                     // Type specific fields
                     platform: data.platform,
@@ -161,50 +162,69 @@ export const MediaTable: React.FC = () => {
                 };
                 result = await updateMediaItem(currentType, data.item.id, updateData);
             } else {
+                // Adding new item - Fetch full details for TMDB items to ensure we have all metadata
+                let itemDetails = data.item;
+                if (currentType === 'movies' || currentType === 'tv-shows' || currentType === 'documentaries') {
+                    try {
+                        const tmdbType = currentType === 'movies' ? 'movie' : 'tv';
+                        const details = await getTMDBDetails(data.item.id, tmdbType);
+                        if (details) {
+                            console.log('Fetched TMDB details:', details);
+                            itemDetails = { ...data.item, ...details };
+                        }
+                    } catch (err) {
+                        console.error('Error fetching TMDB details:', err);
+                        // Continue with existing data if fetch fails
+                    }
+                }
+
                 // Adding new item - Flatten data for POST request with complete metadata
                 const createData = {
                     // Common user fields
                     my_rating: data.rating,
                     status: data.status,
                     review: data.review,
+                    my_review: data.review, // Alias for backend compatibility
                     completed_date: data.date,
 
                     // Type specific ID and metadata mapping
                     ...(currentType === 'movies' && {
-                        tmdb_id: data.item.id,
-                        title: data.item.title,
-                        original_title: data.item.original_title,
-                        cover_image_cdn: data.item.poster_path ? `https://image.tmdb.org/t/p/w500${data.item.poster_path}` : null,
-                        backdrop_image_cdn: data.item.backdrop_path ? `https://image.tmdb.org/t/p/original${data.item.backdrop_path}` : null,
-                        overview: data.item.overview,
-                        genres: data.item.genres?.map((g: any) => g.name || g) || convertGenreIds(data.item.genre_ids),
-                        external_rating: data.item.vote_average,
-                        release_date: data.item.release_date,
-                        runtime: data.item.runtime
+                        tmdb_id: itemDetails.id,
+                        title: itemDetails.title,
+                        original_title: itemDetails.original_title,
+                        cover_image_cdn: itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null,
+                        backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
+                        overview: itemDetails.overview,
+                        genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
+                        external_rating: itemDetails.vote_average,
+                        release_date: itemDetails.release_date,
+                        runtime: itemDetails.runtime
                     }),
                     ...(currentType === 'tv-shows' && {
-                        tmdb_id: data.item.id,
-                        title: data.item.name,
-                        original_title: data.item.original_name,
-                        cover_image_cdn: data.item.poster_path ? `https://image.tmdb.org/t/p/w500${data.item.poster_path}` : null,
-                        backdrop_image_cdn: data.item.backdrop_path ? `https://image.tmdb.org/t/p/original${data.item.backdrop_path}` : null,
-                        overview: data.item.overview,
-                        genres: data.item.genres?.map((g: any) => g.name || g) || convertGenreIds(data.item.genre_ids),
-                        external_rating: data.item.vote_average,
-                        release_date: data.item.first_air_date,
-                        number_of_seasons: data.item.number_of_seasons,
-                        number_of_episodes: data.item.number_of_episodes
+                        tmdb_id: itemDetails.id,
+                        title: itemDetails.name,
+                        original_title: itemDetails.original_name,
+                        cover_image_cdn: itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null,
+                        backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
+                        overview: itemDetails.overview,
+                        genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
+                        external_rating: itemDetails.vote_average,
+                        release_date: itemDetails.first_air_date,
+                        number_of_seasons: itemDetails.number_of_seasons,
+                        number_of_episodes: itemDetails.number_of_episodes
                     }),
                     ...(currentType === 'documentaries' && {
-                        tmdb_id: data.item.id,
-                        title: data.item.name || data.item.title,
-                        original_title: data.item.original_name || data.item.original_title,
-                        cover_image_cdn: data.item.poster_path ? `https://image.tmdb.org/t/p/w500${data.item.poster_path}` : null,
-                        backdrop_image_cdn: data.item.backdrop_path ? `https://image.tmdb.org/t/p/original${data.item.backdrop_path}` : null,
-                        overview: data.item.overview,
-                        genres: data.item.genres?.map((g: any) => g.name || g) || convertGenreIds(data.item.genre_ids),
-                        external_rating: data.item.vote_average,
-                        release_date: data.item.first_air_date || data.item.release_date
+                        tmdb_id: itemDetails.id,
+                        title: itemDetails.name || itemDetails.title,
+                        original_title: itemDetails.original_name || itemDetails.original_title,
+                        cover_image_cdn: itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null,
+                        backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
+                        overview: itemDetails.overview,
+                        genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
+                        external_rating: itemDetails.vote_average,
+                        release_date: itemDetails.first_air_date || itemDetails.release_date,
+                        number_of_seasons: itemDetails.number_of_seasons,
+                        number_of_episodes: itemDetails.number_of_episodes
                     }),
                     ...(currentType === 'anime' && {
                         anilist_id: data.item.id,
