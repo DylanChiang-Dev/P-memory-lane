@@ -3,12 +3,14 @@ import { SearchDialog } from './SearchDialog';
 import { AddMediaModal } from './AddMediaModal';
 import { Plus } from 'lucide-react';
 import { addMediaItem } from '../../lib/api';
+import { useToast } from '../ui/Toast';
 
 export const MediaManager: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [selectedType, setSelectedType] = useState<any>('movie');
+    const { showToast } = useToast();
 
     const handleSelect = (item: any, type: any) => {
         setSelectedItem(item);
@@ -53,14 +55,14 @@ export const MediaManager: React.FC = () => {
             const result = await addMediaItem(apiType, payload);
 
             if (result.success) {
-                alert('已成功添加到媒體庫！');
-                window.location.reload(); // Reload to show new item
+                showToast('已成功添加到媒體庫！', 'success');
+                setTimeout(() => window.location.reload(), 1000); // Delay reload to show toast
             } else {
-                alert('添加失敗: ' + (result.error || '未知錯誤'));
+                showToast('添加失敗: ' + (result.error || '未知錯誤'), 'error', 8000);
             }
         } catch (error) {
             console.error('Error adding media:', error);
-            alert('發生錯誤，請稍後再試');
+            showToast('發生錯誤，請稍後再試', 'error', 8000);
         }
     };
 

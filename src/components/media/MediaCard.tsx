@@ -16,6 +16,7 @@ export interface MediaItem {
     first_air_date?: string;
     published_date?: string;
     status?: string;
+    completed_date?: string;
     // Specific fields
     host?: string;
     episodes_listened?: number;
@@ -36,6 +37,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
     const rating = item.my_rating || item.rating;
     const date = item.release_date || item.first_air_date || item.published_date;
     const year = date ? new Date(date).getFullYear() : '';
+    const completedDate = item.completed_date ? new Date(item.completed_date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
 
     // Type specific info
     const renderExtraInfo = () => {
@@ -97,10 +99,15 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
                     loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-
-                    <span className="text-[10px] text-zinc-300 uppercase tracking-wider font-medium">
-                        {year}
-                    </span>
+                    {completedDate ? (
+                        <span className="text-[10px] text-teal-400 font-medium">
+                            看完于 {completedDate}
+                        </span>
+                    ) : year ? (
+                        <span className="text-[10px] text-zinc-300 uppercase tracking-wider font-medium">
+                            {year}
+                        </span>
+                    ) : null}
                     {type === 'podcast' && item.episodes_listened !== undefined && (
                         <div className="w-full bg-zinc-700 h-1 rounded-full mt-2 overflow-hidden">
                             <div
@@ -171,18 +178,16 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
 function getItemTitle(item: any, type: string) {
     if (!item) return '';
 
-    // Handle string title first
-    if (typeof item.title === 'string') return item.title;
+    // 優先使用後端返回的 title 字段
+    if (typeof item.title === 'string' && item.title) return item.title;
 
-    // Handle anime title object
+    // Handle anime title object (搜索結果可能仍是這種格式)
     if (type === 'anime' && item.title && typeof item.title === 'object') {
         return item.title.native || item.title.romaji || item.title.english || item.name || '';
     }
 
-    // Handle book volumeInfo
+    // 向下兼容舊數據
     if (type === 'book' && item.volumeInfo?.title) return item.volumeInfo.title;
-
-    // Handle podcast collectionName
     if (type === 'podcast') return item.collectionName || item.title || '';
 
     // Default: try name, then title
@@ -192,11 +197,15 @@ function getItemTitle(item: any, type: string) {
 function getItemImage(item: any, type: string) {
     if (!item) return '/placeholder.png';
 
-    // Check unified cover_url field first (set by api.ts data flatten)
+    // 優先使用新字段：cover_image_cdn / cover_image_local
+    if (item.cover_image_cdn) return item.cover_image_cdn;
+    if (item.cover_image_local) return item.cover_image_local;
+
+    // 向下兼容舊數據和搜索結果
     if (item.cover_url) return item.cover_url;
 
     if (type === 'movie' || type === 'documentary' || type === 'tv') {
-        if (item.poster_path) return item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w200${item.poster_path}`;
+        if (item.poster_path) return item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
         return item.image || '/placeholder.png';
     }
     if (type === 'anime') return item.coverImage?.large || item.coverImage?.medium || '/placeholder.png';

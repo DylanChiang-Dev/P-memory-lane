@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Trash2, Plus, Film, Tv, Book, Gamepad2, Mic, Video, Sparkles, Eye, Pencil } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, MoreVertical, Search, Loader2, Film, Tv, Book, Gamepad2, Mic, Video, Sparkles } from 'lucide-react';
+import { clsx } from 'clsx';
 import { fetchMediaItems, deleteMediaItem, addMediaItem, updateMediaItem, type MediaType } from '../../lib/api';
 import { getTMDBDetails, getTMDBImageUrl } from '../../lib/tmdb';
 import { getPodcastDetails } from '../../lib/itunes';
@@ -8,6 +9,7 @@ import { getIGDBImageUrl } from '../../lib/igdb';
 import { SearchDialog } from '../media/SearchDialog';
 import { AddMediaModal } from '../media/AddMediaModal';
 import { DeleteConfirmModal } from '../media/DeleteConfirmModal';
+import { toast } from '../ui/Toast';
 
 const TABS = [
     { id: 'movies', label: '電影', icon: Film },
@@ -19,16 +21,38 @@ const TABS = [
     { id: 'anime', label: '動畫', icon: Sparkles },
 ];
 
+// TMDB Genre ID to Name mapping
+const TMDB_GENRES: Record<number, string> = {
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime',
+    99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History',
+    27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance', 878: 'Science Fiction',
+    10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western',
+    // TV genres
+    10759: 'Action & Adventure', 10762: 'Kids', 10763: 'News', 10764: 'Reality',
+    10765: 'Sci-Fi & Fantasy', 10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics'
+};
+
+// Helper to convert genre_ids to names
+const convertGenreIds = (genreIds: number[] | undefined): string[] | undefined => {
+    if (!genreIds) return undefined;
+    return genreIds.map(id => TMDB_GENRES[id] || `Unknown(${id})`);
+};
+
+
 export const MediaTable: React.FC = () => {
     const [activeTab, setActiveTab] = useState<MediaType>('movies');
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [modalMediaType, setModalMediaType] = useState<MediaType>('movies');
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ total: 0, total_pages: 0, limit: 20 });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [saving, setSaving] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     // Add Modal State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<any>(null);
-    const [modalMediaType, setModalMediaType] = useState<MediaType | null>(null);
 
     // Delete Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -37,18 +61,39 @@ export const MediaTable: React.FC = () => {
     const loadItems = async () => {
         setLoading(true);
         try {
-            const data = await fetchMediaItems(activeTab);
-            setItems(data);
+            const result = await fetchMediaItems(activeTab, undefined, page, 20, undefined, searchQuery);
+
+            if (Array.isArray(result)) {
+                // Fallback for old API response format if any
+                setItems(result);
+                setPagination({ total: result.length, total_pages: 1, limit: 1000 });
+            } else {
+                setItems(result.items || []);
+                const apiPagination = result.pagination || { total: 0, limit: 20 };
+                // Calculate total_pages if not provided by API
+                const totalPages = apiPagination.total_pages || Math.ceil((apiPagination.total || 0) / (apiPagination.limit || 20));
+
+                setPagination({
+                    total: apiPagination.total || 0,
+                    total_pages: totalPages,
+                    limit: apiPagination.limit || 20
+                });
+            }
         } catch (error) {
             console.error('Failed to load items:', error);
+            setItems([]);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadItems();
+        setPage(1); // Reset page when tab changes
     }, [activeTab]);
+
+    useEffect(() => {
+        loadItems();
+    }, [activeTab, page]);
 
     const handleDelete = (id: number) => {
         setItemToDelete(id);
@@ -58,11 +103,16 @@ export const MediaTable: React.FC = () => {
     const confirmDelete = async () => {
         if (!itemToDelete) return;
         try {
-            await deleteMediaItem(activeTab, itemToDelete);
-            setItems(items.filter(item => item.id !== itemToDelete));
+            const result = await deleteMediaItem(activeTab, itemToDelete);
+            if (result && result.success) {
+                setItems(items.filter(item => item.id !== itemToDelete));
+                toast.success('刪除成功');
+            } else {
+                toast.error('刪除失敗: ' + (result?.error || '未知錯誤'));
+            }
         } catch (error) {
             console.error('Delete failed:', error);
-            // alert('刪除失敗'); // Removed alert, maybe show toast later?
+            toast.error('刪除失敗，請檢查網絡連接');
         }
     };
 
@@ -91,6 +141,7 @@ export const MediaTable: React.FC = () => {
 
     const handleSaveMedia = async (data: any) => {
         const currentType = modalMediaType || activeTab;
+        setSaving(true);
         try {
             let result;
             if (data.item.my_rating !== undefined) {
@@ -99,7 +150,7 @@ export const MediaTable: React.FC = () => {
                     my_rating: data.rating,
                     status: data.status,
                     review: data.review,
-                    date: data.date,
+                    completed_date: data.date,
                     // Type specific fields
                     platform: data.platform,
                     current_season: data.season,
@@ -110,30 +161,106 @@ export const MediaTable: React.FC = () => {
                 };
                 result = await updateMediaItem(currentType, data.item.id, updateData);
             } else {
-                // Adding new item - Flatten data for POST request
+                // Adding new item - Flatten data for POST request with complete metadata
                 const createData = {
-                    // Common fields
+                    // Common user fields
                     my_rating: data.rating,
                     status: data.status,
                     review: data.review,
-                    date: data.date,
+                    completed_date: data.date,
 
-                    // ID mapping based on type
-                    ...(currentType === 'movies' && { tmdb_id: data.item.id, title: data.item.title, poster_path: data.item.poster_path, release_date: data.item.release_date }),
-                    ...(currentType === 'tv-shows' && { tmdb_id: data.item.id, name: data.item.name, poster_path: data.item.poster_path, first_air_date: data.item.first_air_date }),
+                    // Type specific ID and metadata mapping
+                    ...(currentType === 'movies' && {
+                        tmdb_id: data.item.id,
+                        title: data.item.title,
+                        original_title: data.item.original_title,
+                        cover_image_cdn: data.item.poster_path ? `https://image.tmdb.org/t/p/w500${data.item.poster_path}` : null,
+                        backdrop_image_cdn: data.item.backdrop_path ? `https://image.tmdb.org/t/p/original${data.item.backdrop_path}` : null,
+                        overview: data.item.overview,
+                        genres: data.item.genres?.map((g: any) => g.name || g) || convertGenreIds(data.item.genre_ids),
+                        external_rating: data.item.vote_average,
+                        release_date: data.item.release_date,
+                        runtime: data.item.runtime
+                    }),
+                    ...(currentType === 'tv-shows' && {
+                        tmdb_id: data.item.id,
+                        title: data.item.name,
+                        original_title: data.item.original_name,
+                        cover_image_cdn: data.item.poster_path ? `https://image.tmdb.org/t/p/w500${data.item.poster_path}` : null,
+                        backdrop_image_cdn: data.item.backdrop_path ? `https://image.tmdb.org/t/p/original${data.item.backdrop_path}` : null,
+                        overview: data.item.overview,
+                        genres: data.item.genres?.map((g: any) => g.name || g) || convertGenreIds(data.item.genre_ids),
+                        external_rating: data.item.vote_average,
+                        release_date: data.item.first_air_date,
+                        number_of_seasons: data.item.number_of_seasons,
+                        number_of_episodes: data.item.number_of_episodes
+                    }),
+                    ...(currentType === 'documentaries' && {
+                        tmdb_id: data.item.id,
+                        title: data.item.name || data.item.title,
+                        original_title: data.item.original_name || data.item.original_title,
+                        cover_image_cdn: data.item.poster_path ? `https://image.tmdb.org/t/p/w500${data.item.poster_path}` : null,
+                        backdrop_image_cdn: data.item.backdrop_path ? `https://image.tmdb.org/t/p/original${data.item.backdrop_path}` : null,
+                        overview: data.item.overview,
+                        genres: data.item.genres?.map((g: any) => g.name || g) || convertGenreIds(data.item.genre_ids),
+                        external_rating: data.item.vote_average,
+                        release_date: data.item.first_air_date || data.item.release_date
+                    }),
                     ...(currentType === 'anime' && {
                         anilist_id: data.item.id,
                         title: data.item.title?.native || data.item.title?.romaji || data.item.title?.english,
-                        cover_url: data.item.coverImage?.large || data.item.coverImage?.medium,
-                        release_date: data.item.startDate?.year ? `${data.item.startDate.year}-01-01` : null
+                        original_title: data.item.title?.romaji,
+                        cover_image_cdn: data.item.coverImage?.large || data.item.coverImage?.medium,
+                        backdrop_image_cdn: data.item.bannerImage,
+                        overview: data.item.description,
+                        genres: data.item.genres,
+                        external_rating: data.item.averageScore ? data.item.averageScore / 10 : null,
+                        release_date: data.item.startDate?.year ? `${data.item.startDate.year}-${String(data.item.startDate.month || 1).padStart(2, '0')}-${String(data.item.startDate.day || 1).padStart(2, '0')}` : null,
+                        episodes: data.item.episodes,
+                        format: data.item.format,
+                        studio: data.item.studios?.nodes?.[0]?.name
                     }),
-                    ...(currentType === 'podcasts' && { itunes_id: data.item.collectionId, title: data.item.collectionName, artwork_url: data.item.artworkUrl600, release_date: data.item.releaseDate }),
-                    ...(currentType === 'documentaries' && { tmdb_id: data.item.id, name: data.item.name, poster_path: data.item.poster_path, first_air_date: data.item.first_air_date }),
-                    // Books and Games might need specific ID fields if backend requires them, assuming google_books_id / rawg_id or similar
-                    ...(currentType === 'books' && { google_books_id: data.item.id, title: data.item.volumeInfo?.title, authors: data.item.volumeInfo?.authors, published_date: data.item.volumeInfo?.publishedDate, image_url: data.item.volumeInfo?.imageLinks?.thumbnail }),
-                    ...(currentType === 'games' && { igdb_id: data.item.id, name: data.item.name, cover_url: data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null, released: data.item.first_release_date ? new Date(data.item.first_release_date * 1000).toISOString().split('T')[0] : null }),
+                    ...(currentType === 'books' && {
+                        google_books_id: data.item.id,
+                        title: data.item.volumeInfo?.title,
+                        original_title: data.item.volumeInfo?.title,
+                        cover_image_cdn: data.item.volumeInfo?.imageLinks?.thumbnail?.replace('http:', 'https:'),
+                        overview: data.item.volumeInfo?.description,
+                        genres: data.item.volumeInfo?.categories,
+                        external_rating: data.item.volumeInfo?.averageRating,
+                        release_date: data.item.volumeInfo?.publishedDate,
+                        authors: data.item.volumeInfo?.authors,
+                        publisher: data.item.volumeInfo?.publisher,
+                        page_count: data.item.volumeInfo?.pageCount,
+                        isbn_10: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_10')?.identifier,
+                        isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
+                    }),
+                    ...(currentType === 'games' && {
+                        igdb_id: data.item.id,
+                        title: data.item.name,
+                        cover_image_cdn: data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null,
+                        backdrop_image_cdn: data.item.screenshots?.[0]?.image_id ? getIGDBImageUrl(data.item.screenshots[0].image_id, 'screenshot_med') : null,
+                        overview: data.item.summary,
+                        genres: data.item.genres?.map((g: any) => g.name),
+                        external_rating: data.item.rating ? data.item.rating / 10 : null,
+                        release_date: data.item.first_release_date ? new Date(data.item.first_release_date * 1000).toISOString().split('T')[0] : null,
+                        platforms: data.item.platforms?.map((p: any) => p.name),
+                        developers: data.item.involved_companies?.filter((c: any) => c.developer)?.map((c: any) => c.company?.name),
+                        publishers: data.item.involved_companies?.filter((c: any) => c.publisher)?.map((c: any) => c.company?.name)
+                    }),
+                    ...(currentType === 'podcasts' && {
+                        itunes_id: data.item.collectionId,
+                        title: data.item.collectionName,
+                        cover_image_cdn: data.item.artworkUrl600 || data.item.artworkUrl100,
+                        overview: data.item.description,
+                        genres: data.item.genres,
+                        release_date: data.item.releaseDate,
+                        artist_name: data.item.artistName,
+                        feed_url: data.item.feedUrl,
+                        episode_count: data.item.trackCount
+                    }),
 
-                    // Type specific fields
+                    // Type specific user fields
                     platform: data.platform,
                     current_season: data.season,
                     current_episode: data.episode,
@@ -146,23 +273,92 @@ export const MediaTable: React.FC = () => {
 
             if (result && result.success) {
                 setIsAddModalOpen(false);
+                toast.success('保存成功！');
                 loadItems();
             } else {
-                alert('保存失敗: ' + (result?.error || '未知錯誤'));
-                if (result?.error === 'Network error' || result?.error === 'Unauthorized') {
-                    // Optional: Redirect to login or show login modal
-                    // window.location.href = '/admin/login'; // Removed: causing 404
-                    console.warn('Save failed due to auth or network error');
+                const errorMsg = result?.error || '未知錯誤';
+                if (errorMsg.includes('already in library')) {
+                    toast.warning('該項目已在您的媒體庫中，正在為您查找...');
+
+                    // Attempt to find the existing item
+                    try {
+                        const titleToSearch = data.item.title || data.item.name || data.item.collectionName;
+                        if (titleToSearch) {
+                            const searchResult = await fetchMediaItems(currentType, undefined, 1, 1, undefined, titleToSearch);
+                            const foundItems = Array.isArray(searchResult) ? searchResult : (searchResult.items || []);
+
+                            if (foundItems.length > 0) {
+                                // Find exact match if possible, otherwise take the first one
+                                const exactMatch = foundItems.find((i: any) =>
+                                    (i.title === titleToSearch) ||
+                                    (i.name === titleToSearch) ||
+                                    (i.tmdb_id === data.item.id) // Also check ID in search results if returned
+                                );
+                                const targetItem = exactMatch || foundItems[0];
+
+                                setSelectedItem(targetItem);
+                                setModalMediaType(currentType);
+                                setIsAddModalOpen(true);
+                                toast.info(`已為您打開現有項目: ${targetItem.title || targetItem.name}`);
+                            } else {
+                                // Title search failed, try Deep Scan by ID
+                                toast.info('標題搜索失敗，正在全庫深度掃描 ID (這可能需要一點時間)...', 5000);
+
+                                const targetId = data.item.id;
+                                let page = 1;
+                                let found = null;
+                                let hasMorePages = true;
+
+                                while (!found && hasMorePages) {
+                                    // Use default limit (20) to avoid backend constraints
+                                    const res = await fetchMediaItems(currentType, undefined, page, 20);
+                                    const items = Array.isArray(res) ? res : res.items;
+
+                                    if (items.length === 0) {
+                                        hasMorePages = false;
+                                        break;
+                                    }
+
+                                    found = items.find((i: any) => {
+                                        if (currentType === 'movies' || currentType === 'tv-shows' || currentType === 'documentaries') return i.tmdb_id == targetId;
+                                        if (currentType === 'anime') return i.anilist_id == targetId;
+                                        if (currentType === 'podcasts') return i.itunes_id == targetId;
+                                        if (currentType === 'games') return i.igdb_id == targetId;
+                                        if (currentType === 'books') return i.google_books_id == targetId;
+                                        return false;
+                                    });
+
+                                    if (found) break;
+                                    page++;
+                                }
+
+                                if (found) {
+                                    setSelectedItem(found);
+                                    setModalMediaType(currentType);
+                                    setIsAddModalOpen(true);
+                                    toast.success(`已定位到項目: ${found.title || found.name}`);
+                                } else {
+                                    toast.error(`無法定位項目 (ID: ${targetId})。請確認它是否在其他分類中 (如動畫)。`);
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error finding duplicate:', err);
+                        toast.error('無法定位現有項目');
+                    }
+                } else {
+                    toast.error('保存失敗: ' + errorMsg);
                 }
             }
         } catch (error) {
             console.error('Failed to save media:', error);
-            alert('保存失敗');
+            toast.error('保存失敗，請檢查網絡連接');
+        } finally {
+            setSaving(false);
         }
     };
 
     const getPreviewUrl = (type: MediaType, id: number) => {
-        // Map internal type to URL path
         const map: Record<string, string> = {
             'movies': 'movies',
             'tv-shows': 'tv',
@@ -172,45 +368,65 @@ export const MediaTable: React.FC = () => {
             'documentaries': 'documentaries',
             'anime': 'anime'
         };
-        return `/${map[type] || type}/${id}`; // Assuming detail pages use ID
-        // Wait, detail pages currently don't exist for individual items in this project structure?
-        // The user request said "Preview... view the public page".
-        // The project has /movies, /tv etc which list items.
-        // Does it have detail pages?
-        // Checking file list... /src/pages/movies.astro exists. /src/pages/movies/[id].astro?
-        // I don't see dynamic routes for details in the file list I saw earlier.
-        // Let's check if detail pages exist.
-        // If not, maybe preview just links to the list page?
-        // User said: "Preview... click eye icon... jump to that item's detail page (e.g. /movies/123)".
-        // I should assume they exist or will exist.
+        return `/${map[type] || type}/${id}`;
     };
 
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery !== undefined) {
+                setPage(1);
+                loadItems();
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     return (
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 rounded-3xl overflow-hidden flex flex-col h-[600px]">
-            {/* Header */}
-            <div className="p-6 border-b border-zinc-200 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 p-1 rounded-xl overflow-x-auto no-scrollbar">
-                    {TABS.map(tab => (
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-white/5 overflow-hidden">
+            {/* Tabs & Actions */}
+            <div className="p-4 border-b border-zinc-200 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+                    {(['movies', 'tv-shows', 'books', 'games', 'podcasts', 'documentaries', 'anime'] as const).map((type) => (
                         <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as MediaType)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id
-                                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }`}
+                            key={type}
+                            onClick={() => setActiveTab(type)}
+                            className={clsx(
+                                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
+                                activeTab === type
+                                    ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md"
+                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5"
+                            )}
                         >
-                            <tab.icon size={16} />
-                            {tab.label}
+                            {type === 'tv-shows' ? '劇集' :
+                                type === 'movies' ? '電影' :
+                                    type === 'books' ? '書籍' :
+                                        type === 'games' ? '遊戲' :
+                                            type === 'podcasts' ? '播客' :
+                                                type === 'documentaries' ? '節目' : '動畫'}
                         </button>
                     ))}
                 </div>
-                <button
-                    onClick={() => setIsSearchOpen(true)}
-                    className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-medium shadow-lg shadow-teal-500/20 transition-all active:scale-95 flex items-center gap-2"
-                >
-                    <Plus size={18} />
-                    添加新項目
-                </button>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="搜索媒體庫..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-black/20 border border-zinc-200 dark:border-white/10 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 transition-all"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setIsSearchOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors shadow-lg shadow-emerald-500/20 whitespace-nowrap"
+                    >
+                        <Plus size={16} />
+                        <span>添加新項目</span>
+                    </button>
+                </div>
             </div>
 
             {/* Table */}
@@ -352,6 +568,34 @@ export const MediaTable: React.FC = () => {
                 </table>
             </div>
 
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+                <div className="p-4 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                        顯示 {(page - 1) * pagination.limit + 1} 到 {Math.min(page * pagination.limit, pagination.total)} 條，共 {pagination.total} 條
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="px-3 py-1 rounded-lg border border-zinc-200 dark:border-white/10 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-zinc-700 dark:text-zinc-300"
+                        >
+                            上一頁
+                        </button>
+                        <span className="text-sm font-medium px-2 text-zinc-700 dark:text-zinc-300">
+                            {page} / {pagination.total_pages}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(pagination.total_pages, p + 1))}
+                            disabled={page === pagination.total_pages}
+                            className="px-3 py-1 rounded-lg border border-zinc-200 dark:border-white/10 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-zinc-700 dark:text-zinc-300"
+                        >
+                            下一頁
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <SearchDialog
                 isOpen={isSearchOpen}
                 onClose={() => setIsSearchOpen(false)}
@@ -364,6 +608,8 @@ export const MediaTable: React.FC = () => {
                 item={selectedItem}
                 type={modalMediaType || activeTab}
                 onSave={handleSaveMedia}
+                saving={saving}
+                onDelete={handleDelete}
             />
 
             <DeleteConfirmModal
@@ -379,29 +625,41 @@ export const MediaTable: React.FC = () => {
 // Helpers
 function getItemTitle(item: any, type: MediaType) {
     if (!item) return '';
-    if (type === 'movies') return item.title;
-    if (type === 'tv-shows' || type === 'documentaries') return item.name;
-    if (type === 'anime') return item.title?.native || item.title?.romaji || item.title?.english || item.name || item.title;
+
+    // 優先使用後端返回的 title 字段
+    if (typeof item.title === 'string' && item.title) return item.title;
+
+    // 向下兼容舊數據和搜索結果
+    if (type === 'tv-shows' || type === 'documentaries') return item.name || item.title;
+    if (type === 'anime') return item.title?.native || item.title?.romaji || item.title?.english || item.name;
     if (type === 'books') return item.volumeInfo?.title || item.title;
-    if (type === 'games') return item.name;
+    if (type === 'games') return item.name || item.title;
     if (type === 'podcasts') return item.collectionName || item.title;
+
     return item.title || item.name || 'Unknown Title';
 }
 
 function getItemImage(item: any, type: MediaType) {
     if (!item) return '/placeholder.png';
 
+    // 優先使用新字段：cover_image_cdn / cover_image_local
+    if (item.cover_image_cdn) return item.cover_image_cdn;
+    if (item.cover_image_local) return item.cover_image_local;
+
+    // 向下兼容舊數據和搜索結果
+    if (item.cover_url) return item.cover_url;
+
     if (type === 'movies' || type === 'documentaries' || type === 'tv-shows') {
-        if (item.poster_path) return item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w200${item.poster_path}`;
-        return item.cover_url || item.image || '/placeholder.png';
+        if (item.poster_path) return item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+        return item.image || '/placeholder.png';
     }
-    if (type === 'anime') return item.coverImage?.large || item.coverImage?.medium || item.cover_url || '/placeholder.png';
-    if (type === 'books') return item.volumeInfo?.imageLinks?.thumbnail || item.cover_url || item.image || '/placeholder.png';
+    if (type === 'anime') return item.coverImage?.large || item.coverImage?.medium || '/placeholder.png';
+    if (type === 'books') return item.volumeInfo?.imageLinks?.thumbnail || item.image || '/placeholder.png';
     if (type === 'games') {
         if (item.cover?.image_id) return getIGDBImageUrl(item.cover.image_id);
-        return item.background_image || item.cover_url || '/placeholder.png';
+        return item.background_image || '/placeholder.png';
     }
-    if (type === 'podcasts') return item.artworkUrl600 || item.artworkUrl100 || item.artwork_url || item.cover_url || '/placeholder.png';
+    if (type === 'podcasts') return item.artworkUrl600 || item.artworkUrl100 || item.artwork_url || '/placeholder.png';
 
-    return item.cover_url || item.image || '/placeholder.png';
+    return item.image || '/placeholder.png';
 }

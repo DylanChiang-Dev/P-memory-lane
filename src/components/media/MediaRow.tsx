@@ -31,8 +31,12 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                                         type === 'documentary' ? 'documentaries' :
                                             'anime';
 
-                const data = await fetchMediaItems(apiType);
-                setItems(data);
+                const result = await fetchMediaItems(apiType, undefined, 1, 20, 'completed_date_desc');
+                if (Array.isArray(result)) {
+                    setItems(result);
+                } else {
+                    setItems(result.items || []);
+                }
             } catch (err) {
                 if (err instanceof Error && err.message === 'Unauthorized' && retry) {
                     // Token was likely invalid and cleared by fetchWithAuth
@@ -63,10 +67,15 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                                     type === 'game' ? 'games' :
                                         type === 'podcast' ? 'podcasts' :
                                             type === 'documentary' ? 'documentaries' :
-                                                'anime'
-                    ).then(data => {
-                        if (data.length > 0) {
-                            setItems(data);
+                                                'anime',
+                        undefined,
+                        1,
+                        20,
+                        'completed_date_desc'
+                    ).then(result => {
+                        const items = Array.isArray(result) ? result : (result.items || []);
+                        if (items.length > 0) {
+                            setItems(items);
                             setError(null);
                         }
                     });

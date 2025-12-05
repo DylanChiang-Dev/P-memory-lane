@@ -22,23 +22,63 @@ export interface Stats {
 }
 
 // Helper to fetch with auth header
+// Helper to fetch with auth header
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-    const token = auth.getAccessToken();
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...options.headers,
-    };
+    let token = auth.getAccessToken();
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const getHeaders = (t: string | null) => ({
+        'Content-Type': 'application/json',
+        ...(t ? { 'Authorization': `Bearer ${t}` } : {}),
+        ...options.headers,
+    });
+
+    let response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        headers,
+        headers: getHeaders(token),
     });
 
     if (response.status === 401) {
-        // Token expired or invalid
+        // Token might be expired, try to refresh
+        const refreshToken = auth.getRefreshToken();
+
+        if (refreshToken) {
+            try {
+                // Call refresh endpoint
+                const refreshResponse = await fetch(`${API_BASE_URL}/api/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refreshToken }),
+                });
+
+                if (refreshResponse.ok) {
+                    const data = await refreshResponse.json();
+                    if (data.success && data.data.access_token) {
+                        // Update tokens
+                        auth.setTokens(data.data.access_token, data.data.refresh_token || refreshToken);
+
+                        // Retry original request with new token
+                        token = data.data.access_token;
+                        response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                            ...options,
+                            headers: getHeaders(token),
+                        });
+
+                        // If it's still 401, then we really are unauthorized
+                        if (response.status === 401) {
+                            auth.clearTokens();
+                            throw new Error('Unauthorized');
+                        }
+
+                        return response;
+                    }
+                }
+            } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+            }
+        }
+
+        // If we get here, refresh failed or no refresh token
         auth.clearTokens();
-        // Do not reload, let AuthManager handle the UI
         throw new Error('Unauthorized');
     }
 
@@ -120,112 +160,56 @@ const MEDIA_TYPE_API_MAP: Record<MediaType, string> = {
 };
 
 // Media Library API
-export async function fetchMediaItems(type: MediaType, status?: string) {
+export async function fetchMediaItems(type: MediaType, status?: string, page: number = 1, limit: number = 20, sort?: string, search?: string) {
     try {
         const apiType = MEDIA_TYPE_API_MAP[type];
-        const url = status
-            ? `/api/library/${apiType}?status=${status}`
-            : `/api/library/${apiType}`;
+        let url = `/api/library/${apiType}?page=${page}&limit=${limit}`;
+        if (status) {
+            url += `&status=${status}`;
+        }
+        if (sort) {
+            url += `&sort=${sort}`;
+        }
+        if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+        }
+
         const response = await fetchWithAuth(url);
-        if (!response.ok) return [];
+        if (!response.ok) return { items: [], pagination: { page: 1, limit: 20, total: 0, total_pages: 0 } };
         const json = await response.json();
 
         const items = json.success ? json.data.items : [];
+        const pagination = json.success ? json.data.pagination : { page: 1, limit: 20, total: 0, total_pages: 0 };
 
-        // Enrich items with metadata
-        return await Promise.all(items.map(async (item: any) => {
-            // If we already have a full URL for poster/cover, assume it's good
-            if (item.poster_path?.startsWith('http') || item.cover_image?.startsWith('http')) return item;
+        // 後端已返回完整元數據，無需客戶端 enrichment
+        // Backend now returns complete metadata (title, cover_image_cdn, overview, etc.)
+        return { items, pagination };
 
-            try {
-                let details: any = null;
-
-                if (type === 'movies' && item.tmdb_id) {
-                    details = await getTMDBDetails(item.tmdb_id, 'movie');
-                    if (details?.poster_path) {
-                        details.poster_path = getTMDBImageUrl(details.poster_path);
-                    }
-                } else if (type === 'tv-shows' && item.tmdb_id) {
-                    details = await getTMDBDetails(item.tmdb_id, 'tv');
-                    if (details?.poster_path) {
-                        details.poster_path = getTMDBImageUrl(details.poster_path);
-                    }
-                } else if (type === 'documentaries' && item.tmdb_id) {
-                    details = await getTMDBDetails(item.tmdb_id, 'tv');
-                    if (details?.poster_path) {
-                        details.poster_path = getTMDBImageUrl(details.poster_path);
-                    }
-                } else if (type === 'podcasts' && item.itunes_id) {
-                    details = await getPodcastDetails(item.itunes_id);
-                } else if (type === 'anime' && item.anilist_id) {
-                    details = await getAnimeDetails(item.anilist_id);
-                } else if (type === 'books' && item.google_books_id) {
-                    details = await getBookDetails(item.google_books_id);
-                } else if (type === 'games' && item.igdb_id) {
-                    details = await getIGDBGameDetails(item.igdb_id);
-                    if (details?.cover?.image_id) {
-                        details.cover_url = getIGDBImageUrl(details.cover.image_id);
-                    }
-                } else if (type === 'games' && item.rawg_id) {
-                    // Fallback for existing items
-                    details = await getGameDetails(item.rawg_id);
-                }
-
-                if (details) {
-                    // Flatten nested objects from external APIs
-                    let flatDetails: any = { ...details };
-
-                    // Handle anime title object
-                    if (type === 'anime' && details.title && typeof details.title === 'object') {
-                        flatDetails.title = details.title.native || details.title.romaji || details.title.english || item.title;
-                    }
-                    // Handle anime coverImage object
-                    if (type === 'anime' && details.coverImage) {
-                        flatDetails.cover_url = details.coverImage.large || details.coverImage.medium;
-                        delete flatDetails.coverImage;
-                    }
-                    // Handle book volumeInfo object
-                    if (type === 'books' && details.volumeInfo) {
-                        flatDetails.title = details.volumeInfo.title || item.title;
-                        flatDetails.cover_url = details.volumeInfo.imageLinks?.thumbnail;
-                        flatDetails.authors = details.volumeInfo.authors;
-                        flatDetails.published_date = details.volumeInfo.publishedDate;
-                        delete flatDetails.volumeInfo;
-                    }
-                    // Handle game cover object
-                    if (type === 'games' && details.cover && typeof details.cover === 'object') {
-                        flatDetails.cover_url = flatDetails.cover_url || getIGDBImageUrl(details.cover.image_id);
-                        delete flatDetails.cover;
-                    }
-                    // Handle podcast artwork
-                    if (type === 'podcasts') {
-                        flatDetails.title = details.collectionName || item.title;
-                        flatDetails.cover_url = details.artworkUrl600 || details.artworkUrl100 || item.artwork_url;
-                    }
-
-                    // Merge details but preserve critical user fields (id, status, my_rating)
-                    return { ...item, ...flatDetails, id: item.id, status: item.status, my_rating: item.my_rating };
-                }
-            } catch (e) {
-                console.error('Failed to enrich item:', item, e);
-            }
-            return item;
-        }));
     } catch (error) {
-        if (error instanceof Error && error.message === 'Unauthorized') return [];
+        if (error instanceof Error && error.message === 'Unauthorized') return { items: [], pagination: { page: 1, limit: 20, total: 0, total_pages: 0 } };
         console.error(`Error fetching ${type}:`, error);
-        return [];
+        return { items: [], pagination: { page: 1, limit: 20, total: 0, total_pages: 0 } };
     }
 }
 
 export async function addMediaItem(type: MediaType, data: any) {
     try {
         const apiType = MEDIA_TYPE_API_MAP[type];
+        console.log('[addMediaItem] Sending data:', JSON.stringify(data, null, 2));
         const response = await fetchWithAuth(`/api/library/${apiType}`, {
             method: 'POST',
             body: JSON.stringify(data),
         });
-        return await response.json();
+        const result = await response.json();
+        console.log('[addMediaItem] Response:', JSON.stringify(result, null, 2));
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: result.error || result.message || `HTTP ${response.status}`
+            };
+        }
+        return result;
     } catch (error) {
         console.error(`Error adding ${type}:`, error);
         return { success: false, error: 'Network error' };

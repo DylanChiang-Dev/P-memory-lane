@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { Header } from "../components/layout/Header";
+import { ToastContainer } from "../components/ui/Toast";
 
 interface Props {
     title: string;
@@ -27,25 +28,67 @@ const { title } = Astro.props;
             } else {
                 document.documentElement.classList.remove("dark");
             }
+            // Initialize sidebar state
+            if (localStorage.sidebarCollapsed === "true") {
+                document.documentElement.classList.add("sidebar-collapsed");
+            }
         </script>
+        <style>
+            /* Sidebar transition styles */
+            .admin-sidebar {
+                transition: width 0.2s ease-in-out;
+            }
+            .admin-sidebar.collapsed {
+                width: 4rem !important;
+            }
+            .admin-sidebar.collapsed .sidebar-text {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+            }
+            .admin-sidebar.collapsed .sidebar-header-text {
+                display: none;
+            }
+            .admin-sidebar.collapsed .nav-link {
+                justify-content: center;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .admin-sidebar.collapsed .nav-link span:first-child {
+                margin: 0;
+            }
+            .admin-main {
+                transition: margin-left 0.2s ease-in-out;
+            }
+            .admin-main.collapsed {
+                margin-left: 4rem !important;
+            }
+            .toggle-btn {
+                transition: transform 0.2s ease-in-out;
+            }
+            .admin-sidebar.collapsed .toggle-btn {
+                transform: rotate(180deg);
+            }
+        </style>
     </head>
     <body
         class="min-h-screen flex bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300"
     >
         <!-- Sidebar -->
         <aside
-            class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-white/5 hidden md:flex flex-col z-50"
+            id="admin-sidebar"
+            class="admin-sidebar fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-white/5 hidden md:flex flex-col z-50"
         >
             <div
                 class="p-6 flex items-center gap-3 border-b border-zinc-200 dark:border-white/5"
             >
                 <div
-                    class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold"
+                    class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold flex-shrink-0"
                 >
                     M
                 </div>
                 <span
-                    class="font-bold text-xl text-zinc-900 dark:text-white tracking-tight"
+                    class="sidebar-header-text font-bold text-xl text-zinc-900 dark:text-white tracking-tight"
                     >Memory Lane</span
                 >
             </div>
@@ -53,42 +96,58 @@ const { title } = Astro.props;
             <nav class="flex-1 p-4 space-y-2">
                 <a
                     href="/admin"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 font-medium"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 font-medium"
                 >
-                    <span>📊</span> 概覽
+                    <span>📊</span>
+                    <span class="sidebar-text">概覽</span>
                 </a>
                 <a
                     href="/admin/habits"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
-                    <span>💪</span> 習慣管理
+                    <span>💪</span>
+                    <span class="sidebar-text">習慣管理</span>
                 </a>
                 <a
                     href="/admin/media"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
-                    <span>🎬</span> 媒體庫
+                    <span>🎬</span>
+                    <span class="sidebar-text">媒體庫</span>
                 </a>
                 <a
                     href="/admin/settings"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
-                    <span>⚙️</span> API 設置
+                    <span>⚙️</span>
+                    <span class="sidebar-text">API 設置</span>
                 </a>
             </nav>
 
-            <div class="p-4 border-t border-zinc-200 dark:border-white/5">
+            <div
+                class="p-4 border-t border-zinc-200 dark:border-white/5 space-y-2"
+            >
                 <a
                     href="/"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
-                    <span>⬅️</span> 返回首頁
+                    <span>⬅️</span>
+                    <span class="sidebar-text">返回首頁</span>
                 </a>
+                <!-- Toggle Button -->
+                <button
+                    id="sidebar-toggle"
+                    class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                    title="收合側邊欄"
+                >
+                    <span class="toggle-btn">◀️</span>
+                    <span class="sidebar-text text-sm">收合</span>
+                </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 min-h-screen">
+        <main id="admin-main" class="admin-main flex-1 md:ml-64 min-h-screen">
             <!-- Mobile Header -->
             <div
                 class="md:hidden p-4 flex items-center justify-between bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/5"
@@ -103,5 +162,29 @@ const { title } = Astro.props;
                 <slot />
             </div>
         </main>
+        <ToastContainer client:load />
+
+        <script is:inline>
+            // Sidebar toggle functionality
+            document.addEventListener("DOMContentLoaded", function () {
+                const sidebar = document.getElementById("admin-sidebar");
+                const main = document.getElementById("admin-main");
+                const toggleBtn = document.getElementById("sidebar-toggle");
+
+                // Restore state from localStorage
+                if (localStorage.sidebarCollapsed === "true") {
+                    sidebar.classList.add("collapsed");
+                    main.classList.add("collapsed");
+                }
+
+                toggleBtn.addEventListener("click", function () {
+                    const isCollapsed = sidebar.classList.toggle("collapsed");
+                    main.classList.toggle("collapsed");
+                    localStorage.sidebarCollapsed = isCollapsed
+                        ? "true"
+                        : "false";
+                });
+            });
+        </script>
     </body>
 </html>

@@ -136,8 +136,8 @@ export const HabitConsole: React.FC = () => {
                 </div>
                 {notification && (
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-full animate-fade-in ${notification.type === 'success'
-                            ? 'text-teal-500 bg-teal-500/10'
-                            : 'text-red-500 bg-red-500/10'
+                        ? 'text-teal-500 bg-teal-500/10'
+                        : 'text-red-500 bg-red-500/10'
                         }`}>
                         {notification.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                         <span className="font-medium">{notification.message}</span>
@@ -196,8 +196,9 @@ export const HabitConsole: React.FC = () => {
                             </label>
                             <input
                                 type="date"
-                                defaultValue={new Date().toLocaleDateString('en-CA')}
-                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-teal-500 outline-none transition-all text-zinc-900 dark:text-white"
+                                defaultValue={new Date().toISOString().split('T')[0]}
+                                className="w-full min-w-[180px] px-4 py-3 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-teal-500 outline-none transition-all text-zinc-900 dark:text-white [&::-webkit-calendar-picker-indicator]:dark:invert"
+                                style={{ minWidth: '180px' }}
                             />
                         </div>
                     </div>

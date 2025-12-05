@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Star, Calendar, Clock, Mic, Video, Sparkles } from 'lucide-react';
+import { X, Save, Star, Calendar, Loader2, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { getIGDBImageUrl } from '../../lib/igdb';
 
@@ -13,9 +13,11 @@ interface AddMediaModalProps {
     item: any;
     type: MediaType;
     onSave: (data: any) => void;
+    saving: boolean;
+    onDelete?: (id: number) => void;
 }
 
-export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, item, type, onSave }) => {
+export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, item, type, onSave, saving, onDelete }) => {
     const [rating, setRating] = useState(0);
     const [status, setStatus] = useState('completed');
     const [review, setReview] = useState('');
@@ -30,18 +32,22 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
     useEffect(() => {
         if (item) {
-            // Pre-fill data if editing an existing item
-            if (item.my_rating !== undefined) setRating(Number(item.my_rating));
-            if (item.status) setStatus(item.status);
-            if (item.review) setReview(item.review);
+            // Pre-fill data if editing an existing item, otherwise reset to defaults
+            setRating(item.my_rating !== undefined ? Number(item.my_rating) : 0);
+            setStatus(item.status || 'completed');
+            setReview(item.review || '');
+
+            // Date
+            if (item.date) setDate(item.date.split('T')[0]);
+            else if (item.completed_date) setDate(item.completed_date.split('T')[0]);
+            else setDate(new Date().toISOString().split('T')[0]);
 
             // Type specific
-            if (item.platform) setPlatform(item.platform);
-            if (item.current_season) setSeason(item.current_season);
-            if (item.current_episode) setEpisode(item.current_episode);
-            if (item.episodes_watched !== undefined) setEpisodesWatched(item.episodes_watched);
-            if (item.episodes_listened !== undefined) setEpisodesWatched(item.episodes_listened);
-            if (item.total_episodes !== undefined) setTotalEpisodes(item.total_episodes);
+            setPlatform(item.platform || '');
+            setSeason(item.current_season || 1);
+            setEpisode(item.current_episode || 1);
+            setEpisodesWatched(item.episodes_watched || item.episodes_listened || 0);
+            setTotalEpisodes(item.total_episodes || 0);
         }
     }, [item]);
 
@@ -62,30 +68,38 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             ...(type === 'podcasts' && { episodes_listened: episodesWatched, total_episodes: totalEpisodes }),
         };
         onSave(data);
-        onClose();
+        // Don't close here - let parent close after successful save
     };
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="w-full max-w-lg bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    const isEditing = !!item.created_at;
 
-                {/* Header */}
-                <div className="p-4 border-b border-white/5 flex items-center justify-between bg-zinc-800/50">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                        {type === 'podcasts' && <Mic size={20} className="text-pink-500" />}
-                        {type === 'documentaries' && <Video size={20} className="text-amber-500" />}
-                        {type === 'anime' && <Sparkles size={20} className="text-rose-500" />}
-                        {item?.id && item?.my_rating ? '編輯媒體' : '添加到媒體庫'}
-                    </h3>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
-                        <X size={24} />
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl border border-zinc-200 dark:border-white/10">
+                <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-white/10 sticky top-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md z-10">
+                    <div>
+                        <h2 className="text-lg font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+                            {isEditing ? '編輯媒體' : '添加媒體'}
+                            {isEditing && <span className="text-xs font-normal px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full">已存在</span>}
+                        </h2>
+                        {isEditing && item.updated_at && (
+                            <p className="text-xs text-zinc-500 mt-0.5">
+                                上次更新: {new Date(item.updated_at).toLocaleString()}
+                            </p>
+                        )}
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                    >
+                        <X size={20} />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto">
                     {/* Selected Item Preview */}
-                    <div className="flex gap-4 bg-zinc-800/30 p-4 rounded-xl border border-white/5">
-                        <div className="w-16 h-24 bg-zinc-800 rounded-lg flex-shrink-0 overflow-hidden">
+                    <div className="flex gap-4 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-xl border border-zinc-200 dark:border-white/5">
+                        <div className="w-16 h-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg flex-shrink-0 overflow-hidden">
                             <img
                                 src={getItemImage(item, type)}
                                 alt={getItemTitle(item, type)}
@@ -96,14 +110,14 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                             />
                         </div>
                         <div>
-                            <h4 className="font-bold text-white line-clamp-1">{getItemTitle(item, type)}</h4>
-                            <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{getItemSubtitle(item, type)}</p>
+                            <h4 className="font-bold text-zinc-900 dark:text-white line-clamp-1">{getItemTitle(item, type)}</h4>
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">{getItemSubtitle(item, type)}</p>
                         </div>
                     </div>
 
                     {/* Rating */}
                     <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">評分 (0-10)</label>
+                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">評分 (0-10)</label>
                         <div className="flex items-center gap-4">
                             <input
                                 type="number"
@@ -112,7 +126,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                 step="0.1"
                                 value={rating}
                                 onChange={(e) => setRating(parseFloat(e.target.value))}
-                                className="w-24 bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors text-center font-bold text-lg"
+                                className="w-24 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-center font-bold text-lg"
                             />
                             <div className="flex-1">
                                 <input
@@ -122,7 +136,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                     step="0.1"
                                     value={rating}
                                     onChange={(e) => setRating(parseFloat(e.target.value))}
-                                    className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                    className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
                                 />
                             </div>
                             <div className="flex items-center gap-1 text-amber-500 font-bold text-xl w-16 justify-end">
@@ -134,7 +148,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
                     {/* Status */}
                     <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">狀態</label>
+                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">狀態</label>
                         <div className="grid grid-cols-3 gap-2">
                             {getStatusOptions(type).map((opt) => (
                                 <button
@@ -144,8 +158,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                     className={clsx(
                                         "py-2 px-3 rounded-lg text-sm font-medium border transition-all",
                                         status === opt.value
-                                            ? "bg-white text-black border-white"
-                                            : "bg-zinc-800/50 text-zinc-400 border-transparent hover:bg-zinc-800"
+                                            ? "bg-zinc-900 dark:bg-white text-white dark:text-black border-zinc-900 dark:border-white"
+                                            : "bg-zinc-100 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800"
                                     )}
                                 >
                                     {opt.label}
@@ -157,7 +171,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                     {/* Dynamic Fields */}
                     {type === 'games' && (
                         <div>
-                            <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">平台</label>
+                            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">平台</label>
                             <div className="flex flex-wrap gap-2 mb-3">
                                 {PLATFORMS.map(p => {
                                     const isSelected = platform.split(', ').includes(p);
@@ -177,7 +191,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                                 "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
                                                 isSelected
                                                     ? "bg-indigo-500 border-indigo-500 text-white"
-                                                    : "bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+                                                    : "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                                             )}
                                         >
                                             {p}
@@ -190,7 +204,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                 value={platform}
                                 onChange={(e) => setPlatform(e.target.value)}
                                 placeholder="其他平台..."
-                                className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
                             />
                         </div>
                     )}
@@ -198,23 +212,23 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                     {type === 'tv-shows' && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">季 (Season)</label>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">季 (Season)</label>
                                 <input
                                     type="number"
                                     min="1"
                                     value={season}
                                     onChange={(e) => setSeason(parseInt(e.target.value))}
-                                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">集 (Episode)</label>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">集 (Episode)</label>
                                 <input
                                     type="number"
                                     min="1"
                                     value={episode}
                                     onChange={(e) => setEpisode(parseInt(e.target.value))}
-                                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
                             </div>
                         </div>
@@ -223,7 +237,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                     {(type === 'anime' || type === 'podcasts') && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">
                                     {type === 'podcasts' ? '已聽集數' : '已看集數'}
                                 </label>
                                 <input
@@ -231,17 +245,17 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                     min="0"
                                     value={episodesWatched}
                                     onChange={(e) => setEpisodesWatched(parseInt(e.target.value))}
-                                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">總集數</label>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">總集數</label>
                                 <input
                                     type="number"
                                     min="0"
                                     value={totalEpisodes}
                                     onChange={(e) => setTotalEpisodes(parseInt(e.target.value))}
-                                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
                             </div>
                         </div>
@@ -249,37 +263,121 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
                     {/* Date */}
                     <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">日期</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">日期</label>
+                        <div className="relative flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 focus-within:border-indigo-500 transition-colors">
+                            <Calendar className="text-zinc-400 dark:text-zinc-500 mr-2" size={18} />
+
+                            {/* Year */}
                             <input
-                                type="date"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                className="w-full bg-zinc-800/50 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                type="text"
+                                placeholder="YYYY"
+                                value={date.split('-')[0]}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                    const parts = date.split('-');
+                                    setDate(`${val}-${parts[1] || ''}-${parts[2] || ''}`);
+                                    if (val.length === 4) {
+                                        const next = e.target.nextElementSibling?.nextElementSibling as HTMLInputElement;
+                                        next?.focus();
+                                    }
+                                }}
+                                className="w-16 bg-transparent text-center text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none"
+                            />
+                            <span className="text-zinc-400 dark:text-zinc-600">/</span>
+
+                            {/* Month */}
+                            <input
+                                type="text"
+                                placeholder="MM"
+                                value={date.split('-')[1]}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+                                    const parts = date.split('-');
+                                    setDate(`${parts[0] || ''}-${val}-${parts[2] || ''}`);
+                                    if (val.length === 2) {
+                                        const next = e.target.nextElementSibling?.nextElementSibling as HTMLInputElement;
+                                        next?.focus();
+                                    }
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Backspace' && !e.currentTarget.value) {
+                                        const prev = e.currentTarget.previousElementSibling?.previousElementSibling as HTMLInputElement;
+                                        prev?.focus();
+                                    }
+                                }}
+                                className="w-10 bg-transparent text-center text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none"
+                            />
+                            <span className="text-zinc-400 dark:text-zinc-600">/</span>
+
+                            {/* Day */}
+                            <input
+                                type="text"
+                                placeholder="DD"
+                                value={date.split('-')[2]}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+                                    const parts = date.split('-');
+                                    setDate(`${parts[0] || ''}-${parts[1] || ''}-${val}`);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Backspace' && !e.currentTarget.value) {
+                                        const prev = e.currentTarget.previousElementSibling?.previousElementSibling as HTMLInputElement;
+                                        prev?.focus();
+                                    }
+                                }}
+                                className="w-10 bg-transparent text-center text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none"
                             />
                         </div>
                     </div>
 
                     {/* Review */}
                     <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">簡評</label>
+                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">簡評</label>
                         <textarea
                             value={review}
                             onChange={(e) => setReview(e.target.value)}
                             rows={3}
                             placeholder="寫下你的想法..."
-                            className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                            className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Save size={20} />
-                        保存到媒體庫
-                    </button>
+                    <div className="flex gap-3">
+                        {!!item.created_at && onDelete && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    onDelete(item.id);
+                                    onClose();
+                                }}
+                                className="px-5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center justify-center"
+                                title="刪除此項目"
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className={clsx(
+                                "flex-1 font-bold py-4 rounded-xl transition-colors flex items-center justify-center gap-2",
+                                saving
+                                    ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 dark:text-zinc-400 cursor-not-allowed"
+                                    : "bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200"
+                            )}
+                        >
+                            {saving ? (
+                                <>
+                                    <Loader2 size={20} className="animate-spin" />
+                                    保存中...
+                                </>
+                            ) : (
+                                <>
+                                    保存到媒體庫
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -288,28 +386,38 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
 // Helpers
 function getItemTitle(item: any, type: MediaType) {
+    // 優先使用後端返回的 title 字段（編輯已存在項目時）
+    if (typeof item.title === 'string' && item.title) return item.title;
+
+    // 搜索結果格式（新增時從第三方 API 獲取）
     if (type === 'movies') return item.title;
-    if (type === 'tv-shows' || type === 'documentaries') return item.name;
+    if (type === 'tv-shows' || type === 'documentaries') return item.name || item.title;
     if (type === 'anime') return item.title?.native || item.title?.romaji || item.title?.english || item.name;
-    if (type === 'books') return item.volumeInfo?.title;
-    if (type === 'games') return item.name;
+    if (type === 'books') return item.volumeInfo?.title || item.title;
+    if (type === 'games') return item.name || item.title;
     if (type === 'podcasts') return item.collectionName || item.title;
-    return 'Unknown Title';
+    return item.title || item.name || 'Unknown Title';
 }
 
 function getItemSubtitle(item: any, type: MediaType) {
     if (type === 'movies') return item.release_date;
-    if (type === 'tv-shows' || type === 'documentaries') return item.first_air_date;
-    if (type === 'anime') return item.startDate?.year || item.first_air_date;
-    if (type === 'books') return item.volumeInfo?.authors?.join(', ');
-    if (type === 'games') return item.released;
-    if (type === 'podcasts') return item.artistName || item.publisher || item.host;
+    if (type === 'tv-shows' || type === 'documentaries') return item.first_air_date || item.release_date;
+    if (type === 'anime') return item.startDate?.year || item.release_date;
+    if (type === 'books') return item.authors?.join(', ') || item.volumeInfo?.authors?.join(', ');
+    if (type === 'games') return item.released || item.release_date;
+    if (type === 'podcasts') return item.artist_name || item.artistName || item.publisher || item.host;
     return '';
 }
 
 function getItemImage(item: any, type: MediaType) {
     if (!item) return '/placeholder.png';
 
+    // 優先使用新字段（編輯已存在項目時）
+    if (item.cover_image_cdn) return item.cover_image_cdn;
+    if (item.cover_image_local) return item.cover_image_local;
+    if (item.cover_url) return item.cover_url;
+
+    // 搜索結果格式（新增時從第三方 API 獲取）
     if (type === 'movies' || type === 'documentaries' || type === 'tv-shows') {
         if (item.poster_path) return `https://image.tmdb.org/t/p/w200${item.poster_path}`;
         return '/placeholder.png';
@@ -318,7 +426,7 @@ function getItemImage(item: any, type: MediaType) {
     if (type === 'books') return item.volumeInfo?.imageLinks?.thumbnail || '/placeholder.png';
     if (type === 'games') {
         if (item.cover?.image_id) return getIGDBImageUrl(item.cover.image_id);
-        return item.background_image || item.cover_url || '/placeholder.png';
+        return item.background_image || '/placeholder.png';
     }
     if (type === 'podcasts') return item.artworkUrl600 || item.artworkUrl100 || item.artwork_url || '/placeholder.png';
 
@@ -326,11 +434,14 @@ function getItemImage(item: any, type: MediaType) {
 }
 
 function getStatusOptions(type: MediaType) {
-    const common = [
-        { value: 'completed', label: '已完成' },
-        { value: 'progress', label: '進行中' },
-        { value: 'planned', label: '想看/玩' },
-    ];
+    // Movies, TV Shows, Documentaries - use watched/watching/want_to_watch
+    if (type === 'movies' || type === 'tv-shows' || type === 'documentaries') {
+        return [
+            { value: 'watched', label: '已看' },
+            { value: 'watching', label: '在追' },
+            { value: 'want_to_watch', label: '想看' },
+        ];
+    }
 
     if (type === 'books') {
         return [
@@ -364,9 +475,11 @@ function getStatusOptions(type: MediaType) {
         ];
     }
 
+    // Default fallback
     return [
         { value: 'watched', label: '已看' },
         { value: 'watching', label: '在追' },
         { value: 'want_to_watch', label: '想看' },
     ];
 }
+
