@@ -273,15 +273,15 @@ export const MediaTable: React.FC = () => {
                         publishers: data.item.involved_companies?.filter((c: any) => c.publisher)?.map((c: any) => c.company?.name)
                     }),
                     ...(currentType === 'podcasts' && {
-                        itunes_id: data.item.collectionId,
+                        podcast_id: String(data.item.collectionId), // Backend expects podcast_id
                         title: data.item.collectionName,
                         cover_image_cdn: data.item.artworkUrl600 || data.item.artworkUrl100,
                         overview: data.item.description,
                         genres: data.item.genres,
                         release_date: data.item.releaseDate,
-                        artist_name: data.item.artistName,
-                        feed_url: data.item.feedUrl,
-                        episode_count: data.item.trackCount
+                        host: data.item.artistName, // Backend expects host, not artist_name
+                        rss_feed: data.item.feedUrl, // Backend expects rss_feed, not feed_url
+                        total_episodes: data.item.trackCount
                     }),
 
                     // Type specific user fields

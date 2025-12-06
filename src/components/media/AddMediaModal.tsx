@@ -558,9 +558,9 @@ function getStatusOptions(type: MediaType) {
 
     if (type === 'podcasts') {
         return [
-            { value: 'listened', label: '已聽' },
+            { value: 'completed', label: '已聽' },    // Backend uses completed
             { value: 'listening', label: '在聽' },
-            { value: 'want_to_listen', label: '想聽' },
+            { value: 'plan_to_listen', label: '想聽' }, // Backend uses plan_to_listen
         ];
     }
 
