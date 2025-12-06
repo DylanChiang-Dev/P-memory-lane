@@ -1,6 +1,5 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { AuthGuard } from "../../components/auth/AuthGuard";
 import { HabitConsole } from "../../components/admin/HabitConsole";
 import { HabitTracker } from "../../components/habits/HabitTracker";
 
@@ -8,31 +7,27 @@ const currentYear = new Date().getFullYear();
 ---
 
 <AdminLayout title="習慣管理 - 管理後台">
-    <AuthGuard client:only="react">
-        <div class="space-y-8">
-            <div>
-                <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
-                    習慣管理
-                </h1>
-                <p class="text-zinc-500 dark:text-zinc-400 mt-2">
-                    記錄每日進度，查看長期趨勢。
-                </p>
-            </div>
-
-            <!-- Check-in Console -->
-            <HabitConsole client:load />
-
-            <!-- Visualization -->
-            <div
-                class="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 rounded-3xl p-6 md:p-8"
-            >
-                <h2
-                    class="text-xl font-bold text-zinc-900 dark:text-white mb-6"
-                >
-                    數據概覽
-                </h2>
-                <HabitTracker initialYear={currentYear} client:load />
-            </div>
+    <div class="space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
+                習慣管理
+            </h1>
+            <p class="text-zinc-500 dark:text-zinc-400 mt-2">
+                記錄每日進度，查看長期趨勢。
+            </p>
         </div>
-    </AuthGuard>
+
+        <!-- Check-in Console -->
+        <HabitConsole client:load />
+
+        <!-- Visualization -->
+        <div
+            class="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 rounded-3xl p-6 md:p-8"
+        >
+            <h2 class="text-xl font-bold text-zinc-900 dark:text-white mb-6">
+                數據概覽
+            </h2>
+            <HabitTracker initialYear={currentYear} client:load />
+        </div>
+    </div>
 </AdminLayout>

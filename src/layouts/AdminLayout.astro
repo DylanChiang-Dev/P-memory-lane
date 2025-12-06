@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { Header } from "../components/layout/Header";
 import { ToastContainer } from "../components/ui/Toast";
 import { AuthManager } from "../components/auth/AuthManager";
+import { AuthGuard } from "../components/auth/AuthGuard";
 
 interface Props {
     title: string;
@@ -35,156 +36,213 @@ const { title } = Astro.props;
             }
         </script>
         <style>
-            /* Sidebar transition styles */
-            .admin-sidebar {
-                transition: width 0.2s ease-in-out;
+            /* Active nav link styles */
+            .nav-link.active {
+                background: rgba(255, 255, 255, 0.08);
+                color: white;
             }
-            .admin-sidebar.collapsed {
-                width: 4rem !important;
-            }
-            .admin-sidebar.collapsed .sidebar-text {
-                opacity: 0;
-                width: 0;
-                overflow: hidden;
-            }
-            .admin-sidebar.collapsed .sidebar-header-text {
-                display: none;
-            }
-            .admin-sidebar.collapsed .nav-link {
-                justify-content: center;
-                padding-left: 0;
-                padding-right: 0;
-            }
-            .admin-sidebar.collapsed .nav-link span:first-child {
-                margin: 0;
-            }
-            .admin-main {
-                transition: margin-left 0.2s ease-in-out;
-            }
-            .admin-main.collapsed {
-                margin-left: 4rem !important;
-            }
-            .toggle-btn {
-                transition: transform 0.2s ease-in-out;
-            }
-            .admin-sidebar.collapsed .toggle-btn {
-                transform: rotate(180deg);
+            .nav-link.active svg {
+                color: rgb(45, 212, 191); /* teal-400 */
             }
         </style>
     </head>
-    <body
-        class="min-h-screen flex bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300"
-    >
-        <!-- Sidebar -->
-        <aside
-            id="admin-sidebar"
-            class="admin-sidebar fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-white/5 hidden md:flex flex-col z-50"
-        >
-            <div
-                class="p-6 flex items-center gap-3 border-b border-zinc-200 dark:border-white/5"
-            >
-                <div
-                    class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold flex-shrink-0"
+    <body class="min-h-screen bg-zinc-950">
+        <AuthGuard client:only="react">
+            <div class="flex min-h-screen">
+                <!-- Sidebar -->
+                <aside
+                    id="admin-sidebar"
+                    class="admin-sidebar fixed inset-y-0 left-0 w-56 bg-zinc-900 hidden md:flex flex-col z-50"
                 >
-                    M
-                </div>
-                <span
-                    class="sidebar-header-text font-bold text-xl text-zinc-900 dark:text-white tracking-tight"
-                    >Memory Lane</span
-                >
-            </div>
+                    <!-- Logo -->
+                    <div
+                        class="h-14 flex items-center px-5 border-b border-white/5"
+                    >
+                        <a
+                            href="/admin"
+                            class="flex items-center gap-2.5 group"
+                        >
+                            <div
+                                class="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <span
+                                class="sidebar-header-text text-sm font-semibold text-white/90 group-hover:text-white transition-colors"
+                                >Memory Lane</span
+                            >
+                        </a>
+                    </div>
 
-            <nav class="flex-1 p-4 space-y-2">
-                <a
-                    href="/admin"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 font-medium"
-                >
-                    <span>📊</span>
-                    <span class="sidebar-text">概覽</span>
-                </a>
-                <a
-                    href="/admin/habits"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                >
-                    <span>💪</span>
-                    <span class="sidebar-text">習慣管理</span>
-                </a>
-                <a
-                    href="/admin/media"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                >
-                    <span>🎬</span>
-                    <span class="sidebar-text">媒體庫</span>
-                </a>
-                <a
-                    href="/admin/settings"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                >
-                    <span>⚙️</span>
-                    <span class="sidebar-text">API 設置</span>
-                </a>
-            </nav>
+                    <!-- Navigation -->
+                    <nav class="flex-1 py-4 px-3 space-y-1">
+                        <a
+                            href="/admin"
+                            class="nav-link group flex items-center gap-3 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all duration-150"
+                            data-nav="overview"
+                        >
+                            <svg
+                                class="w-[18px] h-[18px] text-white/40 group-hover:text-teal-400 transition-colors"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+                                ></path>
+                            </svg>
+                            <span class="sidebar-text text-[13px]">概覽</span>
+                        </a>
+                        <a
+                            href="/admin/habits"
+                            class="nav-link group flex items-center gap-3 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all duration-150"
+                            data-nav="habits"
+                        >
+                            <svg
+                                class="w-[18px] h-[18px] text-white/40 group-hover:text-teal-400 transition-colors"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                            </svg>
+                            <span class="sidebar-text text-[13px]">習慣</span>
+                        </a>
+                        <a
+                            href="/admin/media"
+                            class="nav-link group flex items-center gap-3 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all duration-150"
+                            data-nav="media"
+                        >
+                            <svg
+                                class="w-[18px] h-[18px] text-white/40 group-hover:text-teal-400 transition-colors"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+                                ></path>
+                            </svg>
+                            <span class="sidebar-text text-[13px]">媒體庫</span>
+                        </a>
+                        <a
+                            href="/admin/settings"
+                            class="nav-link group flex items-center gap-3 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all duration-150"
+                            data-nav="settings"
+                        >
+                            <svg
+                                class="w-[18px] h-[18px] text-white/40 group-hover:text-teal-400 transition-colors"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                                ></path>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="sidebar-text text-[13px]">設定</span>
+                        </a>
+                    </nav>
 
-            <div
-                class="p-4 border-t border-zinc-200 dark:border-white/5 space-y-2"
-            >
-                <a
-                    href="/"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                >
-                    <span>⬅️</span>
-                    <span class="sidebar-text">返回首頁</span>
-                </a>
-                <!-- Toggle Button -->
-                <button
-                    id="sidebar-toggle"
-                    class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                    title="收合側邊欄"
-                >
-                    <span class="toggle-btn">◀️</span>
-                    <span class="sidebar-text text-sm">收合</span>
-                </button>
-            </div>
-        </aside>
+                    <!-- Bottom -->
+                    <div class="p-3 border-t border-white/5">
+                        <a
+                            href="/"
+                            class="nav-link group flex items-center gap-3 px-3 py-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 transition-all duration-150"
+                        >
+                            <svg
+                                class="w-[18px] h-[18px]"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+                            </svg>
+                            <span class="sidebar-text text-[13px]"
+                                >返回網站</span
+                            >
+                        </a>
+                    </div>
+                </aside>
 
-        <!-- Main Content -->
-        <main id="admin-main" class="admin-main flex-1 md:ml-64 min-h-screen">
-            <!-- Mobile Header -->
-            <div
-                class="md:hidden p-4 flex items-center justify-between bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/5"
-            >
-                <span class="font-bold text-lg text-zinc-900 dark:text-white"
-                    >Memory Lane Admin</span
+                <!-- Main Content -->
+                <main
+                    id="admin-main"
+                    class="admin-main flex-1 md:ml-56 min-h-screen"
                 >
-                <a href="/" class="text-sm text-zinc-500">Back</a>
-            </div>
+                    <!-- Mobile Header -->
+                    <div
+                        class="md:hidden p-4 flex items-center justify-between bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/5"
+                    >
+                        <span
+                            class="font-bold text-lg text-zinc-900 dark:text-white"
+                            >Memory Lane Admin</span
+                        >
+                        <a href="/" class="text-sm text-zinc-500">Back</a>
+                    </div>
 
-            <div class="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
-                <slot />
+                    <div class="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+                        <slot />
+                    </div>
+                </main>
             </div>
-        </main>
+        </AuthGuard>
         <ToastContainer client:load />
         <AuthManager client:load />
 
         <script is:inline>
-            // Sidebar toggle functionality
+            // Highlight active nav link
             document.addEventListener("DOMContentLoaded", function () {
-                const sidebar = document.getElementById("admin-sidebar");
-                const main = document.getElementById("admin-main");
-                const toggleBtn = document.getElementById("sidebar-toggle");
+                const path = window.location.pathname;
+                const navLinks = document.querySelectorAll(
+                    ".nav-link[data-nav]",
+                );
 
-                // Restore state from localStorage
-                if (localStorage.sidebarCollapsed === "true") {
-                    sidebar.classList.add("collapsed");
-                    main.classList.add("collapsed");
-                }
+                navLinks.forEach((link) => {
+                    const href = link.getAttribute("href");
+                    // Exact match for /admin, prefix match for sub-pages
+                    const isActive =
+                        href === "/admin"
+                            ? path === "/admin" || path === "/admin/"
+                            : path.startsWith(href);
 
-                toggleBtn.addEventListener("click", function () {
-                    const isCollapsed = sidebar.classList.toggle("collapsed");
-                    main.classList.toggle("collapsed");
-                    localStorage.sidebarCollapsed = isCollapsed
-                        ? "true"
-                        : "false";
+                    if (isActive) {
+                        link.classList.add("active");
+                    }
                 });
             });
         </script>

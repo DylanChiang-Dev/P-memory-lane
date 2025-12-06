@@ -27,7 +27,7 @@ export const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({
 
     // New state for search and sort
     const [searchQuery, setSearchQuery] = useState('');
-    const [sort, setSort] = useState<'completed_date_desc' | 'rating_desc' | 'rating_asc'>('completed_date_desc');
+    const [sort, setSort] = useState<'created_at_desc' | 'completed_date_desc' | 'rating_desc' | 'rating_asc'>('created_at_desc');
 
     const [totalItems, setTotalItems] = useState(0);
 
@@ -119,6 +119,7 @@ export const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({
     ];
 
     const sortOptions = [
+        { value: 'created_at_desc', label: '最新添加' },
         { value: 'completed_date_desc', label: '觀看時間' },
         { value: 'rating_desc', label: '評分最高' },
         { value: 'rating_asc', label: '評分最低' },
@@ -126,14 +127,17 @@ export const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({
 
     // Helper to group items by date - relies on backend sorting
     const groupedItems = React.useMemo(() => {
-        if (sort !== 'completed_date_desc' || viewMode !== 'grid') return null;
+        if ((sort !== 'completed_date_desc' && sort !== 'created_at_desc') || viewMode !== 'grid') return null;
 
         // Backend returns items in sorted order, just group by year-month
         const groupOrder: string[] = [];
         const groups: Record<string, any[]> = {};
 
         items.forEach(item => {
-            const dateStr = item.completed_date || item.date;
+            // 根據排序方式選擇日期字段
+            const dateStr = sort === 'created_at_desc'
+                ? item.created_at
+                : (item.completed_date || item.date);
             let key = '未知日期';
             if (dateStr) {
                 const date = new Date(dateStr);

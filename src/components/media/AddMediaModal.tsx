@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Star, Calendar, Loader2, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Save, Star, Calendar, Loader2, Trash2, Upload } from 'lucide-react';
 import { clsx } from 'clsx';
 import { getIGDBImageUrl } from '../../lib/igdb';
+import { uploadMedia } from '../../lib/api';
 
 const PLATFORMS = ['PC', 'PS5', 'PS4', 'Switch', 'Xbox Series', 'Xbox One', 'iOS', 'Android', 'macOS'];
 
@@ -30,6 +31,11 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
     const [episodesWatched, setEpisodesWatched] = useState(0);
     const [totalEpisodes, setTotalEpisodes] = useState(0);
 
+    // Cover upload
+    const [customCoverUrl, setCustomCoverUrl] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     useEffect(() => {
         if (item) {
             // Pre-fill data if editing an existing item, otherwise reset to defaults
@@ -48,10 +54,31 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             setEpisode(item.current_episode || 1);
             setEpisodesWatched(item.episodes_watched || item.episodes_listened || 0);
             setTotalEpisodes(item.total_episodes || 0);
+            setCustomCoverUrl(null); // Reset custom cover when item changes
         }
     }, [item]);
 
     if (!isOpen || !item) return null;
+
+    const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const result = await uploadMedia(file);
+            if (result.success && result.url) {
+                setCustomCoverUrl(result.url);
+            } else {
+                alert('封面上傳失敗: ' + (result.error || '未知錯誤'));
+            }
+        } catch (err) {
+            console.error('Cover upload failed:', err);
+            alert('封面上傳失敗');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,6 +89,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             status,
             review,
             date,
+            customCoverUrl, // Pass custom cover URL if uploaded
             ...(type === 'games' && { platform }),
             ...(type === 'tv-shows' && { season, episode }),
             ...(type === 'anime' && { episodes_watched: episodesWatched, total_episodes: totalEpisodes }),
@@ -97,21 +125,49 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto">
-                    {/* Selected Item Preview */}
+                    {/* Selected Item Preview with Upload */}
                     <div className="flex gap-4 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-xl border border-zinc-200 dark:border-white/5">
-                        <div className="w-16 h-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg flex-shrink-0 overflow-hidden">
+                        <div className="relative w-16 h-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg flex-shrink-0 overflow-hidden group">
                             <img
-                                src={getItemImage(item, type)}
+                                src={customCoverUrl || getItemImage(item, type)}
                                 alt={getItemTitle(item, type)}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                     (e.target as HTMLImageElement).src = '/placeholder.png';
                                 }}
                             />
+                            {/* Upload overlay - only show for books */}
+                            {type === 'books' && (
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={uploading}
+                                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                    title="上傳封面"
+                                >
+                                    {uploading ? (
+                                        <Loader2 size={20} className="text-white animate-spin" />
+                                    ) : (
+                                        <Upload size={20} className="text-white" />
+                                    )}
+                                </button>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleCoverUpload}
+                                className="hidden"
+                            />
                         </div>
-                        <div>
+                        <div className="flex-1">
                             <h4 className="font-bold text-zinc-900 dark:text-white line-clamp-1">{getItemTitle(item, type)}</h4>
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">{getItemSubtitle(item, type)}</p>
+                            {type === 'books' && (
+                                <p className="text-xs text-indigo-500 mt-2">
+                                    {customCoverUrl ? '✓ 已上傳自訂封面' : '滑鼠移至封面可上傳'}
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -261,6 +317,30 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                         </div>
                     )}
 
+                    {/* Type specific inputs */}
+                    {type === 'books' && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">作者</label>
+                                <input
+                                    type="text"
+                                    value={item.authors ? (typeof item.authors === 'string' ? item.authors.replace(/^"|"$/g, '') : item.authors) : ''}
+                                    readOnly
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white opacity-60 cursor-not-allowed"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">頁數</label>
+                                <input
+                                    type="text"
+                                    value={item.page_count || '-'}
+                                    readOnly
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white opacity-60 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {/* Date */}
                     <div>
                         <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">日期</label>
@@ -403,7 +483,24 @@ function getItemSubtitle(item: any, type: MediaType) {
     if (type === 'movies') return item.release_date;
     if (type === 'tv-shows' || type === 'documentaries') return item.first_air_date || item.release_date;
     if (type === 'anime') return item.startDate?.year || item.release_date;
-    if (type === 'books') return item.authors?.join(', ') || item.volumeInfo?.authors?.join(', ');
+    if (type === 'books') {
+        const authors = item.authors || item.volumeInfo?.authors;
+        if (Array.isArray(authors)) return authors.join(', ');
+        if (typeof authors === 'string') {
+            // Handle "stringified" string or array
+            try {
+                if (authors.startsWith('[')) {
+                    const parsed = JSON.parse(authors);
+                    if (Array.isArray(parsed)) return parsed.join(', ');
+                }
+                // Remove surrounding quotes if it's like "\"Author\""
+                return authors.replace(/^"|"$/g, '');
+            } catch (e) {
+                return authors;
+            }
+        }
+        return '';
+    }
     if (type === 'games') return item.released || item.release_date;
     if (type === 'podcasts') return item.artist_name || item.artistName || item.publisher || item.host;
     return '';

@@ -1,27 +1,24 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { AuthGuard } from "../../components/auth/AuthGuard";
 import { APISettings } from "../../components/admin/APISettings";
 import { BatchDateFixer } from "../../components/admin/BatchDateFixer";
 ---
 
 <AdminLayout title="API 设置 - 管理后台">
-    <AuthGuard client:only="react">
-        <div class="space-y-8">
-            <div>
-                <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
-                    API 设置
-                </h1>
-                <p class="text-zinc-500 dark:text-zinc-400 mt-2">
-                    配置第三方 API 密钥以启用媒体搜索功能。
-                </p>
-            </div>
-
-            <!-- API Settings -->
-            <APISettings client:load />
-
-            <!-- Batch Tools -->
-            <BatchDateFixer client:load />
+    <div class="space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
+                API 设置
+            </h1>
+            <p class="text-zinc-500 dark:text-zinc-400 mt-2">
+                配置第三方 API 密钥以启用媒体搜索功能。
+            </p>
         </div>
-    </AuthGuard>
+
+        <!-- API Settings -->
+        <APISettings client:load />
+
+        <!-- Batch Tools -->
+        <BatchDateFixer client:load />
+    </div>
 </AdminLayout>

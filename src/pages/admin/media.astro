@@ -1,22 +1,19 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { AuthGuard } from "../../components/auth/AuthGuard";
 import { MediaTable } from "../../components/admin/MediaTable";
 ---
 
 <AdminLayout title="媒體庫管理 - 管理後台">
-    <AuthGuard client:only="react">
-        <div class="space-y-8">
-            <div>
-                <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
-                    媒體庫管理
-                </h1>
-                <p class="text-zinc-500 dark:text-zinc-400 mt-2">
-                    管理你的電影、劇集、書籍、遊戲、播客、節目和動畫收藏。
-                </p>
-            </div>
-
-            <MediaTable client:only="react" />
+    <div class="space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
+                媒體庫管理
+            </h1>
+            <p class="text-zinc-500 dark:text-zinc-400 mt-2">
+                管理你的電影、劇集、書籍、遊戲、播客、節目和動畫收藏。
+            </p>
         </div>
-    </AuthGuard>
+
+        <MediaTable client:only="react" />
+    </div>
 </AdminLayout>

@@ -1,0 +1,1344 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 1000000,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "Ztg2zgEACAAJ",
+      "etag": "vSMHjk28zS8",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/Ztg2zgEACAAJ",
+      "volumeInfo": {
+        "title": "哈利+!JY'T2!ar!G*!N( (Harry Potter and the Philosopher's Stone)",
+        "publishedDate": "2016",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1781104808"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781781104804"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com.tw/books?id=Ztg2zgEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=1&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=Ztg2zgEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9+_JY_T2_ar_G_N_Harry_Potter_and_th.html?hl=&id=Ztg2zgEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=Ztg2zgEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "7OeFxwEACAAJ",
+      "etag": "th+d14Na8Ak",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/7OeFxwEACAAJ",
+      "volumeInfo": {
+        "title": "哈利・波特与避水珠",
+        "publishedDate": "2002",
+        "description": "A fantasy story featuring characters from Harry Potter series and The Hobbit.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "702003344X"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020033447"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 180,
+        "printType": "BOOK",
+        "categories": [
+          "Magic"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=7OeFxwEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=2&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=7OeFxwEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E9%81%BF%E6%B0%B4%E7%8F%A0.html?hl=&id=7OeFxwEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=7OeFxwEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "A fantasy story featuring characters from Harry Potter series and The Hobbit."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "QR-0AAAACAAJ",
+      "etag": "xkxFr+sztDs",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/QR-0AAAACAAJ",
+      "volumeInfo": {
+        "title": "哈利波特",
+        "subtitle": "火盃的考驗",
+        "authors": [
+          "J. K. Rowling",
+          "彭倩文"
+        ],
+        "publisher": "Huang Guan",
+        "publishedDate": "2001",
+        "description": "Harry Potter and the Goblet of Fire. In traditional Chinese Edition.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "9573318318"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9789573318316"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 762,
+        "printType": "BOOK",
+        "categories": [
+          "Children's stories, English"
+        ],
+        "averageRating": 5,
+        "ratingsCount": 1,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=QR-0AAAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=QR-0AAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=QR-0AAAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=3&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=QR-0AAAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9.html?hl=&id=QR-0AAAACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=QR-0AAAACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Fourteen-year-old Harry Potter joins the Weasleys at the Quidditch World Cup, then enters his fourth year at Hogwarts Academy where he is mysteriously entered in an unusual contest that challenges his wizarding skills, friendships and ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "gmFiEAAAQBAJ",
+      "etag": "7WtasEoxhSo",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/gmFiEAAAQBAJ",
+      "volumeInfo": {
+        "title": "哈利波特終極哲學觀",
+        "subtitle": "麻瓜的霍格華茲",
+        "authors": [
+          "格雷葛里．巴沙姆",
+          "威廉．爾文"
+        ],
+        "publisher": "讀書共和國╱活字文化",
+        "publishedDate": "2018-10-11",
+        "description": "《哈利‧波特》，有史以來最受歡迎的小說；哲學教授們怎麼看? 史上最有趣的哲學教材，看完此書，有如上了一學期豐富而有趣的西洋哲學人文概論課。美國Goodreads 、Amazon 網站4.4星評 哈利波特不只是史上最受歡迎的小說，全年齡的人都為它著迷，還引發了許多書評家、學者，認真的撰寫深度評論，其魅力何在？原來，它不只是單純的魔法故事，它還融合了各面向的哲學、人生議題，並給出了相當富有內涵的方向，讓這一系列故事也給讀者正向的支撐，讓年輕讀者從中得到許多人生艱難抉擇的解答……而現在，這些哲學內涵都由哲學教授一一破解、分析出來了。 本書收錄18篇由淺入深的當代哲學學者文章，包含五大部分：命運與靈魂、最強力的魔法（與女性主義）、自由與政治、需求與轉變、死亡、希望和意義。 本書涵蓋了西方人文思想的各個面向的精髓，倫理學、形上學、政治哲學、女性主義、知識論、心靈哲學……看完本書，有如上了全年的哲學人文概論課。 J.K.羅琳暢銷的哈利‧波特系列小說，表面上看起來可能是單純的故事，但就和霍格華茲一樣，小說中也有許多隱藏的密室、暗門、和令人費解的秘密。《哈利‧波特的終極哲學觀》引用了哈利波特系列全部七冊小說的內容，針對善與惡、愛、死亡、權力、犧牲、和希望等議題，提出了強而有力的深刻見解。是不是真的像鄧不利多說的，我們的選擇，遠比我們的才能更可以呈現出我們的真實面貌？是否真有死後的世界，如果有，會是什麼模樣？來用儲思盆檢視你的思緒吧。喝一大口巴費醒腦劑，加入巴沙姆才華洋溢的哲學家團隊，一起探索波特系列小說和電影裡燒腦的深奧問題吧。 作者簡介 | 格雷葛里‧巴沙姆（Gregory Bassham）是賓州威爾克斯-巴里國王學院的哲學系主任及哲學教授，共同彙編過《哈比人與哲學》、《魔戒與哲學》、《納尼亞傳奇與哲學》、以及《籃球與哲學》，本人也是本書其中三篇的作者。 威廉‧爾文（William Irwin）是賓州威爾克斯-巴里國王學院的哲學教授，發想了哲學與大眾文化系列書籍，且共同彙編過暢銷書《辛普森家庭與哲學》，並監督協作了近期的系列，包括《蝙蝠俠與哲學》、《怪醫豪斯與哲學》、與《愛麗絲夢遊仙境與哲學》。 譯者簡介 | 王冠中 在外商新聞通訊社擔任多年編譯後，進入認真的翻譯世界。譯作有《印象停格：莎莉．曼恩攝影回憶錄》。",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9789869460873"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "9869460879"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": true
+        },
+        "pageCount": 322,
+        "printType": "BOOK",
+        "categories": [
+          "Young Adult Nonfiction"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": true,
+        "contentVersion": "0.1.1.0.preview.1",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=gmFiEAAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=gmFiEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=gmFiEAAAQBAJ&printsec=frontcover&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=4&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=gmFiEAAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=gmFiEAAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 257,
+          "currencyCode": "TWD"
+        },
+        "retailPrice": {
+          "amount": 193,
+          "currencyCode": "TWD"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=gmFiEAAAQBAJ&rdid=book-gmFiEAAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 257000000,
+              "currencyCode": "TWD"
+            },
+            "retailPrice": {
+              "amountInMicros": 193000000,
+              "currencyCode": "TWD"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.com.tw/books/download/%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9%E7%B5%82%E6%A5%B5%E5%93%B2%E5%AD%B8%E8%A7%80-sample-pdf.acsm?id=gmFiEAAAQBAJ&format=pdf&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=gmFiEAAAQBAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "《哈利‧波特》，有史以來最受歡迎的小說；哲學教授們怎麼看? 史上最有趣的哲學教材，看完此書，有如上了一學期豐富而有趣的西洋哲學人文概論課。美國Goodreads 、Amazon 網站4 ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "P5MT0AEACAAJ",
+      "etag": "H7LWjwCcIE0",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/P5MT0AEACAAJ",
+      "volumeInfo": {
+        "title": "哈利+!JY'T2!;!!:u (Harry Potter and the Chamber of Secrets)",
+        "publishedDate": "2016",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1781104832"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781781104835"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=P5MT0AEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=5&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=P5MT0AEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9+_JY_T2_u_Harry_Potter_and_the_Cha.html?hl=&id=P5MT0AEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=P5MT0AEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "OeG2wAEACAAJ",
+      "etag": "JV+4WMQeA5k",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/OeG2wAEACAAJ",
+      "volumeInfo": {
+        "title": "哈利波特與魔法石",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publishedDate": "2000",
+        "description": "Chinese translation of the first Harry Potter book.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020033431"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020033430"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "Chinese language materials"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=OeG2wAEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=OeG2wAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=OeG2wAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=6&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=OeG2wAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9%E8%88%87%E9%AD%94%E6%B3%95%E7%9F%B3.html?hl=&id=OeG2wAEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=OeG2wAEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Chinese translation of the first Harry Potter book."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "A4OWAAAACAAJ",
+      "etag": "RaCjrXvL36s",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/A4OWAAAACAAJ",
+      "volumeInfo": {
+        "title": "哈利波特",
+        "subtitle": "神秘的魔法石",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publisher": "Huang Guan",
+        "publishedDate": "2000",
+        "description": "Harry Potter and the Sorcerer's Stone in traditional Chinese.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "9573317249"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9789573317241"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 316,
+        "printType": "BOOK",
+        "categories": [
+          "Boarding schools"
+        ],
+        "averageRating": 4.5,
+        "ratingsCount": 2,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=A4OWAAAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=A4OWAAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=A4OWAAAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=7&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=A4OWAAAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9.html?hl=&id=A4OWAAAACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=A4OWAAAACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Harry Potter and the Sorcerer&#39;s Stone in traditional Chinese."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "uIhcoAEACAAJ",
+      "etag": "FUNkYRk7cuI",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/uIhcoAEACAAJ",
+      "volumeInfo": {
+        "title": "哈利・波特与魔法石",
+        "subtitle": "",
+        "authors": [
+          "J. K. Rowling",
+          "J.K.·罗琳",
+          "苏农"
+        ],
+        "publisher": "People's Literature Publishing House",
+        "publishedDate": "2000",
+        "description": "Chinese translation of the first Harry Potter book.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020103294"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020103294"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "England"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=uIhcoAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=8&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=uIhcoAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E9%AD%94%E6%B3%95%E7%9F%B3.html?hl=&id=uIhcoAEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=uIhcoAEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Chinese translation of the first Harry Potter book."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "YErvwAEACAAJ",
+      "etag": "P1IOOIhdRXs",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/YErvwAEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与\"混血王子\"",
+        "authors": [
+          "J. K. Rowling",
+          "罗琳"
+        ],
+        "publishedDate": "2005",
+        "description": "The war against Voldemort is not going well: even Muggle governments are noticing. Ron scans the obituary pages of \"The Daily Prophet\" looking for familiar names. Dumbledore is absent from Hogwarts for long stretches of time, and the Order of the Phoenix has already suffered losses. And yet... As in all wars, life goes on. Sixth-year students learn to Apparate--and lose a few eyebrows in the process. The Weasley twins expand their business. Teenagers flirt and fight and fall in love. Classes are never straightforward, though Harry receives some extraordinary help from the mysterious Half-Blood Prince. So it's the home front that takes center stage in the multilayered sixth installment of the story of Harry Potter. Here at Hogwarts, Harry will search for the full and complex story of the boy who became Lord Voldemort--and thereby find what may be his only vulnerability. \"From the Compact Disc edition.\"",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020053238"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020053230"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 496,
+        "printType": "BOOK",
+        "categories": [
+          "England"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=YErvwAEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=YErvwAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=YErvwAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=9&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=YErvwAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E_%E6%B7%B7%E8%A1%80%E7%8E%8B%E5%AD%90.html?hl=&id=YErvwAEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=YErvwAEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Classes are never straightforward, though Harry receives some extraordinary help from the mysterious Half-Blood Prince. So it&#39;s the home front that takes center stage in the multilayered sixth installment of the story of Harry Potter."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "_bGvtwAACAAJ",
+      "etag": "2La82PrkOYw",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/_bGvtwAACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与密室",
+        "authors": [
+          "J.K. Rowling",
+          "罗琳 (英)"
+        ],
+        "publishedDate": "2000",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020072917"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020072910"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 261,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=_bGvtwAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=10&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=_bGvtwAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E5%AF%86%E5%AE%A4.html?hl=&id=_bGvtwAACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=_bGvtwAACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "hW3uxQEACAAJ",
+      "etag": "5hDJPsDjpKQ",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/hW3uxQEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与火焰杯",
+        "authors": [
+          "J. K.·罗琳"
+        ],
+        "publishedDate": "2018",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020144446"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020144440"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 521,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=hW3uxQEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=11&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=hW3uxQEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E7%81%AB%E7%84%B0%E6%9D%AF.html?hl=&id=hW3uxQEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=hW3uxQEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "本书讲述了:哈利想要逃离恶毒的德思礼一家,还想和赫敏,罗恩还有韦斯莱一家去看魁地奇世界杯赛.他总是希望见到秋·张,一个他暗恋的女孩,渴望与她走进一个美丽的故事 ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "zV5kAQAACAAJ",
+      "etag": "6MmtGzs0rw8",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/zV5kAQAACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与被诅咒的孩子",
+        "subtitle": "第一部和第二部",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publisher": "Bright Sparks",
+        "publishedDate": "2016",
+        "description": "哈利·波特与被诅咒的孩子以J.K.罗琳,约翰·蒂法尼,杰克·索恩创作的全新故事为基础,是\"哈利·波特\"系列的第八个故事,是一部由杰克·索恩执笔的全新剧本,也是第一个被搬上舞台的\"哈利·波特\"官方故事:身为\"大难不死的男孩\",哈利·波特一直生活得很艰难.如今他是一个超负荷工作的魔法部雇员,一个已婚的男人,三个学龄孩子的父亲.......",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020120288"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020120284"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 352,
+        "printType": "BOOK",
+        "categories": [
+          "Fantasy drama"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=zV5kAQAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=zV5kAQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=zV5kAQAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=12&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=zV5kAQAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E8%A2%AB%E8%AF%85%E5%92%92%E7%9A%84%E5%AD%A9%E5%AD%90.html?hl=&id=zV5kAQAACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=zV5kAQAACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "哈利·波特与被诅咒的孩子以J.K.罗琳, 约翰·蒂法尼, 杰克·索恩创作的全新故事为基础, 是&quot;哈利·波特&quot;系列的第八个故事, 是一部由杰克·索恩执笔的全新剧本, ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "WoTjoAEACAAJ",
+      "etag": "OrB/JhOSnYQ",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/WoTjoAEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与魔法石",
+        "authors": [
+          "罗琳 (英)",
+          "苏农"
+        ],
+        "publishedDate": "2000",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020072879"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020072873"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 241,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=WoTjoAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=13&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=WoTjoAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E9%AD%94%E6%B3%95%E7%9F%B3.html?hl=&id=WoTjoAEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=WoTjoAEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "g3G8xQEACAAJ",
+      "etag": "sOuRo9eOjT8",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/g3G8xQEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与凤凰社",
+        "authors": [
+          "J. K.·罗琳"
+        ],
+        "publishedDate": "2018",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020144578"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020144570"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 674,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=g3G8xQEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=14&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=g3G8xQEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E5%87%A4%E5%87%B0%E7%A4%BE.html?hl=&id=g3G8xQEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=g3G8xQEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "本书讲述了:在一条寂静的走廊尽头有一扇门,这一幕萦绕在哈利·波特的梦中,使他时常在半夜醒来,惊惧尖叫.哈利·波特面对的不仅是即将到来的O.W.L.考试 ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "ikJs0AEACAAJ",
+      "etag": "QLRsXbAazps",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/ikJs0AEACAAJ",
+      "volumeInfo": {
+        "title": "哈利。波特与\"混血王子\"",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publishedDate": "2005",
+        "industryIdentifiers": [
+          {
+            "type": "OTHER",
+            "identifier": "OCLC:1413380818"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "England"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=ikJs0AEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=15&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=ikJs0AEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E_%E6%B7%B7%E8%A1%80%E7%8E%8B%E5%AD%90.html?hl=&id=ikJs0AEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=ikJs0AEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "vXT5wAEACAAJ",
+      "etag": "k5NpS7lAqWY",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/vXT5wAEACAAJ",
+      "volumeInfo": {
+        "title": "哈利波特",
+        "subtitle": "混血王子的背叛",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publisher": "Huang Guan",
+        "publishedDate": "2005",
+        "description": "Chinese edition of \"Harry Potter and the Half Blooded Prince (Book 6).\" The sixth in the Harry Potter series and a favorite of J. K. Rowling herself. In traditional Chinese.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "9573321742"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9789573321743"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 735,
+        "printType": "BOOK",
+        "categories": [
+          "Adventure stories"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=vXT5wAEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=vXT5wAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=vXT5wAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=16&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=vXT5wAEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9.html?hl=&id=vXT5wAEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=vXT5wAEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Chinese edition of &quot;Harry Potter and the Half Blooded Prince (Book 6).&quot; The sixth in the Harry Potter series and a favorite of J. K. Rowling herself. In traditional Chinese."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "ipK-xQEACAAJ",
+      "etag": "nXH2QQu+wnM",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/ipK-xQEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与密室",
+        "authors": [
+          "J. K.·罗琳"
+        ],
+        "publishedDate": "2018",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020144543"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020144549"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 261,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=ipK-xQEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=17&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=ipK-xQEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E5%AF%86%E5%AE%A4.html?hl=&id=ipK-xQEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=ipK-xQEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "本书讲述的是哈利在霍格沃茨魔法学校的第二个学年充满了新的苦恼和恐怖,包括一位极为自命不凡的新教授吉德罗·洛哈特;一个时常在女生盥洗室中出没的幽灵&quot;哭泣的桃金娘&quot; ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "9Kk4zgEACAAJ",
+      "etag": "JkW+5Q93lTo",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/9Kk4zgEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与魔法石",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publishedDate": "2020",
+        "industryIdentifiers": [
+          {
+            "type": "OTHER",
+            "identifier": "OCLC:1235723157"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 241,
+        "printType": "BOOK",
+        "categories": [
+          "Chinese language materials"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=9Kk4zgEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=18&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=9Kk4zgEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E9%AD%94%E6%B3%95%E7%9F%B3.html?hl=&id=9Kk4zgEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=9Kk4zgEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "EJk7zgEACAAJ",
+      "etag": "kv5geCyUAes",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/EJk7zgEACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与\"混血王子\"",
+        "authors": [
+          "J. K. Rowling"
+        ],
+        "publishedDate": "2020",
+        "industryIdentifiers": [
+          {
+            "type": "OTHER",
+            "identifier": "OCLC:1235723430"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 480,
+        "printType": "BOOK",
+        "categories": [
+          "Chinese language materials"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=EJk7zgEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=19&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=EJk7zgEACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E_%E6%B7%B7%E8%A1%80%E7%8E%8B%E5%AD%90.html?hl=&id=EJk7zgEACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=EJk7zgEACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "tREmvgAACAAJ",
+      "etag": "RBe9br2vahY",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/tREmvgAACAAJ",
+      "volumeInfo": {
+        "title": "哈利·波特与魔法石",
+        "publishedDate": "2008",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "7020068383"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9787020068388"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 241,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "zh-CN",
+        "previewLink": "http://books.google.com.tw/books?id=tREmvgAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&cd=20&source=gbs_api",
+        "infoLink": "http://books.google.com.tw/books?id=tREmvgAACAAJ&dq=intitle:%E5%93%88%E5%88%A9%E6%B3%A2%E7%89%B9&hl=&as_pt=BOOKS&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/%E5%93%88%E5%88%A9_%E6%B3%A2%E7%89%B9%E4%B8%8E%E9%AD%94%E6%B3%95%E7%9F%B3.html?hl=&id=tREmvgAACAAJ"
+      },
+      "saleInfo": {
+        "country": "TW",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "TW",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=tREmvgAACAAJ&hl=&as_pt=BOOKS&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    }
+  ]
+}

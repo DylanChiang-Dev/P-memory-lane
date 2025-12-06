@@ -268,3 +268,38 @@ export async function saveUserSettings(data: any) {
         return { success: false, error: 'Network error' };
     }
 }
+
+/**
+ * Upload a media file (image) to the backend.
+ * Returns the URL of the uploaded file.
+ */
+export async function uploadMedia(file: File): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+        const token = auth.getAccessToken();
+        const formData = new FormData();
+        formData.append('files[]', file);
+
+        const response = await fetch(`${API_BASE_URL}/api/media`, {
+            method: 'POST',
+            headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            },
+            body: formData,
+        });
+
+        const json = await response.json();
+
+        if (!response.ok || !json.success) {
+            return { success: false, error: json.error || `Upload failed: HTTP ${response.status}` };
+        }
+
+        if (json.data?.items?.length > 0) {
+            return { success: true, url: json.data.items[0].url };
+        }
+
+        return { success: false, error: 'No URL returned from server' };
+    } catch (error) {
+        console.error('Error uploading media:', error);
+        return { success: false, error: 'Network error' };
+    }
+}

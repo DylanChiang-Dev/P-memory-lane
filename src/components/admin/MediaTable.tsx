@@ -146,7 +146,7 @@ export const MediaTable: React.FC = () => {
             let result;
             if (data.item.my_rating !== undefined) {
                 // Editing existing item - Flatten data for PUT request
-                const updateData = {
+                const updateData: any = {
                     my_rating: data.rating,
                     status: data.status,
                     review: data.review,
@@ -160,6 +160,10 @@ export const MediaTable: React.FC = () => {
                     episodes_listened: data.episodes_listened,
                     total_episodes: data.total_episodes
                 };
+                // Add custom cover URL if provided (for books with uploaded covers)
+                if (data.customCoverUrl) {
+                    updateData.cover_image_cdn = data.customCoverUrl;
+                }
                 result = await updateMediaItem(currentType, data.item.id, updateData);
             } else {
                 // Adding new item - Fetch full details for TMDB items to ensure we have all metadata
@@ -244,7 +248,7 @@ export const MediaTable: React.FC = () => {
                         google_books_id: data.item.id,
                         title: data.item.volumeInfo?.title,
                         original_title: data.item.volumeInfo?.title,
-                        cover_image_cdn: data.item.volumeInfo?.imageLinks?.thumbnail?.replace('http:', 'https:'),
+                        cover_image_cdn: data.customCoverUrl || data.item.volumeInfo?.imageLinks?.thumbnail?.replace('http:', 'https:'),
                         overview: data.item.volumeInfo?.description,
                         genres: data.item.volumeInfo?.categories,
                         external_rating: data.item.volumeInfo?.averageRating,
