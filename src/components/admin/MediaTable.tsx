@@ -260,7 +260,7 @@ export const MediaTable: React.FC = () => {
                         isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
                     }),
                     ...(currentType === 'games' && {
-                        igdb_id: data.item.id,
+                        rawg_id: data.item.id, // Backend expects rawg_id, not igdb_id
                         title: data.item.name,
                         cover_image_cdn: data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null,
                         backdrop_image_cdn: data.item.screenshots?.[0]?.image_id ? getIGDBImageUrl(data.item.screenshots[0].image_id, 'screenshot_med') : null,
