@@ -13,8 +13,8 @@ const ML_API_BASE = process.env.ML_API_BASE || 'https://pyqapi.3331322.xyz';
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
 
 // Memory Lane credentials
-let ML_EMAIL = process.env.ML_EMAIL || '3331322@gmail.com';
-let ML_PASSWORD = process.env.ML_PASSWORD || 'ca123456789';
+let ML_EMAIL = process.env.ML_EMAIL;
+let ML_PASSWORD = process.env.ML_PASSWORD;
 
 let accessToken = null;
 
@@ -23,6 +23,10 @@ let accessToken = null;
  */
 async function login() {
     console.log('🔐 登入 Memory Lane...');
+
+    if (!ML_EMAIL || !ML_PASSWORD) {
+        throw new Error('Missing credentials: set ML_EMAIL and ML_PASSWORD (and optionally ML_API_BASE).');
+    }
 
     const response = await fetch(`${ML_API_BASE}/api/login`, {
         method: 'POST',

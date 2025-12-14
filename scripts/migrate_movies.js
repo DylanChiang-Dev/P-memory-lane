@@ -11,8 +11,8 @@ const TOTAL_PAGES = 81;
 const CONCURRENCY_LIMIT = 10;
 
 // Credentials
-const USERNAME = 'Dylan.Chiang';
-const PASSWORD = 'ca123456789';
+const USERNAME = process.env.WP_USERNAME;
+const PASSWORD = process.env.WP_PASSWORD;
 
 async function getCookies() {
     console.log('Launching browser to login...');
@@ -20,6 +20,9 @@ async function getCookies() {
     const page = await browser.newPage();
 
     try {
+        if (!USERNAME || !PASSWORD) {
+            throw new Error('Missing WordPress credentials: set WP_USERNAME and WP_PASSWORD.');
+        }
         await page.goto(WP_LOGIN_URL, { waitUntil: 'networkidle0' });
 
         console.log('Entering credentials...');

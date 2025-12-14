@@ -40,3 +40,17 @@ credentials.md
 # local dev server artifacts
 .dev-memory-lane.pid
 .dev-memory-lane.log
+
+# local cookies/export artifacts
+cookies.txt
+game_reviews.json
+game_reviews_full.json
+game_reviews.tsv
+game_reviews.md
+igdb_wp_game_import_*.results.json
+igdb_wp_game_import_*.unmatched.json
+igdb_wp_game_import_*.suspicious.tsv
+wp_game_sync_*.results.json
+wp_game_sync_*.updated.tsv
+wp_game_sync_*.placeholders.tsv
+game_title_overrides.json

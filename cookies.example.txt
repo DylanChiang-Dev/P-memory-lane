@@ -1,0 +1,6 @@
+# Netscape HTTP Cookie File
+# This is a placeholder. Do NOT commit real cookies.
+#
+# Generate a real one locally if needed, for example:
+#   - use browser devtools/exporter, or
+#   - update scripts to login and fetch cookies at runtime.

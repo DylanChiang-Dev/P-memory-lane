@@ -43,7 +43,8 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
         if (refreshToken) {
             try {
                 // Call refresh endpoint
-                const refreshResponse = await fetch(`${API_BASE_URL}/api/refresh`, {
+                // Backend endpoint is /api/refresh-token (see api_manual.md)
+                const refreshResponse = await fetch(`${API_BASE_URL}/api/refresh-token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ refresh_token: refreshToken }),
@@ -59,7 +60,11 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
                     const data = await refreshResponse.json();
                     if (data.success && data.data.access_token) {
                         // Update tokens
-                        auth.setTokens(data.data.access_token, data.data.refresh_token || refreshToken);
+                        auth.setTokens(
+                            data.data.access_token,
+                            data.data.refresh_token || refreshToken,
+                            data.data.access_expires_in ?? data.data.expires_in ?? null
+                        );
 
                         // Retry original request with new token
                         token = data.data.access_token;

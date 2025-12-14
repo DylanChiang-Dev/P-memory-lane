@@ -25,6 +25,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     // Type specific fields
+    const [titleZh, setTitleZh] = useState('');
     const [platform, setPlatform] = useState('');
     const [season, setSeason] = useState(1);
     const [episode, setEpisode] = useState(1);
@@ -49,6 +50,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             else setDate(new Date().toISOString().split('T')[0]);
 
             // Type specific
+            setTitleZh(item.title_zh || '');
             setPlatform(item.platform || '');
             setSeason(item.current_season || 1);
             setEpisode(item.current_episode || 1);
@@ -90,7 +92,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             review,
             date,
             customCoverUrl, // Pass custom cover URL if uploaded
-            ...(type === 'games' && { platform }),
+            ...(type === 'games' && { platform, title_zh: titleZh.trim() || undefined }),
             ...(type === 'tv-shows' && { season, episode }),
             ...(type === 'anime' && { episodes_watched: episodesWatched, total_episodes: totalEpisodes }),
             ...(type === 'podcasts' && { episodes_listened: episodesWatched, total_episodes: totalEpisodes }),
@@ -226,43 +228,55 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
                     {/* Dynamic Fields */}
                     {type === 'games' && (
-                        <div>
-                            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">平台</label>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                {PLATFORMS.map(p => {
-                                    const isSelected = platform.split(', ').includes(p);
-                                    return (
-                                        <button
-                                            key={p}
-                                            type="button"
-                                            onClick={() => {
-                                                const current = platform ? platform.split(', ') : [];
-                                                if (isSelected) {
-                                                    setPlatform(current.filter(i => i !== p).join(', '));
-                                                } else {
-                                                    setPlatform([...current, p].join(', '));
-                                                }
-                                            }}
-                                            className={clsx(
-                                                "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
-                                                isSelected
-                                                    ? "bg-indigo-500 border-indigo-500 text-white"
-                                                    : "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-                                            )}
-                                        >
-                                            {p}
-                                        </button>
-                                    );
-                                })}
+                        <>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">中文名稱（可選）</label>
+                                <input
+                                    type="text"
+                                    value={titleZh}
+                                    onChange={(e) => setTitleZh(e.target.value)}
+                                    placeholder="例如：巫師3：狂獵"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                />
                             </div>
-                            <input
-                                type="text"
-                                value={platform}
-                                onChange={(e) => setPlatform(e.target.value)}
-                                placeholder="其他平台..."
-                                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">平台</label>
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    {PLATFORMS.map(p => {
+                                        const isSelected = platform.split(', ').includes(p);
+                                        return (
+                                            <button
+                                                key={p}
+                                                type="button"
+                                                onClick={() => {
+                                                    const current = platform ? platform.split(', ') : [];
+                                                    if (isSelected) {
+                                                        setPlatform(current.filter(i => i !== p).join(', '));
+                                                    } else {
+                                                        setPlatform([...current, p].join(', '));
+                                                    }
+                                                }}
+                                                className={clsx(
+                                                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
+                                                    isSelected
+                                                        ? "bg-indigo-500 border-indigo-500 text-white"
+                                                        : "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                                                )}
+                                            >
+                                                {p}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <input
+                                    type="text"
+                                    value={platform}
+                                    onChange={(e) => setPlatform(e.target.value)}
+                                    placeholder="其他平台..."
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                />
+                            </div>
+                        </>
                     )}
 
                     {type === 'tv-shows' && (
@@ -466,6 +480,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
 // Helpers
 function getItemTitle(item: any, type: MediaType) {
+    if (type === 'games' && typeof item.title_zh === 'string' && item.title_zh) return item.title_zh;
+
     // 優先使用後端返回的 title 字段（編輯已存在項目時）
     if (typeof item.title === 'string' && item.title) return item.title;
 
@@ -579,4 +595,3 @@ function getStatusOptions(type: MediaType) {
         { value: 'want_to_watch', label: '想看' },
     ];
 }
-

@@ -27,7 +27,7 @@ export const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({
 
     // New state for search and sort
     const [searchQuery, setSearchQuery] = useState('');
-    const [sort, setSort] = useState<'created_at_desc' | 'completed_date_desc' | 'rating_desc' | 'rating_asc'>('created_at_desc');
+    const [sort, setSort] = useState<'created_at_desc' | 'completed_date_desc' | 'rating_desc' | 'rating_asc'>('completed_date_desc');
 
     const [totalItems, setTotalItems] = useState(0);
 

@@ -6,12 +6,15 @@
 
 const WP_API_BASE = 'https://blog.3331322.xyz/wp-json/wp/v2';
 const ML_API_BASE = 'https://pyqapi.3331322.xyz';
-const ML_EMAIL = process.env.ML_EMAIL || '3331322@gmail.com';
-const ML_PASSWORD = process.env.ML_PASSWORD || 'ca123456789';
+const ML_EMAIL = process.env.ML_EMAIL;
+const ML_PASSWORD = process.env.ML_PASSWORD;
 
 let accessToken = null;
 
 async function login() {
+    if (!ML_EMAIL || !ML_PASSWORD) {
+        throw new Error('Missing credentials: set ML_EMAIL and ML_PASSWORD.');
+    }
     const response = await fetch(`${ML_API_BASE}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,0 +1,15 @@
+{
+  "巫师3：狂猎": {
+    "query": "The Witcher 3: Wild Hunt"
+  },
+  "https://blog.3331322.xyz/index.php/game_review/call-of-duty-4/": {
+    "query": "Call of Duty 4: Modern Warfare"
+  },
+  "某個你不想匯入的遊戲標題": {
+    "skip": true
+  },
+  "某個你想指定 IGDB id 的遊戲標題": {
+    "igdb_id": 1942
+  }
+}
+

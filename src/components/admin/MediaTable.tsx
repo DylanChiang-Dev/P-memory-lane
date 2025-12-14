@@ -62,7 +62,8 @@ export const MediaTable: React.FC = () => {
     const loadItems = async () => {
         setLoading(true);
         try {
-            const result = await fetchMediaItems(activeTab, undefined, page, 20, undefined, debouncedSearchQuery);
+            // Admin list should default to "completed date" ordering, not recently-updated ordering.
+            const result = await fetchMediaItems(activeTab, undefined, page, 20, 'completed_date_desc', debouncedSearchQuery);
 
             if (Array.isArray(result)) {
                 // Fallback for old API response format if any
@@ -150,6 +151,7 @@ export const MediaTable: React.FC = () => {
                     review: data.review,
                     my_review: data.review, // Alias for backend compatibility
                     completed_date: data.date,
+                    title_zh: data.title_zh,
                     // Type specific fields
                     platform: data.platform,
                     current_season: data.season,
@@ -247,6 +249,7 @@ export const MediaTable: React.FC = () => {
                     ...(currentType === 'games' && {
                         rawg_id: data.item.id, // Backend expects rawg_id, not igdb_id
                         title: data.item.name,
+                        title_zh: data.title_zh,
                         cover_image_cdn: data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null,
                         backdrop_image_cdn: data.item.screenshots?.[0]?.image_id ? getIGDBImageUrl(data.item.screenshots[0].image_id, 'screenshot_med') : null,
                         overview: data.item.summary,
@@ -390,8 +393,8 @@ export const MediaTable: React.FC = () => {
 
     // Reset pagination when search changes (avoid fetching until debounce settles)
     useEffect(() => {
-        if (page !== 1) setPage(1);
-    }, [searchQuery, page]);
+        setPage(1);
+    }, [searchQuery]);
 
     return (
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-white/5 overflow-hidden">
@@ -649,6 +652,8 @@ export const MediaTable: React.FC = () => {
 // Helpers
 function getItemTitle(item: any, type: MediaType) {
     if (!item) return '';
+
+    if (type === 'games' && typeof item.title_zh === 'string' && item.title_zh) return item.title_zh;
 
     // 優先使用後端返回的 title 字段
     if (typeof item.title === 'string' && item.title) return item.title;

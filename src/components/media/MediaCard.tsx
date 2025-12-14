@@ -5,6 +5,7 @@ import { getIGDBImageUrl } from '../../lib/igdb';
 export interface MediaItem {
     id: number;
     title?: string;
+    title_zh?: string;
     name?: string; // Some APIs return name instead of title
     poster_path?: string;
     cover_url?: string;
@@ -178,6 +179,8 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
 // Helpers
 function getItemTitle(item: any, type: string) {
     if (!item) return '';
+
+    if (type === 'game' && typeof item.title_zh === 'string' && item.title_zh) return item.title_zh;
 
     // 優先使用後端返回的 title 字段
     if (typeof item.title === 'string' && item.title) return item.title;
