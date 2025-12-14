@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, API_BASE_URL } from '../../lib/auth';
+import { fetchUserSettings } from '../../lib/api';
+import { apiConfigManager } from '../../lib/apiConfig';
 import { LoginForm } from './LoginForm';
 import { AlertTriangle, Loader2, LogOut, RefreshCcw } from 'lucide-react';
 
@@ -46,6 +48,14 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
             if (response.ok) {
                 setAuthState('authenticated');
+                try {
+                    const settings = await fetchUserSettings();
+                    if (settings?.api_keys) {
+                        apiConfigManager.saveConfig(settings.api_keys);
+                    }
+                } catch (e) {
+                    console.warn('Failed to sync API settings:', e);
+                }
             } else {
                 // Only treat auth-related responses as unauthenticated; keep session on transient backend errors.
                 if (response.status === 401 || response.status === 403) {
