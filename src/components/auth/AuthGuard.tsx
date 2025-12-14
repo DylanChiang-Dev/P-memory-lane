@@ -42,19 +42,18 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
             if (response.ok) {
                 setAuthState('authenticated');
-            } else if (response.status === 401) {
-                // Token expired or invalid
+            } else {
+                // Any non-OK response (including 401, 403, 500, etc.) means unauthenticated
+                // Clear tokens to ensure clean state
                 auth.clearTokens();
                 setAuthState('unauthenticated');
-            } else {
-                // Other errors - treat as authenticated to avoid blocking on network issues
-                // Individual API calls will fail and show appropriate errors
-                setAuthState('authenticated');
             }
         } catch (error) {
             console.error('Auth validation failed:', error);
-            // Network error - allow access, individual API calls will handle failures
-            setAuthState('authenticated');
+            // Network error - require login to be safe
+            // Clear any stale tokens
+            auth.clearTokens();
+            setAuthState('unauthenticated');
         }
     };
 

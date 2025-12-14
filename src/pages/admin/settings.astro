@@ -1,7 +1,6 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { APISettings } from "../../components/admin/APISettings";
-import { BatchDateFixer } from "../../components/admin/BatchDateFixer";
 ---
 
 <AdminLayout title="API 设置 - 管理后台">
@@ -17,8 +16,5 @@ import { BatchDateFixer } from "../../components/admin/BatchDateFixer";
 
         <!-- API Settings -->
         <APISettings client:load />
-
-        <!-- Batch Tools -->
-        <BatchDateFixer client:load />
     </div>
 </AdminLayout>
