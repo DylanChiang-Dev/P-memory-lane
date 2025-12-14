@@ -31,6 +31,16 @@ export const APISettings: React.FC = () => {
         load();
     }, []);
 
+    const refreshStatus = async () => {
+        setLoading(true);
+        try {
+            const res = await fetchIntegrationStatus();
+            setStatus(res);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSave = async () => {
         setError(null);
         setSaved(false);
@@ -49,6 +59,24 @@ export const APISettings: React.FC = () => {
             const result = await saveIntegrationCredentials(payload);
 
             if (result.success) {
+                const res = await fetchIntegrationStatus();
+                setStatus(res);
+
+                const expectedProviders: Array<{ key: keyof IntegrationStatus; label: string }> = [];
+                if (payload.tmdb_api_key) expectedProviders.push({ key: 'tmdb', label: 'TMDB' });
+                if (payload.rawg_api_key) expectedProviders.push({ key: 'rawg', label: 'RAWG' });
+                if (payload.google_books_api_key) expectedProviders.push({ key: 'google_books', label: 'Google Books' });
+                if (payload.igdb_client_id || payload.igdb_client_secret) expectedProviders.push({ key: 'igdb', label: 'IGDB' });
+
+                const missing = expectedProviders
+                    .filter(p => (res as any)?.[p.key]?.configured !== true)
+                    .map(p => p.label);
+
+                if (missing.length > 0) {
+                    setError(`已提交保存，但后端仍显示未配置：${missing.join(', ')}。请检查后端是否成功写入/解密 credentials，或是否登录了不同账号。`);
+                    return;
+                }
+
                 setSaved(true);
                 setForm({
                     tmdb_api_key: '',
@@ -57,8 +85,6 @@ export const APISettings: React.FC = () => {
                     igdb_client_id: '',
                     igdb_client_secret: ''
                 });
-                const res = await fetchIntegrationStatus();
-                setStatus(res);
                 setTimeout(() => setSaved(false), 3000);
             } else {
                 setError(result.error || result.message || '保存失败');
@@ -130,18 +156,27 @@ export const APISettings: React.FC = () => {
                         密钥只保存在服务器端；前端不会显示已保存的明文
                     </p>
                 </div>
-                {saved && (
-                    <div className="flex items-center gap-2 text-teal-500 bg-teal-500/10 px-4 py-2 rounded-full animate-fade-in">
-                        <CheckCircle2 size={18} />
-                        <span className="font-medium">已保存</span>
-                    </div>
-                )}
-                {error && (
-                    <div className="flex items-center gap-2 text-red-500 bg-red-500/10 px-4 py-2 rounded-full animate-fade-in">
-                        <AlertCircle size={18} />
-                        <span className="font-medium">{error}</span>
-                    </div>
-                )}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={refreshStatus}
+                        className="px-4 py-2 rounded-full text-sm font-medium border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors"
+                        type="button"
+                    >
+                        刷新状态
+                    </button>
+                    {saved && (
+                        <div className="flex items-center gap-2 text-teal-500 bg-teal-500/10 px-4 py-2 rounded-full animate-fade-in">
+                            <CheckCircle2 size={18} />
+                            <span className="font-medium">已保存</span>
+                        </div>
+                    )}
+                    {error && (
+                        <div className="flex items-center gap-2 text-red-500 bg-red-500/10 px-4 py-2 rounded-full animate-fade-in max-w-[520px]">
+                            <AlertCircle size={18} className="flex-shrink-0" />
+                            <span className="font-medium text-xs leading-relaxed">{error}</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="space-y-6">
