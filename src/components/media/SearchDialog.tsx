@@ -15,14 +15,22 @@ interface SearchDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onSelect: (item: any, type: SearchType) => void;
+    defaultType?: SearchType;
 }
 
-export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onSelect }) => {
+export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onSelect, defaultType }) => {
     const [query, setQuery] = useState('');
-    const [type, setType] = useState<SearchType>('movie');
+    const [type, setType] = useState<SearchType>(defaultType || 'movie');
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setType(defaultType || 'movie');
+        setQuery('');
+        setResults([]);
+    }, [isOpen, defaultType]);
 
     // Debounce search query
     useEffect(() => {

@@ -615,6 +615,15 @@ export const MediaTable: React.FC = () => {
                 isOpen={isSearchOpen}
                 onClose={() => setIsSearchOpen(false)}
                 onSelect={handleSearchSelect}
+                defaultType={
+                    activeTab === 'movies' ? 'movie' :
+                        activeTab === 'tv-shows' ? 'tv' :
+                            activeTab === 'books' ? 'book' :
+                                activeTab === 'games' ? 'game' :
+                                    activeTab === 'podcasts' ? 'podcast' :
+                                        activeTab === 'documentaries' ? 'documentary' :
+                                            'anime'
+                }
             />
 
             <AddMediaModal
