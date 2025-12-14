@@ -48,6 +48,7 @@ export const MediaTable: React.FC = () => {
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({ total: 0, total_pages: 0, limit: 20 });
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
     const [saving, setSaving] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -61,7 +62,7 @@ export const MediaTable: React.FC = () => {
     const loadItems = async () => {
         setLoading(true);
         try {
-            const result = await fetchMediaItems(activeTab, undefined, page, 20, undefined, searchQuery);
+            const result = await fetchMediaItems(activeTab, undefined, page, 20, undefined, debouncedSearchQuery);
 
             if (Array.isArray(result)) {
                 // Fallback for old API response format if any
@@ -88,12 +89,9 @@ export const MediaTable: React.FC = () => {
     };
 
     useEffect(() => {
-        setPage(1); // Reset page when tab changes
-    }, [activeTab]);
-
-    useEffect(() => {
+        if (debouncedSearchQuery !== searchQuery) return;
         loadItems();
-    }, [activeTab, page]);
+    }, [activeTab, page, debouncedSearchQuery, searchQuery]);
 
     const handleDelete = (id: number) => {
         setItemToDelete(id);
@@ -382,16 +380,18 @@ export const MediaTable: React.FC = () => {
         return `/${map[type] || type}/${id}`;
     };
 
-    // Debounce search
+    // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (searchQuery !== undefined) {
-                setPage(1);
-                loadItems();
-            }
+            setDebouncedSearchQuery(searchQuery);
         }, 500);
         return () => clearTimeout(timer);
     }, [searchQuery]);
+
+    // Reset pagination when search changes (avoid fetching until debounce settles)
+    useEffect(() => {
+        if (page !== 1) setPage(1);
+    }, [searchQuery, page]);
 
     return (
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-white/5 overflow-hidden">
@@ -401,7 +401,11 @@ export const MediaTable: React.FC = () => {
                     {(['movies', 'tv-shows', 'books', 'games', 'podcasts', 'documentaries', 'anime'] as const).map((type) => (
                         <button
                             key={type}
-                            onClick={() => setActiveTab(type)}
+                            onClick={() => {
+                                if (type === activeTab) return;
+                                setActiveTab(type);
+                                setPage(1);
+                            }}
                             className={clsx(
                                 "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
                                 activeTab === type
