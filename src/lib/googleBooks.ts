@@ -30,6 +30,7 @@ export async function searchGoogleBooks(query: string): Promise<GoogleBookResult
         const data: GoogleBooksResponse = json?.data ?? json;
         return data?.items || [];
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') throw error;
         console.error('Error searching Google Books:', error);
         return [];
     }

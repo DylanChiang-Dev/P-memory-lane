@@ -9,20 +9,28 @@ interface AuthResponse {
 }
 
 export const auth = {
-    setTokens(accessToken: string, refreshToken: string) {
+    setTokens(accessToken: string, refreshToken?: string | null) {
         if (typeof window === 'undefined') return;
         localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('refresh_token', refreshToken);
+        if (refreshToken) {
+            localStorage.setItem('refresh_token', refreshToken);
+        } else {
+            localStorage.removeItem('refresh_token');
+        }
     },
 
     getAccessToken() {
         if (typeof window === 'undefined') return null;
-        return localStorage.getItem('access_token');
+        const token = localStorage.getItem('access_token');
+        if (!token || token === 'undefined' || token === 'null') return null;
+        return token;
     },
 
     getRefreshToken() {
         if (typeof window === 'undefined') return null;
-        return localStorage.getItem('refresh_token');
+        const token = localStorage.getItem('refresh_token');
+        if (!token || token === 'undefined' || token === 'null') return null;
+        return token;
     },
 
     clearTokens() {

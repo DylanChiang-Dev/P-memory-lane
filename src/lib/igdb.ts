@@ -24,6 +24,7 @@ export async function searchIGDB(query: string): Promise<IGDBGameResult[]> {
         const data: IGDBGameResult[] = json?.data ?? json;
         return Array.isArray(data) ? data : [];
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') throw error;
         console.error('Error searching IGDB:', error);
         return [];
     }

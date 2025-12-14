@@ -36,3 +36,7 @@ yarn-error.log*
 
 # credentials (sensitive data)
 credentials.md
+
+# local dev server artifacts
+.dev-memory-lane.pid
+.dev-memory-lane.log

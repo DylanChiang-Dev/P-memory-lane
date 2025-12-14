@@ -43,6 +43,7 @@ export async function searchTMDB(query: string, type: 'movie' | 'tv' | 'multi' =
         // Filter out results without posters or very low popularity if needed
         return data.results.filter(item => item.poster_path);
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') throw error;
         console.error('Error searching TMDB:', error);
         return [];
     }

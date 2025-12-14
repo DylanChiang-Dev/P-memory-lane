@@ -30,6 +30,7 @@ export async function searchRAWG(query: string): Promise<RAWGGameResult[]> {
         const data: RAWGResponse = json?.data?.results ? json.data : (json?.data ?? json);
         return data?.results || [];
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') throw error;
         console.error('Error searching RAWG:', error);
         return [];
     }

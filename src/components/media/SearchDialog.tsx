@@ -5,6 +5,7 @@ import { searchGoogleBooks, getGoogleBookImageUrl, type GoogleBookResult } from 
 import { searchIGDB, getIGDBImageUrl, type IGDBGameResult } from '../../lib/igdb';
 import { searchPodcasts, type ITunesPodcastResult } from '../../lib/itunes';
 import { searchAnime, type AnilistResult } from '../../lib/anilist';
+import { toast } from '../ui/Toast';
 import { clsx } from 'clsx';
 
 type SearchType = 'movie' | 'tv' | 'book' | 'game' | 'podcast' | 'documentary' | 'anime';
@@ -64,6 +65,11 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                 }
                 setResults(data);
             } catch (error) {
+                if (error instanceof Error && error.message === 'Unauthorized') {
+                    toast.error('未登入或登入已失效，請重新登入後再試');
+                    onClose();
+                    return;
+                }
                 console.error('Search error:', error);
             } finally {
                 setLoading(false);

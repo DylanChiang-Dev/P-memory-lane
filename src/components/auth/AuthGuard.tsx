@@ -24,6 +24,15 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         validateAuth();
     }, []);
 
+    useEffect(() => {
+        const handleLogout = () => {
+            setErrorMessage(null);
+            setAuthState('unauthenticated');
+        };
+        window.addEventListener('auth:logout', handleLogout as EventListener);
+        return () => window.removeEventListener('auth:logout', handleLogout as EventListener);
+    }, []);
+
     const validateAuth = async () => {
         setErrorMessage(null);
         setAuthState('loading');
