@@ -6,6 +6,7 @@ import { searchIGDB, getIGDBImageUrl, type IGDBGameResult } from '../../lib/igdb
 import { searchPodcasts, type ITunesPodcastResult } from '../../lib/itunes';
 import { searchAnime, type AnilistResult } from '../../lib/anilist';
 import { toast } from '../ui/Toast';
+import { fetchIntegrationStatus } from '../../lib/api';
 import { clsx } from 'clsx';
 
 type SearchType = 'movie' | 'tv' | 'book' | 'game' | 'podcast' | 'documentary' | 'anime';
@@ -66,7 +67,18 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                 setResults(data);
             } catch (error) {
                 if (error instanceof Error && error.message === 'Unauthorized') {
-                    toast.error('未登入或登入已失效，請重新登入後再試');
+                    try {
+                        if (type === 'game') {
+                            const status = await fetchIntegrationStatus();
+                            if (status?.igdb?.configured === false) {
+                                toast.warning('IGDB 未配置，請到 /admin/settings 設定後再試', 5000);
+                                return;
+                            }
+                        }
+                    } catch {
+                        // ignore
+                    }
+                    toast.error('未授權（可能登入已失效），請重新登入後再試');
                     onClose();
                     return;
                 }

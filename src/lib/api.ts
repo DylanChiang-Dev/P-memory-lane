@@ -44,6 +44,12 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
                     body: JSON.stringify({ refresh_token: refreshToken }),
                 });
 
+                // Refresh token invalid/expired: end session
+                if (refreshResponse.status === 401 || refreshResponse.status === 403) {
+                    auth.clearTokens();
+                    throw new Error('Unauthorized');
+                }
+
                 if (refreshResponse.ok) {
                     const data = await refreshResponse.json();
                     if (data.success && data.data.access_token) {
@@ -69,10 +75,12 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
             } catch (refreshError) {
                 console.error('Token refresh failed:', refreshError);
             }
+
+            // Refresh attempt failed (network/5xx/invalid format): don't force logout here.
+            throw new Error('Unauthorized');
         }
 
-        // If we get here, refresh failed or no refresh token
-        auth.clearTokens();
+        // No refresh token: don't force logout on a single 401.
         throw new Error('Unauthorized');
     }
 
