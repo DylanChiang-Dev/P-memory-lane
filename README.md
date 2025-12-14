@@ -48,14 +48,7 @@ npm run dev
 
 ### 3. 環境變量（可選）
 
-如需在構建時注入 API 密鑰：
-
-```
-VITE_TMDB_API_KEY=your_key
-VITE_RAWG_API_KEY=your_key
-```
-
-> **注意**: 本項目 API 密鑰主要通過前端 `/admin/settings` 頁面配置，存儲在 localStorage。
+本項目外部 API 密鑰由後端保存（與帳號綁定），前端不再存放第三方密鑰。
 
 ### 4. 後端 CORS 配置
 

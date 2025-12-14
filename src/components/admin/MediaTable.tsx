@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, MoreVertical, Search, Loader2, Film, Tv, Book, Gamepad2, Mic, Video, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 import { fetchMediaItems, deleteMediaItem, addMediaItem, updateMediaItem, type MediaType } from '../../lib/api';
-import { getTMDBDetails, getTMDBImageUrl } from '../../lib/tmdb';
+import { getTMDBImageUrl } from '../../lib/tmdb';
 import { getPodcastDetails } from '../../lib/itunes';
 import { getAnimeDetails } from '../../lib/anilist';
 import { getIGDBImageUrl } from '../../lib/igdb';
@@ -166,21 +166,8 @@ export const MediaTable: React.FC = () => {
                 }
                 result = await updateMediaItem(currentType, data.item.id, updateData);
             } else {
-                // Adding new item - Fetch full details for TMDB items to ensure we have all metadata
-                let itemDetails = data.item;
-                if (currentType === 'movies' || currentType === 'tv-shows' || currentType === 'documentaries') {
-                    try {
-                        const tmdbType = currentType === 'movies' ? 'movie' : 'tv';
-                        const details = await getTMDBDetails(data.item.id, tmdbType);
-                        if (details) {
-                            console.log('Fetched TMDB details:', details);
-                            itemDetails = { ...data.item, ...details };
-                        }
-                    } catch (err) {
-                        console.error('Error fetching TMDB details:', err);
-                        // Continue with existing data if fetch fails
-                    }
-                }
+                // Adding new item - Use search result payload (details are served by backend)
+                const itemDetails = data.item;
 
                 // Adding new item - Flatten data for POST request with complete metadata
                 const createData = {

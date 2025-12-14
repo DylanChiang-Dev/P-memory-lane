@@ -1,10 +1,4 @@
 import { auth, API_BASE_URL } from './auth';
-import { getTMDBDetails, getTMDBImageUrl } from './tmdb';
-import { getPodcastDetails } from './itunes';
-import { getAnimeDetails } from './anilist';
-import { getBookDetails } from './googleBooks';
-import { getGameDetails } from './rawg';
-import { getIGDBGameDetails, getIGDBImageUrl } from './igdb';
 
 export interface Activity {
     date: string;
@@ -23,7 +17,7 @@ export interface Stats {
 
 // Helper to fetch with auth header
 // Helper to fetch with auth header
-async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     let token = auth.getAccessToken();
 
     const getHeaders = (t: string | null) => ({
@@ -83,6 +77,46 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     }
 
     return response;
+}
+
+export type IntegrationStatus = {
+    tmdb?: { configured: boolean };
+    rawg?: { configured: boolean };
+    google_books?: { configured: boolean };
+    igdb?: { configured: boolean };
+};
+
+export async function fetchIntegrationStatus(): Promise<IntegrationStatus | null> {
+    try {
+        const response = await fetchWithAuth('/api/integrations/status');
+        if (!response.ok) return null;
+        const json = await response.json();
+        return json.success ? json.data : null;
+    } catch (error) {
+        console.error('Error fetching integrations status:', error);
+        return null;
+    }
+}
+
+export type IntegrationCredentialsPayload = Partial<{
+    tmdb_api_key: string;
+    rawg_api_key: string;
+    google_books_api_key: string;
+    igdb_client_id: string;
+    igdb_client_secret: string;
+}>;
+
+export async function saveIntegrationCredentials(payload: IntegrationCredentialsPayload) {
+    try {
+        const response = await fetchWithAuth('/api/integrations/credentials', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error saving integrations credentials:', error);
+        return { success: false, error: 'Network error' };
+    }
 }
 
 export async function fetchHeatmapData(type: string, year: number): Promise<Activity[]> {

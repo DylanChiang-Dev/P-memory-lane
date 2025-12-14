@@ -1,4 +1,4 @@
-const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
+import { fetchWithAuth } from './api';
 
 export interface GoogleBookResult {
     id: string;
@@ -24,19 +24,11 @@ export interface GoogleBooksResponse {
 
 export async function searchGoogleBooks(query: string): Promise<GoogleBookResult[]> {
     try {
-        // Google Books API is public and doesn't strictly require an API key for basic search,
-        // but using one is recommended for higher quotas. 
-        // We'll use it without key for now as per requirements, or add key if provided later.
-        const response = await fetch(
-            `${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=20&printType=books`
-        );
-
-        if (!response.ok) {
-            throw new Error(`Google Books API Error: ${response.statusText}`);
-        }
-
-        const data: GoogleBooksResponse = await response.json();
-        return data.items || [];
+        const response = await fetchWithAuth(`/api/search/google-books?query=${encodeURIComponent(query)}`);
+        if (!response.ok) return [];
+        const json = await response.json();
+        const data: GoogleBooksResponse = json?.data ?? json;
+        return data?.items || [];
     } catch (error) {
         console.error('Error searching Google Books:', error);
         return [];
@@ -50,13 +42,6 @@ export function getGoogleBookImageUrl(link: string | undefined): string {
 }
 
 export async function getBookDetails(id: string): Promise<GoogleBookResult | null> {
-    try {
-        const response = await fetch(`${BASE_URL}/${id}`);
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching Google Book details:', error);
-        return null;
-    }
+    // Details are served by backend/library; no direct Google Books calls in frontend.
+    return null;
 }

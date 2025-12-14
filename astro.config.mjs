@@ -13,12 +13,6 @@ export default defineConfig({
           changeOrigin: true,
           secure: true,
         },
-        '/igdb-proxy': {
-          target: 'https://api.igdb.com/v4',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/igdb-proxy/, ''),
-          secure: true,
-        }
       }
     }
   }

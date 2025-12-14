@@ -1,6 +1,4 @@
-import { apiConfigManager } from './apiConfig';
-
-const BASE_URL = 'https://api.rawg.io/api';
+import { fetchWithAuth } from './api';
 
 export interface RAWGGameResult {
     id: number;
@@ -25,41 +23,16 @@ export interface RAWGResponse {
 }
 
 export async function searchRAWG(query: string): Promise<RAWGGameResult[]> {
-    const RAWG_API_KEY = apiConfigManager.getRAWGKey();
-
-    if (!RAWG_API_KEY) {
-        console.warn('RAWG API Key is missing. Please configure it in /admin/settings.');
-        return [];
-    }
-
     try {
-        const response = await fetch(
-            `${BASE_URL}/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}&page_size=20`
-        );
-
-        if (!response.ok) {
-            throw new Error(`RAWG API Error: ${response.statusText}`);
-        }
-
-        const data: RAWGResponse = await response.json();
-        return data.results;
+        const response = await fetchWithAuth(`/api/search/rawg?query=${encodeURIComponent(query)}`);
+        if (!response.ok) return [];
+        const json = await response.json();
+        const data: RAWGResponse = json?.data?.results ? json.data : (json?.data ?? json);
+        return data?.results || [];
     } catch (error) {
         console.error('Error searching RAWG:', error);
         return [];
     }
 }
 
-export async function getGameDetails(id: number): Promise<RAWGGameResult | null> {
-    const RAWG_API_KEY = apiConfigManager.getRAWGKey();
-    if (!RAWG_API_KEY) return null;
-
-    try {
-        const response = await fetch(`${BASE_URL}/games/${id}?key=${RAWG_API_KEY}`);
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching RAWG game details:', error);
-        return null;
-    }
-}
+// Details are served by backend/library; no direct RAWG calls in frontend.

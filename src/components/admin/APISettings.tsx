@@ -1,109 +1,122 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Key, Save, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
-import { apiConfigManager, type APIConfig } from '../../lib/apiConfig';
-import { fetchUserSettings, saveUserSettings } from '../../lib/api';
+import { fetchIntegrationStatus, saveIntegrationCredentials, type IntegrationStatus, type IntegrationCredentialsPayload } from '../../lib/api';
 
 export const APISettings: React.FC = () => {
-    const [config, setConfig] = useState<APIConfig>(apiConfigManager.getDefaultConfig());
+    const [status, setStatus] = useState<IntegrationStatus | null>(null);
+    const [form, setForm] = useState<IntegrationCredentialsPayload>({
+        tmdb_api_key: '',
+        rawg_api_key: '',
+        google_books_api_key: '',
+        igdb_client_id: '',
+        igdb_client_secret: ''
+    });
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const loadSettings = async () => {
+        const load = async () => {
             setLoading(true);
             try {
-                // Try to fetch from backend first
-                const settings = await fetchUserSettings();
-                const currentConfig = settings && settings.api_keys ? settings.api_keys : apiConfigManager.getConfig();
-                setConfig(currentConfig);
-
-                if (settings && settings.api_keys) {
-                    // Also update local manager for immediate use in other components
-                    apiConfigManager.saveConfig(settings.api_keys);
-                }
-            } catch (err) {
-                console.error('Failed to load settings:', err);
-                const localConfig = apiConfigManager.getConfig();
-                setConfig(localConfig);
+                const res = await fetchIntegrationStatus();
+                setStatus(res);
+            } catch (e) {
+                console.error('Failed to load integrations status:', e);
+                setStatus(null);
             } finally {
                 setLoading(false);
             }
         };
-        loadSettings();
+        load();
     }, []);
 
     const handleSave = async () => {
         setError(null);
         setSaved(false);
+        const payload = Object.fromEntries(
+            Object.entries(form)
+                .map(([k, v]) => [k, typeof v === 'string' ? v.trim() : v])
+                .filter(([, v]) => typeof v === 'string' && v.length > 0)
+        ) as IntegrationCredentialsPayload;
 
-        // Always save to local storage first so frontend works
-        apiConfigManager.saveConfig(config);
+        if (Object.keys(payload).length === 0) {
+            setError('没有要保存的内容（全部为空）');
+            return;
+        }
 
         try {
-            // Save to backend
-            const result = await saveUserSettings({ api_keys: config });
+            const result = await saveIntegrationCredentials(payload);
 
             if (result.success) {
                 setSaved(true);
+                setForm({
+                    tmdb_api_key: '',
+                    rawg_api_key: '',
+                    google_books_api_key: '',
+                    igdb_client_id: '',
+                    igdb_client_secret: ''
+                });
+                const res = await fetchIntegrationStatus();
+                setStatus(res);
                 setTimeout(() => setSaved(false), 3000);
             } else {
-                // Backend failed, but we saved locally
-                console.warn('Backend save failed, but saved locally:', result.error);
-                setSaved(true); // Show saved status anyway
-                setError('已保存到本地 (服务器同步失败: ' + (result.error || '未授权') + ')');
-                setTimeout(() => setSaved(false), 3000);
+                setError(result.error || result.message || '保存失败');
             }
         } catch (err: any) {
-            // Network error, but we saved locally
-            console.warn('Backend save error, but saved locally:', err);
-            setSaved(true);
-            setError('已保存到本地 (服务器连接失败)');
-            setTimeout(() => setSaved(false), 3000);
+            console.warn('Backend save error:', err);
+            setError('服务器连接失败');
         }
     };
 
-    const apiItems = [
+    const apiItems = useMemo(() => ([
         {
             key: 'tmdb_api_key',
             label: 'TMDB API Key',
-            description: '用于搜索电影和电视剧信息',
+            description: '用于搜索电影和电视剧信息（仅保存在服务器端）',
             link: 'https://www.themoviedb.org/settings/api',
-            required: true,
+            providerKey: 'tmdb',
         },
         {
             key: 'rawg_api_key',
             label: 'RAWG API Key',
-            description: '（旧）用于搜索游戏信息，建议迁移到 IGDB',
+            description: '用于游戏搜索（可选，若 IGDB 已配置可不填）',
             link: 'https://rawg.io/apidocs',
-            required: false,
+            providerKey: 'rawg',
         },
         {
             key: 'igdb_client_id',
             label: 'IGDB Client ID',
-            description: '（推荐）Twitch 开发者应用 ID',
+            description: 'Twitch 开发者应用 Client ID（Access Token 由后端自动获取）',
             link: 'https://dev.twitch.tv/console',
-            required: true,
+            providerKey: 'igdb',
         },
         {
-            key: 'igdb_access_token',
-            label: 'IGDB Access Token',
-            description: '（推荐）Twitch 应用访问令牌',
+            key: 'igdb_client_secret',
+            label: 'IGDB Client Secret',
+            description: 'Twitch 开发者应用 Client Secret（仅保存在服务器端）',
             link: 'https://dev.twitch.tv/console',
-            required: true,
+            providerKey: 'igdb',
         },
         {
             key: 'google_books_api_key',
             label: 'Google Books API Key',
-            description: '（可选）用于增强书籍搜索功能',
+            description: '（可选）用于提升 Google Books 配额（仅保存在服务器端）',
             link: 'https://console.cloud.google.com/apis/library/books.googleapis.com',
-            required: false,
+            providerKey: 'google_books',
         },
-    ];
+    ] as const), []);
 
     if (loading) {
         return <div className="p-8 text-center text-zinc-500">加载配置中...</div>;
     }
+
+    const configuredLabel = (providerKey: string) => {
+        const configured = (status as any)?.[providerKey]?.configured;
+        if (configured === true) return '已配置';
+        if (configured === false) return '未配置';
+        return '未知';
+    };
 
     return (
         <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 rounded-3xl p-6 md:p-8">
@@ -114,7 +127,7 @@ export const APISettings: React.FC = () => {
                         API 配置
                     </h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-                        配置外部 API 密钥以启用搜索功能
+                        密钥只保存在服务器端；前端不会显示已保存的明文
                     </p>
                 </div>
                 {saved && (
@@ -138,9 +151,9 @@ export const APISettings: React.FC = () => {
                             <div>
                                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
                                     {item.label}
-                                    {item.required && (
-                                        <span className="text-red-500 text-xs">*必填</span>
-                                    )}
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-400">
+                                        {configuredLabel(item.providerKey)}
+                                    </span>
                                 </label>
                                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                                     {item.description}
@@ -158,11 +171,11 @@ export const APISettings: React.FC = () => {
                         </div>
                         <input
                             type="text"
-                            value={config[item.key as keyof APIConfig] || ''}
+                            value={(form as any)[item.key] || ''}
                             onChange={(e) =>
-                                setConfig({ ...config, [item.key]: e.target.value })
+                                setForm({ ...form, [item.key]: e.target.value })
                             }
-                            placeholder={`输入 ${item.label}`}
+                            placeholder={`输入 ${item.label}（留空则不修改）`}
                             className="w-full px-4 py-3 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-teal-500 outline-none transition-all text-zinc-900 dark:text-white font-mono text-sm"
                         />
                     </div>
@@ -184,10 +197,9 @@ export const APISettings: React.FC = () => {
                     💡 配置说明
                 </h3>
                 <ul className="text-xs text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
-                    <li>API 密钥将加密保存在服务器端</li>
-                    <li>TMDB 和 RAWG 是必需的，用于搜索电影、剧集和游戏</li>
-                    <li>Google Books API Key 是可选的，不填写也可以使用基本搜索</li>
-                    <li>配置后刷新页面即可生效</li>
+                    <li>密钥将加密保存在服务器端，与账号绑定</li>
+                    <li>IGDB 的 Access Token 会由后端自动获取/刷新</li>
+                    <li>为安全起见，本页不会回显已保存的明文密钥</li>
                 </ul>
             </div>
         </div>
