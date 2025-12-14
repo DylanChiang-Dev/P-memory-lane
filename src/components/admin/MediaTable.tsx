@@ -40,6 +40,7 @@ const convertGenreIds = (genreIds: number[] | undefined): string[] | undefined =
 
 
 export const MediaTable: React.FC = () => {
+    const ADMIN_PAGE_LIMIT = 1000;
     const [activeTab, setActiveTab] = useState<MediaType>('movies');
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -63,22 +64,23 @@ export const MediaTable: React.FC = () => {
         setLoading(true);
         try {
             // Admin list should default to "completed date" ordering, not recently-updated ordering.
-            const result = await fetchMediaItems(activeTab, undefined, page, 20, 'completed_date_desc', debouncedSearchQuery);
+            const result = await fetchMediaItems(activeTab, undefined, page, ADMIN_PAGE_LIMIT, 'completed_date_desc', debouncedSearchQuery);
 
             if (Array.isArray(result)) {
                 // Fallback for old API response format if any
                 setItems(result);
-                setPagination({ total: result.length, total_pages: 1, limit: 1000 });
+                setPagination({ total: result.length, total_pages: 1, limit: ADMIN_PAGE_LIMIT });
             } else {
                 setItems(result.items || []);
-                const apiPagination = result.pagination || { total: 0, limit: 20 };
+                const apiPagination = result.pagination || { total: 0, limit: ADMIN_PAGE_LIMIT };
                 // Calculate total_pages if not provided by API
-                const totalPages = apiPagination.total_pages || Math.ceil((apiPagination.total || 0) / (apiPagination.limit || 20));
+                const effectiveLimit = apiPagination.limit || ADMIN_PAGE_LIMIT;
+                const totalPages = apiPagination.total_pages || Math.ceil((apiPagination.total || 0) / effectiveLimit);
 
                 setPagination({
                     total: apiPagination.total || 0,
                     total_pages: totalPages,
-                    limit: apiPagination.limit || 20
+                    limit: effectiveLimit
                 });
             }
         } catch (error) {
