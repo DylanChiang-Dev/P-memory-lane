@@ -58,7 +58,7 @@ export const auth = {
             }
 
             const data = await response.json();
-            if (data.success) {
+            if (data.success && data?.data?.access_token) {
                 this.setTokens(data.data.access_token, data.data.refresh_token);
                 return true;
             }

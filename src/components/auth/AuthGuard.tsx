@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, API_BASE_URL } from '../../lib/auth';
+import { fetchWithAuth } from '../../lib/api';
 import { LoginForm } from './LoginForm';
 import { AlertTriangle, Loader2, LogOut, RefreshCcw } from 'lucide-react';
 
@@ -43,16 +44,9 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             return;
         }
 
-        // Validate token with backend using an existing authenticated endpoint
+        // Validate token with backend using an authenticated endpoint
         try {
-            const token = auth.getAccessToken();
-            const response = await fetch(`${API_BASE_URL}/api/library/movies?limit=1`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
+            const response = await fetchWithAuth('/api/integrations/status');
             if (response.ok) {
                 setAuthState('authenticated');
             } else {
@@ -68,6 +62,11 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             }
         } catch (error) {
             console.error('Auth validation failed:', error);
+            if (error instanceof Error && error.message === 'Unauthorized') {
+                auth.clearTokens();
+                setAuthState('unauthenticated');
+                return;
+            }
             setErrorMessage('无法连接到后端，请检查网络或稍后重试。');
             setAuthState('error');
         }

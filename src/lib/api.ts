@@ -19,6 +19,11 @@ export interface Stats {
 // Helper to fetch with auth header
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     let token = auth.getAccessToken();
+    const shouldLogoutOn401 =
+        endpoint.startsWith('/api/library/') ||
+        endpoint.startsWith('/api/activities/') ||
+        endpoint.startsWith('/api/integrations/') ||
+        endpoint.startsWith('/api/user/');
 
     const getHeaders = (t: string | null) => ({
         'Content-Type': 'application/json',
@@ -76,11 +81,13 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
                 console.error('Token refresh failed:', refreshError);
             }
 
-            // Refresh attempt failed (network/5xx/invalid format): don't force logout here.
+            // Refresh attempt failed (network/5xx/invalid format)
+            if (shouldLogoutOn401) auth.clearTokens();
             throw new Error('Unauthorized');
         }
 
-        // No refresh token: don't force logout on a single 401.
+        // No refresh token
+        if (shouldLogoutOn401) auth.clearTokens();
         throw new Error('Unauthorized');
     }
 
