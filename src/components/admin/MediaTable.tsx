@@ -64,24 +64,52 @@ export const MediaTable: React.FC = () => {
         setLoading(true);
         try {
             // Admin list should default to "completed date" ordering, not recently-updated ordering.
-            const result = await fetchMediaItems(activeTab, undefined, page, ADMIN_PAGE_LIMIT, 'completed_date_desc', debouncedSearchQuery);
+            const sort = 'completed_date_desc';
+            const result = await fetchMediaItems(activeTab, undefined, page, ADMIN_PAGE_LIMIT, sort, debouncedSearchQuery);
 
             if (Array.isArray(result)) {
                 // Fallback for old API response format if any
                 setItems(result);
                 setPagination({ total: result.length, total_pages: 1, limit: ADMIN_PAGE_LIMIT });
             } else {
-                setItems(result.items || []);
+                const apiItems = result.items || [];
                 const apiPagination = result.pagination || { total: 0, limit: ADMIN_PAGE_LIMIT };
-                // Calculate total_pages if not provided by API
-                const effectiveLimit = apiPagination.limit || ADMIN_PAGE_LIMIT;
-                const totalPages = apiPagination.total_pages || Math.ceil((apiPagination.total || 0) / effectiveLimit);
+                const backendLimit = apiPagination.limit || ADMIN_PAGE_LIMIT;
+                const total = apiPagination.total || 0;
 
-                setPagination({
-                    total: apiPagination.total || 0,
-                    total_pages: totalPages,
-                    limit: effectiveLimit
-                });
+                // If backend clamps limit (e.g. public max=100), auto-stitch pages so admin UI can still show 1000 items per page.
+                if (backendLimit < ADMIN_PAGE_LIMIT && total > backendLimit) {
+                    const factor = Math.ceil(ADMIN_PAGE_LIMIT / backendLimit);
+                    const startBackendPage = (page - 1) * factor + 1;
+
+                    const stitched: any[] = [];
+                    for (let i = 0; i < factor; i++) {
+                        const backendPage = startBackendPage + i;
+                        const pageResult = await fetchMediaItems(activeTab, undefined, backendPage, backendLimit, sort, debouncedSearchQuery);
+                        if (Array.isArray(pageResult)) {
+                            stitched.push(...pageResult);
+                        } else {
+                            stitched.push(...(pageResult.items || []));
+                        }
+                        if (stitched.length >= ADMIN_PAGE_LIMIT) break;
+                    }
+
+                    setItems(stitched.slice(0, ADMIN_PAGE_LIMIT));
+                    setPagination({
+                        total,
+                        total_pages: Math.max(1, Math.ceil(total / ADMIN_PAGE_LIMIT)),
+                        limit: ADMIN_PAGE_LIMIT
+                    });
+                } else {
+                    setItems(apiItems);
+                    // Calculate total_pages if not provided by API
+                    const totalPages = apiPagination.total_pages || Math.ceil(total / backendLimit);
+                    setPagination({
+                        total,
+                        total_pages: totalPages,
+                        limit: backendLimit
+                    });
+                }
             }
         } catch (error) {
             console.error('Failed to load items:', error);
@@ -552,7 +580,12 @@ export const MediaTable: React.FC = () => {
                                                     'Post Production': '後製中',
                                                     'Rumored': '傳聞中'
                                                 };
-                                                return statusMap[item.status] || item.status;
+                                                const label = statusMap[item.status] || item.status;
+                                                const rawDate = item.completed_date || item.date;
+                                                const date = typeof rawDate === 'string' && rawDate
+                                                    ? rawDate.split('T')[0].split(' ')[0]
+                                                    : '';
+                                                return date ? `${label} ${date}` : label;
                                             })()}
                                         </span>
                                     </td>
