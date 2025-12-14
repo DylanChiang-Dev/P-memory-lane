@@ -11,7 +11,7 @@ export default defineConfig({
         '/api': {
           target: 'https://pyqapi.3331322.xyz',
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
         '/igdb-proxy': {
           target: 'https://api.igdb.com/v4',

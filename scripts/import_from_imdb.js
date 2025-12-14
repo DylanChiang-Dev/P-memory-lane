@@ -5,8 +5,13 @@ import path from 'path';
 // Configuration
 const MIGRATION_FILE = 'movies_migration.json';
 const API_BASE_URL = 'https://pyqapi.3331322.xyz';
-const TMDB_API_KEY = process.env.VITE_TMDB_API_KEY || '1ff5ff58b8e85fb19686971c740ca702';
+const TMDB_API_KEY = process.env.VITE_TMDB_API_KEY;
 const USER_TOKEN = ''; // We need to get this dynamically or ask user. For now, let's try to login first.
+
+if (!TMDB_API_KEY) {
+    console.error('Missing env var: VITE_TMDB_API_KEY');
+    process.exit(1);
+}
 
 // Login credentials
 const EMAIL = 'user@example.com'; // We need to know which user to import to. 

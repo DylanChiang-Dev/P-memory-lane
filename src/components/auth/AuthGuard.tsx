@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, API_BASE_URL } from '../../lib/auth';
 import { LoginForm } from './LoginForm';
-import { Loader2, LogOut } from 'lucide-react';
+import { AlertTriangle, Loader2, LogOut, RefreshCcw } from 'lucide-react';
 
 interface AuthGuardProps {
     children: React.ReactNode;
@@ -17,13 +17,17 @@ interface AuthGuardProps {
  * 4. 提供退出登录按钮
  */
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-    const [authState, setAuthState] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+    const [authState, setAuthState] = useState<'loading' | 'authenticated' | 'unauthenticated' | 'error'>('loading');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         validateAuth();
     }, []);
 
     const validateAuth = async () => {
+        setErrorMessage(null);
+        setAuthState('loading');
+
         // First check if we have a token locally
         if (!auth.isAuthenticated()) {
             setAuthState('unauthenticated');
@@ -43,17 +47,20 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             if (response.ok) {
                 setAuthState('authenticated');
             } else {
-                // Any non-OK response (including 401, 403, 500, etc.) means unauthenticated
-                // Clear tokens to ensure clean state
-                auth.clearTokens();
-                setAuthState('unauthenticated');
+                // Only treat auth-related responses as unauthenticated; keep session on transient backend errors.
+                if (response.status === 401 || response.status === 403) {
+                    auth.clearTokens();
+                    setAuthState('unauthenticated');
+                    return;
+                }
+
+                setErrorMessage(`后端暂时不可用 (HTTP ${response.status})`);
+                setAuthState('error');
             }
         } catch (error) {
             console.error('Auth validation failed:', error);
-            // Network error - require login to be safe
-            // Clear any stale tokens
-            auth.clearTokens();
-            setAuthState('unauthenticated');
+            setErrorMessage('无法连接到后端，请检查网络或稍后重试。');
+            setAuthState('error');
         }
     };
 
@@ -64,6 +71,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
     const handleLogout = () => {
         auth.clearTokens();
+        setErrorMessage(null);
         setAuthState('unauthenticated');
     };
 
@@ -93,6 +101,47 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         </p>
                     </div>
                     <LoginForm onLoginSuccess={handleLoginSuccess} />
+                </div>
+            </div>
+        );
+    }
+
+    // Backend unavailable / unexpected error - keep user on page with retry
+    if (authState === 'error') {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black p-4">
+                <div className="w-full max-w-md bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/10 rounded-2xl p-6">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="text-amber-500 mt-0.5" size={22} />
+                        <div className="flex-1">
+                            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+                                连接异常
+                            </h2>
+                            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                                {errorMessage || '后端暂时不可用。'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex gap-3">
+                        <button
+                            onClick={validateAuth}
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+                            type="button"
+                        >
+                            <RefreshCcw size={18} />
+                            重试
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+                            type="button"
+                            title="退出登录"
+                        >
+                            <LogOut size={18} />
+                            退出
+                        </button>
+                    </div>
                 </div>
             </div>
         );

@@ -16,8 +16,8 @@ export const apiConfigManager = {
             return {
                 tmdb_api_key: import.meta.env.VITE_TMDB_API_KEY || '',
                 rawg_api_key: import.meta.env.VITE_RAWG_API_KEY || '',
-                igdb_client_id: import.meta.env.VITE_IGDB_CLIENT_ID || 'gxilj8absr82sjublo4qkjftnncmug',
-                igdb_access_token: import.meta.env.VITE_IGDB_ACCESS_TOKEN || 'o96j83dm2bx02p59jb3l2f5wm7jx5i',
+                igdb_client_id: import.meta.env.VITE_IGDB_CLIENT_ID || '',
+                igdb_access_token: import.meta.env.VITE_IGDB_ACCESS_TOKEN || '',
                 google_books_api_key: '',
             };
         }
@@ -25,13 +25,7 @@ export const apiConfigManager = {
         const stored = localStorage.getItem(API_CONFIG_KEY);
         if (stored) {
             try {
-                const config = JSON.parse(stored);
-                // HOTFIX: Replace invalid token with valid one if found
-                if (config.igdb_access_token === 'x2pdmmdlmuqy1i380kr8ezq7vg2xp4') {
-                    config.igdb_access_token = 'o96j83dm2bx02p59jb3l2f5wm7jx5i';
-                    localStorage.setItem(API_CONFIG_KEY, JSON.stringify(config));
-                }
-                return config;
+                return JSON.parse(stored);
             } catch {
                 return this.getDefaultConfig();
             }
@@ -51,8 +45,8 @@ export const apiConfigManager = {
         return {
             tmdb_api_key: import.meta.env.VITE_TMDB_API_KEY || '',
             rawg_api_key: import.meta.env.VITE_RAWG_API_KEY || '',
-            igdb_client_id: import.meta.env.VITE_IGDB_CLIENT_ID || 'gxilj8absr82sjublo4qkjftnncmug',
-            igdb_access_token: import.meta.env.VITE_IGDB_ACCESS_TOKEN || 'o96j83dm2bx02p59jb3l2f5wm7jx5i',
+            igdb_client_id: import.meta.env.VITE_IGDB_CLIENT_ID || '',
+            igdb_access_token: import.meta.env.VITE_IGDB_ACCESS_TOKEN || '',
             google_books_api_key: '',
         };
     },
