@@ -78,7 +78,8 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         break;
                     case 'game':
                         const y = Number.parseInt(debouncedGameYear, 10);
-                        data = await searchIGDB(debouncedQuery, { limit: Number.isFinite(y) ? 100 : 50, year: Number.isFinite(y) ? y : undefined });
+                        const year = Number.isFinite(y) ? y : undefined;
+                        data = await searchIGDB(debouncedQuery, { limit: year ? 100 : 50, year });
                         break;
                     case 'podcast':
                         data = await searchPodcasts(debouncedQuery);
@@ -90,7 +91,17 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         data = await searchAnime(debouncedQuery);
                         break;
                 }
-                setResults(data);
+                if (type === 'game' && typeof year === 'number') {
+                    const yearMatches = (data as any[]).filter((it) => getIGDBReleaseYear(it) === year);
+                    if (yearMatches.length > 0) {
+                        setResults(yearMatches);
+                    } else {
+                        setResults(data);
+                        toast.info(`此搜尋結果中沒有 ${year} 年的項目，已顯示全部結果（可清空年份）`, 4000);
+                    }
+                } else {
+                    setResults(data);
+                }
             } catch (error) {
                 if (error instanceof Error && error.message === 'Unauthorized') {
                     try {
@@ -291,4 +302,18 @@ function getTypeName(type: SearchType) {
         case 'documentary': return '節目';
         case 'anime': return '動畫';
     }
+}
+
+function getIGDBReleaseYear(item: any): number | null {
+    const raw = item?.first_release_date;
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+        // IGDB uses unix seconds; tolerate ms if backend sends ms.
+        const ms = raw > 2e10 ? raw : raw * 1000;
+        return new Date(ms).getFullYear();
+    }
+    if (typeof raw === 'string' && raw) {
+        const dt = new Date(raw);
+        if (!Number.isNaN(dt.getTime())) return dt.getFullYear();
+    }
+    return null;
 }

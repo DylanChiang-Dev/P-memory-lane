@@ -92,6 +92,22 @@ export async function searchIGDB(query: string, options?: { limit?: number; year
         const limit = typeof options?.limit === 'number' && Number.isFinite(options.limit) ? Math.max(1, Math.min(100, options.limit)) : 50;
         const preferredYear = typeof options?.year === 'number' && Number.isFinite(options.year) ? options.year : undefined;
         const variants = buildQueryVariants(q);
+        if (preferredYear) {
+            // Some search backends behave better when year is included in the query string.
+            variants.unshift(`${q} ${preferredYear}`);
+            // Dedup while keeping order.
+            const seen = new Set<string>();
+            for (let i = variants.length - 1; i >= 0; i--) {
+                const v = normalizeQuery(variants[i]);
+                if (!v) {
+                    variants.splice(i, 1);
+                    continue;
+                }
+                const key = v.toLowerCase();
+                if (seen.has(key)) variants.splice(i, 1);
+                else seen.add(key);
+            }
+        }
 
         const all: IGDBGameResult[] = [];
         for (const v of variants) {
