@@ -200,7 +200,6 @@ export const MediaTable: React.FC = () => {
                 // Adding new item - Use search result payload (details are served by backend)
                 const itemDetails = data.item;
                 const isManual = !!itemDetails?.__manual;
-                const legacyManualRawgId = 900000000 + (Date.now() % 1000000000);
 
                 // Adding new item - Flatten data for POST request with complete metadata
                 const createData = {
@@ -364,16 +363,13 @@ export const MediaTable: React.FC = () => {
                     ...(currentType === 'games' && {
                         ...(data.item?.__manual
                             ? {
-                                // Backward-compatible: some deployments still require rawg_id NOT NULL.
                                 source: 'manual',
-                                rawg_id: legacyManualRawgId,
+                                source_id: null,
                             }
                             : {
                                 source: 'igdb',
                                 source_id: typeof data.item?.id === 'number' ? data.item.id : null,
                                 igdb_id: typeof data.item?.id === 'number' ? data.item.id : null,
-                                // Backward-compatible: legacy backends used rawg_id to store IGDB id.
-                                rawg_id: typeof data.item?.id === 'number' ? data.item.id : null,
                             }),
                         title: typeof data.title === 'string' && data.title.trim() ? data.title.trim() : data.item.name,
                         // Some backends accept "name" instead of "title" for manual items.

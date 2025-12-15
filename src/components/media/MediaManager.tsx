@@ -63,15 +63,13 @@ export const MediaManager: React.FC = () => {
                     payload.publication_date = data.item.volumeInfo?.publishedDate;
                 }
             } else if (data.type === 'game') {
-                const legacyManualRawgId = 900000000 + (Date.now() % 1000000000);
                 if (!data.item?.__manual) {
                     payload.source = 'igdb';
                     payload.source_id = data.item.id;
                     payload.igdb_id = data.item.id;
-                    payload.rawg_id = data.item.id; // legacy backends stored IGDB id in rawg_id
                 } else {
                     payload.source = 'manual';
-                    payload.rawg_id = legacyManualRawgId;
+                    payload.source_id = null;
                 }
                 payload.platform = data.platform;
                 payload.title_zh = typeof data.title_zh === 'string' ? data.title_zh.trim() : '';
