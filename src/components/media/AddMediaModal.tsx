@@ -26,6 +26,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
     // Type specific fields
     const [titleZh, setTitleZh] = useState('');
+    const [gameTitle, setGameTitle] = useState('');
+    const [gameOverview, setGameOverview] = useState('');
     const [platform, setPlatform] = useState('');
     const [season, setSeason] = useState(1);
     const [episode, setEpisode] = useState(1);
@@ -51,6 +53,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
             // Type specific
             setTitleZh(item.title_zh || '');
+            setGameTitle(item.title || item.name || '');
+            setGameOverview(item.overview || item.summary || '');
             setPlatform(item.platform || '');
             setSeason(item.current_season || 1);
             setEpisode(item.current_episode || 1);
@@ -84,6 +88,11 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const isManualGame = type === 'games' && item?.__manual;
+        if (isManualGame && !gameTitle.trim()) {
+            alert('請填寫英文名稱');
+            return;
+        }
         const data = {
             item,
             type,
@@ -93,7 +102,13 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             date,
             customCoverUrl, // Pass custom cover URL if uploaded
             // Always send a string so backend can clear to empty string.
-            ...(type === 'games' && { platform, title_zh: titleZh.trim() }),
+            ...(type === 'games' && {
+                platform,
+                title_zh: titleZh.trim(),
+                ...(item?.__manual
+                    ? { title: gameTitle.trim(), overview: gameOverview.trim() || null }
+                    : {}),
+            }),
             ...(type === 'tv-shows' && { season, episode }),
             ...(type === 'anime' && { episodes_watched: episodesWatched, total_episodes: totalEpisodes }),
             ...(type === 'podcasts' && { episodes_listened: episodesWatched, total_episodes: totalEpisodes }),
@@ -230,6 +245,29 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                     {/* Dynamic Fields */}
                     {type === 'games' && (
                         <>
+                            {!!item?.__manual && (
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">英文名稱</label>
+                                        <input
+                                            type="text"
+                                            value={gameTitle}
+                                            onChange={(e) => setGameTitle(e.target.value)}
+                                            placeholder="例如：To the Moon"
+                                            className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">簡介（可選）</label>
+                                        <textarea
+                                            value={gameOverview}
+                                            onChange={(e) => setGameOverview(e.target.value)}
+                                            placeholder="找不到資料時可先自己填一段，之後再補"
+                                            className="w-full min-h-[100px] bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                        />
+                                    </div>
+                                </>
+                            )}
                             <div>
                                 <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">中文名稱（可選）</label>
                                 <input

@@ -191,8 +191,8 @@ export const MediaTable: React.FC = () => {
                     episodes_listened: data.episodes_listened,
                     total_episodes: data.total_episodes
                 };
-                // Add custom cover URL if provided (for books with uploaded covers)
-                if (data.customCoverUrl) {
+                // Add custom cover URL if provided (books + manual games)
+                if (data.customCoverUrl && (currentType === 'books' || currentType === 'games')) {
                     updateData.cover_image_cdn = data.customCoverUrl;
                 }
                 result = await updateMediaItem(currentType, data.item.id, updateData);
@@ -278,12 +278,12 @@ export const MediaTable: React.FC = () => {
                         isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
                     }),
                     ...(currentType === 'games' && {
-                        rawg_id: data.item.id, // Backend expects rawg_id, not igdb_id
-                        title: data.item.name,
+                        rawg_id: typeof data.item?.id === 'number' ? data.item.id : (900000000 + (Date.now() % 1000000000)),
+                        title: typeof data.title === 'string' && data.title.trim() ? data.title.trim() : data.item.name,
                         title_zh: typeof data.title_zh === 'string' ? data.title_zh.trim() : '',
-                        cover_image_cdn: data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null,
+                        cover_image_cdn: data.customCoverUrl || (data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null),
                         backdrop_image_cdn: data.item.screenshots?.[0]?.image_id ? getIGDBImageUrl(data.item.screenshots[0].image_id, 'screenshot_med') : null,
-                        overview: data.item.summary,
+                        overview: typeof data.overview === 'string' && data.overview.trim() ? data.overview.trim() : data.item.summary,
                         genres: data.item.genres?.map((g: any) => g.name),
                         external_rating: data.item.rating ? data.item.rating / 10 : null,
                         release_date: data.item.first_release_date ? new Date(data.item.first_release_date * 1000).toISOString().split('T')[0] : null,
@@ -654,6 +654,7 @@ export const MediaTable: React.FC = () => {
                 isOpen={isSearchOpen}
                 onClose={() => setIsSearchOpen(false)}
                 onSelect={handleSearchSelect}
+                manualGameEnabled={true}
                 defaultType={
                     activeTab === 'movies' ? 'movie' :
                         activeTab === 'tv-shows' ? 'tv' :
