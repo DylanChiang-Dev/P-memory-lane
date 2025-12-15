@@ -63,8 +63,15 @@ export const MediaManager: React.FC = () => {
                     payload.publication_date = data.item.volumeInfo?.publishedDate;
                 }
             } else if (data.type === 'game') {
-                payload.igdb_id = data.item?.__manual ? null : data.item.id;
-                payload.rawg_id = null;
+                if (!data.item?.__manual) {
+                    payload.source = 'igdb';
+                    payload.source_id = data.item.id;
+                    payload.igdb_id = data.item.id;
+                    payload.rawg_id = null;
+                } else {
+                    payload.source = 'manual';
+                    payload.source_id = null;
+                }
                 payload.platform = data.platform;
                 payload.title_zh = typeof data.title_zh === 'string' ? data.title_zh.trim() : '';
                 if (data.item?.__manual) {

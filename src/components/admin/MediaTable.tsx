@@ -361,8 +361,18 @@ export const MediaTable: React.FC = () => {
                             })
                     }),
                     ...(currentType === 'games' && {
-                        igdb_id: data.item?.__manual ? null : (typeof data.item?.id === 'number' ? data.item.id : null),
-                        rawg_id: null,
+                        ...(data.item?.__manual
+                            ? {
+                                // Manual games should not send external IDs; some backends crash on explicit nulls.
+                                source: 'manual',
+                                source_id: null,
+                            }
+                            : {
+                                source: 'igdb',
+                                source_id: typeof data.item?.id === 'number' ? data.item.id : null,
+                                igdb_id: typeof data.item?.id === 'number' ? data.item.id : null,
+                                rawg_id: null,
+                            }),
                         title: typeof data.title === 'string' && data.title.trim() ? data.title.trim() : data.item.name,
                         title_zh: typeof data.title_zh === 'string' ? data.title_zh.trim() : '',
                         cover_image_cdn: data.customCoverUrl || (data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null),
