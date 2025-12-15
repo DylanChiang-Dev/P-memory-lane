@@ -12,13 +12,13 @@ import { DeleteConfirmModal } from '../media/DeleteConfirmModal';
 import { toast } from '../ui/Toast';
 
 const TABS = [
+    { id: 'books', label: '書籍', icon: Book },
+    { id: 'podcasts', label: '播客', icon: Mic },
+    { id: 'games', label: '遊戲', icon: Gamepad2 },
     { id: 'movies', label: '電影', icon: Film },
     { id: 'tv-shows', label: '劇集', icon: Tv },
-    { id: 'books', label: '書籍', icon: Book },
-    { id: 'games', label: '遊戲', icon: Gamepad2 },
-    { id: 'podcasts', label: '播客', icon: Mic },
-    { id: 'documentaries', label: '節目', icon: Video },
     { id: 'anime', label: '動畫', icon: Sparkles },
+    { id: 'documentaries', label: '節目', icon: Video },
 ];
 
 // TMDB Genre ID to Name mapping
@@ -41,11 +41,11 @@ const convertGenreIds = (genreIds: number[] | undefined): string[] | undefined =
 
 export const MediaTable: React.FC = () => {
     const ADMIN_PAGE_LIMIT = 1000;
-    const [activeTab, setActiveTab] = useState<MediaType>('movies');
+    const [activeTab, setActiveTab] = useState<MediaType>('books');
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedItem, setSelectedItem] = useState<any>(null);
-    const [modalMediaType, setModalMediaType] = useState<MediaType>('movies');
+    const [modalMediaType, setModalMediaType] = useState<MediaType>('books');
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({ total: 0, total_pages: 0, limit: 20 });
     const [searchQuery, setSearchQuery] = useState('');
@@ -432,7 +432,7 @@ export const MediaTable: React.FC = () => {
             {/* Tabs & Actions */}
             <div className="p-4 border-b border-zinc-200 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-                    {(['movies', 'tv-shows', 'books', 'games', 'podcasts', 'documentaries', 'anime'] as const).map((type) => (
+                    {(['books', 'podcasts', 'games', 'movies', 'tv-shows', 'anime', 'documentaries'] as const).map((type) => (
                         <button
                             key={type}
                             onClick={() => {

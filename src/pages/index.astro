@@ -47,6 +47,24 @@ const currentYear = new Date().getFullYear();
             </div>
 
             <MediaRow
+                title="閱讀清單"
+                type="book"
+                moreLink="/books"
+                client:only="react"
+            />
+            <MediaRow
+                title="Podcast"
+                type="podcast"
+                moreLink="/podcasts"
+                client:only="react"
+            />
+            <MediaRow
+                title="遊戲"
+                type="game"
+                moreLink="/games"
+                client:only="react"
+            />
+            <MediaRow
                 title="看過的電影"
                 type="movie"
                 moreLink="/movies"
@@ -59,34 +77,16 @@ const currentYear = new Date().getFullYear();
                 client:only="react"
             />
             <MediaRow
-                title="閱讀清單"
-                type="book"
-                moreLink="/books"
-                client:only="react"
-            />
-            <MediaRow
-                title="遊戲"
-                type="game"
-                moreLink="/games"
-                client:only="react"
-            />
-            <MediaRow
-                title="Podcast"
-                type="podcast"
-                moreLink="/podcasts"
-                client:only="react"
+                title="看過的動畫"
+                type="anime"
+                moreLink="/anime"
+                client:load
             />
             <MediaRow
                 title="看過的節目"
                 type="documentary"
                 moreLink="/documentaries"
                 client:only="react"
-            />
-            <MediaRow
-                title="看過的動畫"
-                type="anime"
-                moreLink="/anime"
-                client:load
             />
         </section>
     </div>
