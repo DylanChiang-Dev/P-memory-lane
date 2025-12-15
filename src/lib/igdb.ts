@@ -58,7 +58,7 @@ function buildQueryVariants(q: string) {
         .slice(0, 3);
 }
 
-function scoreResult(item: IGDBGameResult, originalQuery: string) {
+function scoreResult(item: IGDBGameResult, originalQuery: string, preferredYear?: number) {
     const q = normalizeQuery(originalQuery).toLowerCase();
     const qSpace = q.replace(/-/g, ' ');
     const qDash = q.replace(/\s+/g, '-');
@@ -69,6 +69,14 @@ function scoreResult(item: IGDBGameResult, originalQuery: string) {
     if (name.startsWith(q) || name.startsWith(qSpace)) score += 300;
     if (name.includes(q) || name.includes(qSpace)) score += 120;
 
+    if (typeof preferredYear === 'number' && Number.isFinite(preferredYear) && typeof item.first_release_date === 'number') {
+        const releaseYear = new Date(item.first_release_date * 1000).getFullYear();
+        const diff = Math.abs(releaseYear - preferredYear);
+        if (diff === 0) score += 800;
+        else if (diff === 1) score += 250;
+        else if (diff === 2) score += 120;
+    }
+
     // Tie-breakers: prefer entries with rating and release date.
     if (typeof item.total_rating === 'number') score += Math.min(50, Math.max(0, item.total_rating));
     if (typeof item.first_release_date === 'number') score += Math.min(50, item.first_release_date / 1e9); // small bump
@@ -76,12 +84,13 @@ function scoreResult(item: IGDBGameResult, originalQuery: string) {
     return score;
 }
 
-export async function searchIGDB(query: string, options?: { limit?: number }): Promise<IGDBGameResult[]> {
+export async function searchIGDB(query: string, options?: { limit?: number; year?: number }): Promise<IGDBGameResult[]> {
     try {
         const q = normalizeQuery(query);
         if (!q) return [];
 
         const limit = typeof options?.limit === 'number' && Number.isFinite(options.limit) ? Math.max(1, Math.min(100, options.limit)) : 50;
+        const preferredYear = typeof options?.year === 'number' && Number.isFinite(options.year) ? options.year : undefined;
         const variants = buildQueryVariants(q);
 
         const all: IGDBGameResult[] = [];
@@ -94,7 +103,7 @@ export async function searchIGDB(query: string, options?: { limit?: number }): P
         }
 
         const unique = uniqById(all);
-        unique.sort((a, b) => scoreResult(b, q) - scoreResult(a, q));
+        unique.sort((a, b) => scoreResult(b, q, preferredYear) - scoreResult(a, q, preferredYear));
         return unique;
     } catch (error) {
         if (error instanceof Error && error.message === 'Unauthorized') throw error;

@@ -24,12 +24,16 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [debouncedQuery, setDebouncedQuery] = useState(query);
+    const [gameYear, setGameYear] = useState('');
+    const [debouncedGameYear, setDebouncedGameYear] = useState(gameYear);
 
     useEffect(() => {
         if (!isOpen) return;
         setType(defaultType || 'movie');
         setQuery('');
         setResults([]);
+        setGameYear('');
+        setDebouncedGameYear('');
     }, [isOpen, defaultType]);
 
     // Debounce search query
@@ -37,6 +41,19 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
         const timer = setTimeout(() => setDebouncedQuery(query), 500);
         return () => clearTimeout(timer);
     }, [query]);
+
+    // Debounce game year filter (optional)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedGameYear(gameYear), 300);
+        return () => clearTimeout(timer);
+    }, [gameYear]);
+
+    useEffect(() => {
+        if (type !== 'game') {
+            setGameYear('');
+            setDebouncedGameYear('');
+        }
+    }, [type]);
 
     // Perform search
     useEffect(() => {
@@ -60,7 +77,8 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         data = await searchGoogleBooks(debouncedQuery);
                         break;
                     case 'game':
-                        data = await searchIGDB(debouncedQuery, { limit: 50 });
+                        const y = Number.parseInt(debouncedGameYear, 10);
+                        data = await searchIGDB(debouncedQuery, { limit: Number.isFinite(y) ? 100 : 50, year: Number.isFinite(y) ? y : undefined });
                         break;
                     case 'podcast':
                         data = await searchPodcasts(debouncedQuery);
@@ -97,7 +115,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
         };
 
         fetchResults();
-    }, [debouncedQuery, type]);
+    }, [debouncedQuery, type, debouncedGameYear]);
 
     if (!isOpen) return null;
 
@@ -116,6 +134,18 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         className="flex-1 bg-transparent border-none outline-none text-white placeholder-zinc-500 text-lg"
                         autoFocus
                     />
+                    {type === 'game' && (
+                        <input
+                            type="number"
+                            inputMode="numeric"
+                            placeholder="年份"
+                            value={gameYear}
+                            onChange={(e) => setGameYear(e.target.value)}
+                            className="w-24 bg-zinc-800/60 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            min={1970}
+                            max={new Date().getFullYear() + 2}
+                        />
+                    )}
                     <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
                         <X size={24} />
                     </button>
