@@ -60,7 +60,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                         data = await searchGoogleBooks(debouncedQuery);
                         break;
                     case 'game':
-                        data = await searchIGDB(debouncedQuery);
+                        data = await searchIGDB(debouncedQuery, { limit: 50 });
                         break;
                     case 'podcast':
                         data = await searchPodcasts(debouncedQuery);
