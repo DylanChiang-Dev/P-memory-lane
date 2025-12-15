@@ -200,6 +200,7 @@ export const MediaTable: React.FC = () => {
                 // Adding new item - Use search result payload (details are served by backend)
                 const itemDetails = data.item;
                 const isManual = !!itemDetails?.__manual;
+                const legacyManualRawgId = 900000000 + (Date.now() % 1000000000);
 
                 // Adding new item - Flatten data for POST request with complete metadata
                 const createData = {
@@ -363,17 +364,20 @@ export const MediaTable: React.FC = () => {
                     ...(currentType === 'games' && {
                         ...(data.item?.__manual
                             ? {
-                                // Manual games should not send external IDs; some backends crash on explicit nulls.
+                                // Backward-compatible: some deployments still require rawg_id NOT NULL.
                                 source: 'manual',
-                                source_id: null,
+                                rawg_id: legacyManualRawgId,
                             }
                             : {
                                 source: 'igdb',
                                 source_id: typeof data.item?.id === 'number' ? data.item.id : null,
                                 igdb_id: typeof data.item?.id === 'number' ? data.item.id : null,
-                                rawg_id: null,
+                                // Backward-compatible: legacy backends used rawg_id to store IGDB id.
+                                rawg_id: typeof data.item?.id === 'number' ? data.item.id : null,
                             }),
                         title: typeof data.title === 'string' && data.title.trim() ? data.title.trim() : data.item.name,
+                        // Some backends accept "name" instead of "title" for manual items.
+                        name: typeof data.title === 'string' && data.title.trim() ? data.title.trim() : data.item.name,
                         title_zh: typeof data.title_zh === 'string' ? data.title_zh.trim() : '',
                         cover_image_cdn: data.customCoverUrl || (data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null),
                         backdrop_image_cdn: data.item.screenshots?.[0]?.image_id ? getIGDBImageUrl(data.item.screenshots[0].image_id, 'screenshot_med') : null,
