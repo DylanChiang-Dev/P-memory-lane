@@ -32,6 +32,7 @@ export const MediaManager: React.FC = () => {
                 status: data.status,
                 my_review: data.review,
             };
+            if (data.customCoverUrl) payload.cover_image_cdn = data.customCoverUrl;
 
             if (data.type === 'movie') {
                 payload.tmdb_id = data.item.id;
@@ -47,7 +48,8 @@ export const MediaManager: React.FC = () => {
                 payload.isbn = data.item.volumeInfo?.industryIdentifiers?.[0]?.identifier;
                 payload.publication_date = data.item.volumeInfo?.publishedDate;
             } else if (data.type === 'game') {
-                payload.rawg_id = data.item.id;
+                payload.igdb_id = data.item.id;
+                payload.rawg_id = null;
                 payload.platform = data.platform;
                 payload.title_zh = typeof data.title_zh === 'string' ? data.title_zh.trim() : '';
                 payload.playtime_hours = 0; // Default

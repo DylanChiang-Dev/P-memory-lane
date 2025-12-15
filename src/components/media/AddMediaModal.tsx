@@ -154,22 +154,19 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                     (e.target as HTMLImageElement).src = '/placeholder.png';
                                 }}
                             />
-                            {/* Upload overlay - only show for books */}
-                            {type === 'books' && (
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    disabled={uploading}
-                                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                                    title="上傳封面"
-                                >
-                                    {uploading ? (
-                                        <Loader2 size={20} className="text-white animate-spin" />
-                                    ) : (
-                                        <Upload size={20} className="text-white" />
-                                    )}
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                title="上傳封面"
+                            >
+                                {uploading ? (
+                                    <Loader2 size={20} className="text-white animate-spin" />
+                                ) : (
+                                    <Upload size={20} className="text-white" />
+                                )}
+                            </button>
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -181,11 +178,9 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                         <div className="flex-1">
                             <h4 className="font-bold text-zinc-900 dark:text-white line-clamp-1">{getItemTitle(item, type)}</h4>
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">{getItemSubtitle(item, type)}</p>
-                            {type === 'books' && (
-                                <p className="text-xs text-indigo-500 mt-2">
-                                    {customCoverUrl ? '✓ 已上傳自訂封面' : '滑鼠移至封面可上傳'}
-                                </p>
-                            )}
+                            <p className="text-xs text-indigo-500 mt-2">
+                                {customCoverUrl ? '✓ 已上傳自訂封面' : '滑鼠移至封面可上傳'}
+                            </p>
                         </div>
                     </div>
 

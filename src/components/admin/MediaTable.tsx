@@ -191,8 +191,8 @@ export const MediaTable: React.FC = () => {
                     episodes_listened: data.episodes_listened,
                     total_episodes: data.total_episodes
                 };
-                // Add custom cover URL if provided (books + manual games)
-                if (data.customCoverUrl && (currentType === 'books' || currentType === 'games')) {
+                // Add custom cover URL if provided
+                if (data.customCoverUrl) {
                     updateData.cover_image_cdn = data.customCoverUrl;
                 }
                 result = await updateMediaItem(currentType, data.item.id, updateData);
@@ -214,7 +214,7 @@ export const MediaTable: React.FC = () => {
                         tmdb_id: itemDetails.id,
                         title: itemDetails.title,
                         original_title: itemDetails.original_title,
-                        cover_image_cdn: itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null,
+                        cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
                         backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
                         overview: itemDetails.overview,
                         genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
@@ -226,7 +226,7 @@ export const MediaTable: React.FC = () => {
                         tmdb_id: itemDetails.id,
                         title: itemDetails.name,
                         original_title: itemDetails.original_name,
-                        cover_image_cdn: itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null,
+                        cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
                         backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
                         overview: itemDetails.overview,
                         genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
@@ -239,7 +239,7 @@ export const MediaTable: React.FC = () => {
                         tmdb_id: itemDetails.id,
                         title: itemDetails.name || itemDetails.title,
                         original_title: itemDetails.original_name || itemDetails.original_title,
-                        cover_image_cdn: itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null,
+                        cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
                         backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
                         overview: itemDetails.overview,
                         genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
@@ -252,7 +252,7 @@ export const MediaTable: React.FC = () => {
                         anilist_id: data.item.id,
                         title: data.item.title?.native || data.item.title?.romaji || data.item.title?.english,
                         original_title: data.item.title?.romaji,
-                        cover_image_cdn: data.item.coverImage?.large || data.item.coverImage?.medium,
+                        cover_image_cdn: data.customCoverUrl || data.item.coverImage?.large || data.item.coverImage?.medium,
                         backdrop_image_cdn: data.item.bannerImage,
                         overview: data.item.description,
                         genres: data.item.genres,
@@ -278,7 +278,8 @@ export const MediaTable: React.FC = () => {
                         isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
                     }),
                     ...(currentType === 'games' && {
-                        rawg_id: typeof data.item?.id === 'number' ? data.item.id : (900000000 + (Date.now() % 1000000000)),
+                        igdb_id: data.item?.__manual ? null : (typeof data.item?.id === 'number' ? data.item.id : null),
+                        rawg_id: null,
                         title: typeof data.title === 'string' && data.title.trim() ? data.title.trim() : data.item.name,
                         title_zh: typeof data.title_zh === 'string' ? data.title_zh.trim() : '',
                         cover_image_cdn: data.customCoverUrl || (data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null),
@@ -294,7 +295,7 @@ export const MediaTable: React.FC = () => {
                     ...(currentType === 'podcasts' && {
                         podcast_id: String(data.item.collectionId), // Backend expects podcast_id
                         title: data.item.collectionName,
-                        cover_image_cdn: data.item.artworkUrl600 || data.item.artworkUrl100,
+                        cover_image_cdn: data.customCoverUrl || data.item.artworkUrl600 || data.item.artworkUrl100,
                         overview: data.item.description,
                         genres: data.item.genres,
                         release_date: data.item.releaseDate,
