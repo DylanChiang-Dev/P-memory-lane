@@ -175,13 +175,14 @@ export const MediaTable: React.FC = () => {
             let result;
             if (data.item.my_rating !== undefined) {
                 // Editing existing item - Flatten data for PUT request
+                const normalizedTitleZh = typeof data.title_zh === 'string' ? data.title_zh.trim() : '';
                 const updateData: any = {
                     my_rating: data.rating,
                     status: data.status,
                     review: data.review,
                     my_review: data.review, // Alias for backend compatibility
                     completed_date: data.date,
-                    title_zh: data.title_zh,
+                    ...(currentType === 'games' ? { title_zh: normalizedTitleZh } : {}),
                     // Type specific fields
                     platform: data.platform,
                     current_season: data.season,
@@ -279,7 +280,7 @@ export const MediaTable: React.FC = () => {
                     ...(currentType === 'games' && {
                         rawg_id: data.item.id, // Backend expects rawg_id, not igdb_id
                         title: data.item.name,
-                        title_zh: data.title_zh,
+                        title_zh: typeof data.title_zh === 'string' ? data.title_zh.trim() : '',
                         cover_image_cdn: data.item.cover?.image_id ? getIGDBImageUrl(data.item.cover.image_id) : null,
                         backdrop_image_cdn: data.item.screenshots?.[0]?.image_id ? getIGDBImageUrl(data.item.screenshots[0].image_id, 'screenshot_med') : null,
                         overview: data.item.summary,
@@ -688,7 +689,7 @@ export const MediaTable: React.FC = () => {
 function getItemTitle(item: any, type: MediaType) {
     if (!item) return '';
 
-    if (type === 'games' && typeof item.title_zh === 'string' && item.title_zh) return item.title_zh;
+    if (type === 'games' && typeof item.title_zh === 'string' && item.title_zh.trim()) return item.title_zh.trim();
 
     // 優先使用後端返回的 title 字段
     if (typeof item.title === 'string' && item.title) return item.title;

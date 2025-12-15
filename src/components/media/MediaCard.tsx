@@ -180,7 +180,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
 function getItemTitle(item: any, type: string) {
     if (!item) return '';
 
-    if (type === 'game' && typeof item.title_zh === 'string' && item.title_zh) return item.title_zh;
+    if (type === 'game' && typeof item.title_zh === 'string' && item.title_zh.trim()) return item.title_zh.trim();
 
     // 優先使用後端返回的 title 字段
     if (typeof item.title === 'string' && item.title) return item.title;

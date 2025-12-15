@@ -49,7 +49,7 @@ export const MediaManager: React.FC = () => {
             } else if (data.type === 'game') {
                 payload.rawg_id = data.item.id;
                 payload.platform = data.platform;
-                if (data.title_zh) payload.title_zh = data.title_zh;
+                payload.title_zh = typeof data.title_zh === 'string' ? data.title_zh.trim() : '';
                 payload.playtime_hours = 0; // Default
             }
 

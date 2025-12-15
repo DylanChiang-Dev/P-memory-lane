@@ -38,7 +38,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (item) {
+        if (isOpen && item) {
             // Pre-fill data if editing an existing item, otherwise reset to defaults
             setRating(item.my_rating !== undefined ? Number(item.my_rating) : 0);
             setStatus(item.status || 'completed');
@@ -58,7 +58,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             setTotalEpisodes(item.total_episodes || 0);
             setCustomCoverUrl(null); // Reset custom cover when item changes
         }
-    }, [item]);
+    }, [item, isOpen]);
 
     if (!isOpen || !item) return null;
 
@@ -92,7 +92,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             review,
             date,
             customCoverUrl, // Pass custom cover URL if uploaded
-            ...(type === 'games' && { platform, title_zh: titleZh.trim() || undefined }),
+            // Always send a string so backend can clear to empty string.
+            ...(type === 'games' && { platform, title_zh: titleZh.trim() }),
             ...(type === 'tv-shows' && { season, episode }),
             ...(type === 'anime' && { episodes_watched: episodesWatched, total_episodes: totalEpisodes }),
             ...(type === 'podcasts' && { episodes_listened: episodesWatched, total_episodes: totalEpisodes }),
@@ -480,7 +481,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
 
 // Helpers
 function getItemTitle(item: any, type: MediaType) {
-    if (type === 'games' && typeof item.title_zh === 'string' && item.title_zh) return item.title_zh;
+    if (type === 'games' && typeof item.title_zh === 'string' && item.title_zh.trim()) return item.title_zh.trim();
 
     // 優先使用後端返回的 title 字段（編輯已存在項目時）
     if (typeof item.title === 'string' && item.title) return item.title;
