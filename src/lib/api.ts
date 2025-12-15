@@ -20,6 +20,7 @@ export interface Stats {
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     let token = auth.getAccessToken();
     const shouldLogoutOn401 =
+        endpoint.startsWith('/api/search/') ||
         endpoint.startsWith('/api/library/') ||
         endpoint.startsWith('/api/activities/') ||
         endpoint.startsWith('/api/integrations/') ||
