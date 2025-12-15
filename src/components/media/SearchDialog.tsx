@@ -17,9 +17,17 @@ interface SearchDialogProps {
     onSelect: (item: any, type: SearchType) => void;
     defaultType?: SearchType;
     manualGameEnabled?: boolean;
+    manualAddEnabled?: boolean;
 }
 
-export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onSelect, defaultType, manualGameEnabled = false }) => {
+export const SearchDialog: React.FC<SearchDialogProps> = ({
+    isOpen,
+    onClose,
+    onSelect,
+    defaultType,
+    manualGameEnabled = false,
+    manualAddEnabled = false,
+}) => {
     const [query, setQuery] = useState('');
     const [type, setType] = useState<SearchType>(defaultType || 'movie');
     const [results, setResults] = useState<any[]>([]);
@@ -28,15 +36,17 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
     const [gameYear, setGameYear] = useState('');
     const [debouncedGameYear, setDebouncedGameYear] = useState(gameYear);
 
-    const handleManualGame = () => {
-        if (!manualGameEnabled) return;
-        if (type !== 'game') return;
-        const name = query.trim() || 'Untitled Game';
+    const handleManualAdd = () => {
+        const manualEnabledForType = (manualAddEnabled || (manualGameEnabled && type === 'game')) && isManualCapableType(type);
+        if (!manualEnabledForType) return;
+
+        const title = query.trim() || 'Untitled';
         const y = Number.parseInt(gameYear, 10);
-        const year = Number.isFinite(y) ? y : undefined;
+        const year = type === 'game' && Number.isFinite(y) ? y : undefined;
         const first_release_date = year ? Math.floor(new Date(year, 0, 1).getTime() / 1000) : undefined;
         const id = 900000000 + (Date.now() % 1000000000);
-        onSelect({ __manual: true, id, name, ...(first_release_date ? { first_release_date } : {}) }, 'game');
+        const base = { __manual: true, id, title, name: title, ...(first_release_date ? { first_release_date } : {}) };
+        onSelect(base, type);
         onClose();
     };
 
@@ -170,12 +180,12 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose, onS
                             max={new Date().getFullYear() + 2}
                         />
                     )}
-                    {type === 'game' && manualGameEnabled && (
+                    {isManualCapableType(type) && (manualAddEnabled || (manualGameEnabled && type === 'game')) && (
                         <button
                             type="button"
-                            onClick={handleManualGame}
+                            onClick={handleManualAdd}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 transition-colors text-sm border border-indigo-500/20"
-                            title="找不到想要的遊戲？手動新增一筆"
+                            title="找不到想要的項目？手動新增一筆"
                         >
                             <Plus size={16} />
                             手動新增
@@ -340,4 +350,9 @@ function getIGDBReleaseYear(item: any): number | null {
         if (!Number.isNaN(dt.getTime())) return dt.getFullYear();
     }
     return null;
+}
+
+function isManualCapableType(type: SearchType) {
+    // We support manual placeholders for all search types, but keep this centralized for future tuning.
+    return type === 'movie' || type === 'tv' || type === 'book' || type === 'game' || type === 'podcast' || type === 'documentary' || type === 'anime';
 }

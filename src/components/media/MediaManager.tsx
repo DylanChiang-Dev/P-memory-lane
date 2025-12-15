@@ -35,23 +35,42 @@ export const MediaManager: React.FC = () => {
             if (data.customCoverUrl) payload.cover_image_cdn = data.customCoverUrl;
 
             if (data.type === 'movie') {
-                payload.tmdb_id = data.item.id;
-                payload.release_date = data.item.release_date;
+                payload.tmdb_id = data.item?.__manual ? null : data.item.id;
+                if (data.item?.__manual) {
+                    payload.title = data.title;
+                    payload.overview = data.overview ?? null;
+                } else {
+                    payload.release_date = data.item.release_date;
+                }
                 payload.completed_date = data.date;
             } else if (data.type === 'tv') {
-                payload.tmdb_id = data.item.id;
-                payload.first_air_date = data.item.first_air_date;
-                payload.current_season = data.season;
-                payload.current_episode = data.episode;
+                payload.tmdb_id = data.item?.__manual ? null : data.item.id;
+                if (data.item?.__manual) {
+                    payload.title = data.title;
+                    payload.overview = data.overview ?? null;
+                } else {
+                    payload.first_air_date = data.item.first_air_date;
+                    payload.current_season = data.season;
+                    payload.current_episode = data.episode;
+                }
             } else if (data.type === 'book') {
-                payload.google_books_id = data.item.id;
-                payload.isbn = data.item.volumeInfo?.industryIdentifiers?.[0]?.identifier;
-                payload.publication_date = data.item.volumeInfo?.publishedDate;
+                payload.google_books_id = data.item?.__manual ? null : data.item.id;
+                if (data.item?.__manual) {
+                    payload.title = data.title;
+                    payload.overview = data.overview ?? null;
+                } else {
+                    payload.isbn = data.item.volumeInfo?.industryIdentifiers?.[0]?.identifier;
+                    payload.publication_date = data.item.volumeInfo?.publishedDate;
+                }
             } else if (data.type === 'game') {
-                payload.igdb_id = data.item.id;
+                payload.igdb_id = data.item?.__manual ? null : data.item.id;
                 payload.rawg_id = null;
                 payload.platform = data.platform;
                 payload.title_zh = typeof data.title_zh === 'string' ? data.title_zh.trim() : '';
+                if (data.item?.__manual) {
+                    payload.title = data.title;
+                    payload.overview = data.overview ?? null;
+                }
                 payload.playtime_hours = 0; // Default
             }
 
@@ -83,6 +102,7 @@ export const MediaManager: React.FC = () => {
                 isOpen={isSearchOpen}
                 onClose={() => setIsSearchOpen(false)}
                 onSelect={handleSelect}
+                manualAddEnabled={true}
             />
 
             <AddMediaModal

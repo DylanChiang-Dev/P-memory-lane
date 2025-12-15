@@ -28,6 +28,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
     const [titleZh, setTitleZh] = useState('');
     const [gameTitle, setGameTitle] = useState('');
     const [gameOverview, setGameOverview] = useState('');
+    const [manualTitle, setManualTitle] = useState('');
+    const [manualOverview, setManualOverview] = useState('');
     const [platform, setPlatform] = useState('');
     const [season, setSeason] = useState(1);
     const [episode, setEpisode] = useState(1);
@@ -55,6 +57,8 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             setTitleZh(item.title_zh || '');
             setGameTitle(item.title || item.name || '');
             setGameOverview(item.overview || item.summary || '');
+            setManualTitle(item.title || item.name || '');
+            setManualOverview(item.overview || item.summary || item.description || '');
             setPlatform(item.platform || '');
             setSeason(item.current_season || 1);
             setEpisode(item.current_episode || 1);
@@ -89,8 +93,13 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const isManualGame = type === 'games' && item?.__manual;
+        const isManualAny = !!item?.__manual;
         if (isManualGame && !gameTitle.trim()) {
             alert('請填寫英文名稱');
+            return;
+        }
+        if (isManualAny && type !== 'games' && !manualTitle.trim()) {
+            alert('請填寫標題');
             return;
         }
         const data = {
@@ -105,10 +114,11 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
             ...(type === 'games' && {
                 platform,
                 title_zh: titleZh.trim(),
-                ...(item?.__manual
-                    ? { title: gameTitle.trim(), overview: gameOverview.trim() || null }
-                    : {}),
+                ...(item?.__manual ? { title: gameTitle.trim(), overview: gameOverview.trim() || null } : {}),
             }),
+            ...(type !== 'games' && item?.__manual
+                ? { title: manualTitle.trim(), overview: manualOverview.trim() || null }
+                : {}),
             ...(type === 'tv-shows' && { season, episode }),
             ...(type === 'anime' && { episodes_watched: episodesWatched, total_episodes: totalEpisodes }),
             ...(type === 'podcasts' && { episodes_listened: episodesWatched, total_episodes: totalEpisodes }),
@@ -308,6 +318,31 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({ isOpen, onClose, i
                                     onChange={(e) => setPlatform(e.target.value)}
                                     placeholder="其他平台..."
                                     className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {/* Manual fields for non-game types */}
+                    {type !== 'games' && !!item?.__manual && (
+                        <>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">標題</label>
+                                <input
+                                    type="text"
+                                    value={manualTitle}
+                                    onChange={(e) => setManualTitle(e.target.value)}
+                                    placeholder="找不到資料時可先自己填"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider">簡介（可選）</label>
+                                <textarea
+                                    value={manualOverview}
+                                    onChange={(e) => setManualOverview(e.target.value)}
+                                    placeholder="之後可以再補齊"
+                                    className="w-full min-h-[100px] bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors text-sm"
                                 />
                             </div>
                         </>

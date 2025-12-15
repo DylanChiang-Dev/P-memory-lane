@@ -199,6 +199,7 @@ export const MediaTable: React.FC = () => {
             } else {
                 // Adding new item - Use search result payload (details are served by backend)
                 const itemDetails = data.item;
+                const isManual = !!itemDetails?.__manual;
 
                 // Adding new item - Flatten data for POST request with complete metadata
                 const createData = {
@@ -211,71 +212,153 @@ export const MediaTable: React.FC = () => {
 
                     // Type specific ID and metadata mapping
                     ...(currentType === 'movies' && {
-                        tmdb_id: itemDetails.id,
-                        title: itemDetails.title,
-                        original_title: itemDetails.original_title,
-                        cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
-                        backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
-                        overview: itemDetails.overview,
-                        genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
-                        external_rating: itemDetails.vote_average,
-                        release_date: itemDetails.release_date,
-                        runtime: itemDetails.runtime
+                        ...(isManual
+                            ? {
+                                tmdb_id: null,
+                                title: data.title,
+                                original_title: null,
+                                cover_image_cdn: data.customCoverUrl || null,
+                                backdrop_image_cdn: null,
+                                overview: data.overview || null,
+                                genres: undefined,
+                                external_rating: null,
+                                release_date: null,
+                                runtime: null
+                            }
+                            : {
+                                tmdb_id: itemDetails.id,
+                                title: itemDetails.title,
+                                original_title: itemDetails.original_title,
+                                cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
+                                backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
+                                overview: itemDetails.overview,
+                                genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
+                                external_rating: itemDetails.vote_average,
+                                release_date: itemDetails.release_date,
+                                runtime: itemDetails.runtime
+                            })
                     }),
                     ...(currentType === 'tv-shows' && {
-                        tmdb_id: itemDetails.id,
-                        title: itemDetails.name,
-                        original_title: itemDetails.original_name,
-                        cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
-                        backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
-                        overview: itemDetails.overview,
-                        genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
-                        external_rating: itemDetails.vote_average,
-                        release_date: itemDetails.first_air_date,
-                        number_of_seasons: itemDetails.number_of_seasons,
-                        number_of_episodes: itemDetails.number_of_episodes
+                        ...(isManual
+                            ? {
+                                tmdb_id: null,
+                                title: data.title,
+                                original_title: null,
+                                cover_image_cdn: data.customCoverUrl || null,
+                                backdrop_image_cdn: null,
+                                overview: data.overview || null,
+                                genres: undefined,
+                                external_rating: null,
+                                release_date: null,
+                                number_of_seasons: null,
+                                number_of_episodes: null
+                            }
+                            : {
+                                tmdb_id: itemDetails.id,
+                                title: itemDetails.name,
+                                original_title: itemDetails.original_name,
+                                cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
+                                backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
+                                overview: itemDetails.overview,
+                                genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
+                                external_rating: itemDetails.vote_average,
+                                release_date: itemDetails.first_air_date,
+                                number_of_seasons: itemDetails.number_of_seasons,
+                                number_of_episodes: itemDetails.number_of_episodes
+                            })
                     }),
                     ...(currentType === 'documentaries' && {
-                        tmdb_id: itemDetails.id,
-                        title: itemDetails.name || itemDetails.title,
-                        original_title: itemDetails.original_name || itemDetails.original_title,
-                        cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
-                        backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
-                        overview: itemDetails.overview,
-                        genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
-                        external_rating: itemDetails.vote_average,
-                        release_date: itemDetails.first_air_date || itemDetails.release_date,
-                        number_of_seasons: itemDetails.number_of_seasons,
-                        number_of_episodes: itemDetails.number_of_episodes
+                        ...(isManual
+                            ? {
+                                tmdb_id: null,
+                                title: data.title,
+                                original_title: null,
+                                cover_image_cdn: data.customCoverUrl || null,
+                                backdrop_image_cdn: null,
+                                overview: data.overview || null,
+                                genres: undefined,
+                                external_rating: null,
+                                release_date: null,
+                                number_of_seasons: null,
+                                number_of_episodes: null
+                            }
+                            : {
+                                tmdb_id: itemDetails.id,
+                                title: itemDetails.name || itemDetails.title,
+                                original_title: itemDetails.original_name || itemDetails.original_title,
+                                cover_image_cdn: data.customCoverUrl || (itemDetails.poster_path ? `https://image.tmdb.org/t/p/w500${itemDetails.poster_path}` : null),
+                                backdrop_image_cdn: itemDetails.backdrop_path ? `https://image.tmdb.org/t/p/original${itemDetails.backdrop_path}` : null,
+                                overview: itemDetails.overview,
+                                genres: itemDetails.genres?.map((g: any) => g.name || g) || convertGenreIds(itemDetails.genre_ids),
+                                external_rating: itemDetails.vote_average,
+                                release_date: itemDetails.first_air_date || itemDetails.release_date,
+                                number_of_seasons: itemDetails.number_of_seasons,
+                                number_of_episodes: itemDetails.number_of_episodes
+                            })
                     }),
                     ...(currentType === 'anime' && {
-                        anilist_id: data.item.id,
-                        title: data.item.title?.native || data.item.title?.romaji || data.item.title?.english,
-                        original_title: data.item.title?.romaji,
-                        cover_image_cdn: data.customCoverUrl || data.item.coverImage?.large || data.item.coverImage?.medium,
-                        backdrop_image_cdn: data.item.bannerImage,
-                        overview: data.item.description,
-                        genres: data.item.genres,
-                        external_rating: data.item.averageScore ? data.item.averageScore / 10 : null,
-                        release_date: data.item.startDate?.year ? `${data.item.startDate.year}-${String(data.item.startDate.month || 1).padStart(2, '0')}-${String(data.item.startDate.day || 1).padStart(2, '0')}` : null,
-                        episodes: data.item.episodes,
-                        format: data.item.format,
-                        studio: data.item.studios?.nodes?.[0]?.name
+                        ...(isManual
+                            ? {
+                                anilist_id: null,
+                                title: data.title,
+                                original_title: null,
+                                cover_image_cdn: data.customCoverUrl || null,
+                                backdrop_image_cdn: null,
+                                overview: data.overview || null,
+                                genres: undefined,
+                                external_rating: null,
+                                release_date: null,
+                                episodes: null,
+                                format: null,
+                                studio: null
+                            }
+                            : {
+                                anilist_id: data.item.id,
+                                title: data.item.title?.native || data.item.title?.romaji || data.item.title?.english,
+                                original_title: data.item.title?.romaji,
+                                cover_image_cdn: data.customCoverUrl || data.item.coverImage?.large || data.item.coverImage?.medium,
+                                backdrop_image_cdn: data.item.bannerImage,
+                                overview: data.item.description,
+                                genres: data.item.genres,
+                                external_rating: data.item.averageScore ? data.item.averageScore / 10 : null,
+                                release_date: data.item.startDate?.year ? `${data.item.startDate.year}-${String(data.item.startDate.month || 1).padStart(2, '0')}-${String(data.item.startDate.day || 1).padStart(2, '0')}` : null,
+                                episodes: data.item.episodes,
+                                format: data.item.format,
+                                studio: data.item.studios?.nodes?.[0]?.name
+                            })
                     }),
                     ...(currentType === 'books' && {
-                        google_books_id: data.item.id,
-                        title: data.item.volumeInfo?.title,
-                        original_title: data.item.volumeInfo?.title,
-                        cover_image_cdn: data.customCoverUrl || data.item.volumeInfo?.imageLinks?.thumbnail?.replace('http:', 'https:'),
-                        overview: data.item.volumeInfo?.description,
-                        genres: data.item.volumeInfo?.categories,
-                        external_rating: data.item.volumeInfo?.averageRating,
-                        release_date: data.item.volumeInfo?.publishedDate,
-                        authors: data.item.volumeInfo?.authors,
-                        publisher: data.item.volumeInfo?.publisher,
-                        page_count: data.item.volumeInfo?.pageCount,
-                        isbn_10: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_10')?.identifier,
-                        isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
+                        ...(isManual
+                            ? {
+                                google_books_id: null,
+                                title: data.title,
+                                original_title: null,
+                                cover_image_cdn: data.customCoverUrl || null,
+                                overview: data.overview || null,
+                                genres: undefined,
+                                external_rating: null,
+                                release_date: null,
+                                authors: null,
+                                publisher: null,
+                                page_count: null,
+                                isbn_10: null,
+                                isbn_13: null
+                            }
+                            : {
+                                google_books_id: data.item.id,
+                                title: data.item.volumeInfo?.title,
+                                original_title: data.item.volumeInfo?.title,
+                                cover_image_cdn: data.customCoverUrl || data.item.volumeInfo?.imageLinks?.thumbnail?.replace('http:', 'https:'),
+                                overview: data.item.volumeInfo?.description,
+                                genres: data.item.volumeInfo?.categories,
+                                external_rating: data.item.volumeInfo?.averageRating,
+                                release_date: data.item.volumeInfo?.publishedDate,
+                                authors: data.item.volumeInfo?.authors,
+                                publisher: data.item.volumeInfo?.publisher,
+                                page_count: data.item.volumeInfo?.pageCount,
+                                isbn_10: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_10')?.identifier,
+                                isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
+                            })
                     }),
                     ...(currentType === 'games' && {
                         igdb_id: data.item?.__manual ? null : (typeof data.item?.id === 'number' ? data.item.id : null),
@@ -293,15 +376,29 @@ export const MediaTable: React.FC = () => {
                         publishers: data.item.involved_companies?.filter((c: any) => c.publisher)?.map((c: any) => c.company?.name)
                     }),
                     ...(currentType === 'podcasts' && {
-                        podcast_id: String(data.item.collectionId), // Backend expects podcast_id
-                        title: data.item.collectionName,
-                        cover_image_cdn: data.customCoverUrl || data.item.artworkUrl600 || data.item.artworkUrl100,
-                        overview: data.item.description,
-                        genres: data.item.genres,
-                        release_date: data.item.releaseDate,
-                        host: data.item.artistName, // Backend expects host, not artist_name
-                        rss_feed: data.item.feedUrl, // Backend expects rss_feed, not feed_url
-                        total_episodes: data.item.trackCount
+                        ...(isManual
+                            ? {
+                                podcast_id: null,
+                                title: data.title,
+                                cover_image_cdn: data.customCoverUrl || null,
+                                overview: data.overview || null,
+                                genres: undefined,
+                                release_date: null,
+                                host: null,
+                                rss_feed: null,
+                                total_episodes: null
+                            }
+                            : {
+                                podcast_id: String(data.item.collectionId), // Backend expects podcast_id
+                                title: data.item.collectionName,
+                                cover_image_cdn: data.customCoverUrl || data.item.artworkUrl600 || data.item.artworkUrl100,
+                                overview: data.item.description,
+                                genres: data.item.genres,
+                                release_date: data.item.releaseDate,
+                                host: data.item.artistName, // Backend expects host, not artist_name
+                                rss_feed: data.item.feedUrl, // Backend expects rss_feed, not feed_url
+                                total_episodes: data.item.trackCount
+                            })
                     }),
 
                     // Type specific user fields
@@ -655,7 +752,7 @@ export const MediaTable: React.FC = () => {
                 isOpen={isSearchOpen}
                 onClose={() => setIsSearchOpen(false)}
                 onSelect={handleSearchSelect}
-                manualGameEnabled={true}
+                manualAddEnabled={true}
                 defaultType={
                     activeTab === 'movies' ? 'movie' :
                         activeTab === 'tv-shows' ? 'tv' :
