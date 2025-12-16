@@ -22,36 +22,74 @@ export const MediaManager: React.FC = () => {
     const handleSave = async (data: any) => {
         try {
             // Map frontend type to API type
-            const apiType = data.type === 'movie' ? 'movies' :
-                data.type === 'tv' ? 'tv-shows' :
-                    data.type === 'book' ? 'books' : 'games';
+            const apiType =
+                data.type === 'movie' ? 'movies' :
+                    data.type === 'tv' ? 'tv-shows' :
+                        data.type === 'documentary' ? 'documentaries' :
+                            data.type === 'podcast' ? 'podcasts' :
+                                data.type === 'anime' ? 'anime' :
+                                    data.type === 'book' ? 'books' :
+                                        'games';
 
             // Prepare payload based on type
             let payload: any = {
                 my_rating: data.rating,
                 status: data.status,
+                review: data.review,
                 my_review: data.review,
+                completed_date: data.date,
             };
             if (data.customCoverUrl) payload.cover_image_cdn = data.customCoverUrl;
 
             if (data.type === 'movie') {
-                payload.tmdb_id = data.item?.__manual ? null : data.item.id;
+                const isManual = !!data.item?.__manual;
+                payload.tmdb_id = isManual ? null : data.item.id;
                 if (data.item?.__manual) {
                     payload.title = data.title;
                     payload.overview = data.overview ?? null;
                 } else {
-                    payload.release_date = data.item.release_date;
+                    payload.title = data.item.title;
+                    payload.original_title = data.item.original_title ?? null;
+                    payload.overview = data.item.overview ?? null;
+                    payload.external_rating = data.item.vote_average ?? null;
+                    payload.release_date = data.item.release_date ?? null;
+                    if (!payload.cover_image_cdn && data.item.poster_path) {
+                        payload.cover_image_cdn = data.item.poster_path.startsWith('http')
+                            ? data.item.poster_path
+                            : `https://image.tmdb.org/t/p/w500${data.item.poster_path}`;
+                    }
+                    if (data.item.backdrop_path) {
+                        payload.backdrop_image_cdn = data.item.backdrop_path.startsWith('http')
+                            ? data.item.backdrop_path
+                            : `https://image.tmdb.org/t/p/original${data.item.backdrop_path}`;
+                    }
                 }
-                payload.completed_date = data.date;
             } else if (data.type === 'tv') {
-                payload.tmdb_id = data.item?.__manual ? null : data.item.id;
+                const isManual = !!data.item?.__manual;
+                payload.tmdb_id = isManual ? null : data.item.id;
                 if (data.item?.__manual) {
                     payload.title = data.title;
                     payload.overview = data.overview ?? null;
                 } else {
-                    payload.first_air_date = data.item.first_air_date;
-                    payload.current_season = data.season;
-                    payload.current_episode = data.episode;
+                    payload.title = data.item.name;
+                    payload.original_title = data.item.original_name ?? null;
+                    payload.overview = data.item.overview ?? null;
+                    payload.external_rating = data.item.vote_average ?? null;
+                    // Some backends store tv first_air_date in release_date; send both for compatibility.
+                    payload.first_air_date = data.item.first_air_date ?? null;
+                    payload.release_date = data.item.first_air_date ?? null;
+                    if (typeof data.season === 'number') payload.current_season = data.season;
+                    if (typeof data.episode === 'number') payload.current_episode = data.episode;
+                    if (!payload.cover_image_cdn && data.item.poster_path) {
+                        payload.cover_image_cdn = data.item.poster_path.startsWith('http')
+                            ? data.item.poster_path
+                            : `https://image.tmdb.org/t/p/w500${data.item.poster_path}`;
+                    }
+                    if (data.item.backdrop_path) {
+                        payload.backdrop_image_cdn = data.item.backdrop_path.startsWith('http')
+                            ? data.item.backdrop_path
+                            : `https://image.tmdb.org/t/p/original${data.item.backdrop_path}`;
+                    }
                 }
             } else if (data.type === 'book') {
                 payload.google_books_id = data.item?.__manual ? null : data.item.id;
@@ -79,6 +117,30 @@ export const MediaManager: React.FC = () => {
                     payload.overview = data.overview ?? null;
                 }
                 payload.playtime_hours = 0; // Default
+            } else if (data.type === 'documentary') {
+                const isManual = !!data.item?.__manual;
+                payload.tmdb_id = isManual ? null : data.item.id;
+                if (isManual) {
+                    payload.title = data.title;
+                    payload.overview = data.overview ?? null;
+                } else {
+                    payload.title = data.item.name || data.item.title;
+                    payload.original_title = data.item.original_name || data.item.original_title || null;
+                    payload.overview = data.item.overview ?? null;
+                    payload.external_rating = data.item.vote_average ?? null;
+                    payload.first_air_date = data.item.first_air_date ?? null;
+                    payload.release_date = data.item.first_air_date || data.item.release_date || null;
+                    if (!payload.cover_image_cdn && data.item.poster_path) {
+                        payload.cover_image_cdn = data.item.poster_path.startsWith('http')
+                            ? data.item.poster_path
+                            : `https://image.tmdb.org/t/p/w500${data.item.poster_path}`;
+                    }
+                    if (data.item.backdrop_path) {
+                        payload.backdrop_image_cdn = data.item.backdrop_path.startsWith('http')
+                            ? data.item.backdrop_path
+                            : `https://image.tmdb.org/t/p/original${data.item.backdrop_path}`;
+                    }
+                }
             }
 
             const result = await addMediaItem(apiType, payload);

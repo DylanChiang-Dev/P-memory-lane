@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Search, X, Loader2, Film, Tv, Book, Gamepad2, Plus, Mic, Video, Clapperboard } from 'lucide-react';
-import { searchTMDB, getTMDBImageUrl, searchDocumentaries, type TMDBResult } from '../../lib/tmdb';
+import { searchTMDBWithLanguagePreference, getTMDBImageUrl, type TMDBLanguagePreference, type TMDBResult } from '../../lib/tmdb';
 import { searchGoogleBooks, getGoogleBookImageUrl, type GoogleBookResult } from '../../lib/googleBooks';
 import { searchIGDB, getIGDBImageUrl, type IGDBGameResult } from '../../lib/igdb';
 import { searchPodcasts, type ITunesPodcastResult } from '../../lib/itunes';
@@ -28,6 +28,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
     manualGameEnabled = false,
     manualAddEnabled = false,
 }) => {
+    const TMDB_LANG_STORAGE_KEY = 'tmdb_display_language_preference';
     const [query, setQuery] = useState('');
     const [type, setType] = useState<SearchType>(defaultType || 'movie');
     const [results, setResults] = useState<any[]>([]);
@@ -35,6 +36,27 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
     const [debouncedQuery, setDebouncedQuery] = useState(query);
     const [gameYear, setGameYear] = useState('');
     const [debouncedGameYear, setDebouncedGameYear] = useState(gameYear);
+    const [tmdbLanguagePreference, setTmdbLanguagePreference] = useState<TMDBLanguagePreference>('auto');
+    const requestIdRef = useRef(0);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const saved = localStorage.getItem(TMDB_LANG_STORAGE_KEY);
+        const allowed: TMDBLanguagePreference[] = ['auto', 'zh-HK', 'zh-TW', 'zh-CN', 'ja-JP', 'ko-KR', 'en-US'];
+        if (saved === 'zh-TW') {
+            // TMDB 的 zh-TW 有時會回傳簡體/缺少簡介，預設改用 zh-HK 作為繁體優先來源。
+            setTmdbLanguagePreference('zh-HK');
+            return;
+        }
+        if (saved && (allowed as string[]).includes(saved)) {
+            setTmdbLanguagePreference(saved as TMDBLanguagePreference);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        localStorage.setItem(TMDB_LANG_STORAGE_KEY, tmdbLanguagePreference);
+    }, [tmdbLanguagePreference]);
 
     const handleManualAdd = () => {
         const manualEnabledForType = (manualAddEnabled || (manualGameEnabled && type === 'game')) && isManualCapableType(type);
@@ -85,35 +107,40 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
             return;
         }
 
+        const currentRequestId = ++requestIdRef.current;
+        let cancelled = false;
+
         const fetchResults = async () => {
             setLoading(true);
             try {
                 let data = [];
+                let year: number | undefined;
                 switch (type) {
                     case 'movie':
-                        data = await searchTMDB(debouncedQuery, 'movie');
+                        data = await searchTMDBWithLanguagePreference(debouncedQuery, 'movie', tmdbLanguagePreference);
                         break;
                     case 'tv':
-                        data = await searchTMDB(debouncedQuery, 'tv');
+                        data = await searchTMDBWithLanguagePreference(debouncedQuery, 'tv', tmdbLanguagePreference);
                         break;
                     case 'book':
                         data = await searchGoogleBooks(debouncedQuery);
                         break;
                     case 'game':
                         const y = Number.parseInt(debouncedGameYear, 10);
-                        const year = Number.isFinite(y) ? y : undefined;
+                        year = Number.isFinite(y) ? y : undefined;
                         data = await searchIGDB(debouncedQuery, { limit: year ? 100 : 50, year });
                         break;
                     case 'podcast':
                         data = await searchPodcasts(debouncedQuery);
                         break;
                     case 'documentary':
-                        data = await searchDocumentaries(debouncedQuery);
+                        data = await searchTMDBWithLanguagePreference(debouncedQuery, 'tv', tmdbLanguagePreference);
                         break;
                     case 'anime':
                         data = await searchAnime(debouncedQuery);
                         break;
                 }
+                if (cancelled || requestIdRef.current !== currentRequestId) return;
                 if (type === 'game' && typeof year === 'number') {
                     const yearMatches = (data as any[]).filter((it) => getIGDBReleaseYear(it) === year);
                     if (yearMatches.length > 0) {
@@ -126,8 +153,23 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                     setResults(data);
                 }
             } catch (error) {
+                if (cancelled || requestIdRef.current !== currentRequestId) return;
                 if (error instanceof Error && error.message === 'Unauthorized') {
                     try {
+                        if (type === 'movie' || type === 'tv' || type === 'documentary') {
+                            const status = await fetchIntegrationStatus();
+                            if (status?.tmdb?.configured === false) {
+                                toast.warning('TMDB 未配置，請到 /admin/settings 設定後再試（或使用「手動新增」）', 6000);
+                                return;
+                            }
+                        }
+                        if (type === 'book') {
+                            const status = await fetchIntegrationStatus();
+                            if (status?.google_books?.configured === false) {
+                                toast.warning('Google Books 未配置，請到 /admin/settings 設定後再試（或使用「手動新增」）', 6000);
+                                return;
+                            }
+                        }
                         if (type === 'game') {
                             const status = await fetchIntegrationStatus();
                             if (status?.igdb?.configured === false) {
@@ -144,12 +186,16 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                 }
                 console.error('Search error:', error);
             } finally {
+                if (cancelled || requestIdRef.current !== currentRequestId) return;
                 setLoading(false);
             }
         };
 
         fetchResults();
-    }, [debouncedQuery, type, debouncedGameYear]);
+        return () => {
+            cancelled = true;
+        };
+    }, [debouncedQuery, type, debouncedGameYear, tmdbLanguagePreference]);
 
     if (!isOpen) return null;
 
@@ -179,6 +225,22 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                             min={1970}
                             max={new Date().getFullYear() + 2}
                         />
+                    )}
+                    {(type === 'movie' || type === 'tv' || type === 'documentary') && (
+                        <select
+                            value={tmdbLanguagePreference}
+                            onChange={(e) => setTmdbLanguagePreference(e.target.value as TMDBLanguagePreference)}
+                            className="bg-zinc-800/60 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            title="TMDB 顯示語言（Auto：繁→簡→日→韓→英）"
+                        >
+                            <option value="auto">Auto：繁→簡→日→韓→英</option>
+                            <option value="zh-HK">繁體中文</option>
+                            <option value="zh-TW">繁體中文（台灣）</option>
+                            <option value="zh-CN">简体中文</option>
+                            <option value="ja-JP">日本語</option>
+                            <option value="ko-KR">한국어</option>
+                            <option value="en-US">English</option>
+                        </select>
                     )}
                     {isManualCapableType(type) && (manualAddEnabled || (manualGameEnabled && type === 'game')) && (
                         <button

@@ -32,6 +32,21 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
         ...options.headers,
     });
 
+    const isTokenStillAccepted = async (t: string | null): Promise<boolean | null> => {
+        if (!t) return false;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/user/settings`, {
+                method: 'GET',
+                headers: { ...(t ? { 'Authorization': `Bearer ${t}` } : {}) },
+            });
+            if (res.status === 401 || res.status === 403) return false;
+            return true;
+        } catch {
+            // Network/proxy error: don't assume session is invalid.
+            return null;
+        }
+    };
+
     let response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: getHeaders(token),
@@ -76,7 +91,8 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
 
                         // If it's still 401, then we really are unauthorized
                         if (response.status === 401) {
-                            auth.clearTokens();
+                            const accepted = await isTokenStillAccepted(token);
+                            if (accepted === false) auth.clearTokens();
                             throw new Error('Unauthorized');
                         }
 
@@ -87,13 +103,17 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
                 console.error('Token refresh failed:', refreshError);
             }
 
-            // Refresh attempt failed (network/5xx/invalid format)
-            if (shouldLogoutOn401) auth.clearTokens();
+            // Refresh attempt failed (network/5xx/invalid format): only end session if we're sure token is invalid.
+            const accepted = await isTokenStillAccepted(token);
+            if (accepted === false) auth.clearTokens();
             throw new Error('Unauthorized');
         }
 
         // No refresh token
-        if (shouldLogoutOn401) auth.clearTokens();
+        if (shouldLogoutOn401) {
+            const accepted = await isTokenStillAccepted(token);
+            if (accepted === false) auth.clearTokens();
+        }
         throw new Error('Unauthorized');
     }
 
@@ -214,6 +234,15 @@ const MEDIA_TYPE_API_MAP: Record<MediaType, string> = {
     'anime': 'anime',
 };
 
+// Frontend sort keys → backend sort keys
+// Backend expects: date_desc/date_asc/completed_desc/completed_asc/rating_desc/rating_asc
+const MEDIA_SORT_API_MAP: Record<string, string> = {
+    created_at_desc: 'date_desc',
+    created_at_asc: 'date_asc',
+    completed_date_desc: 'completed_desc',
+    completed_date_asc: 'completed_asc',
+};
+
 // Media Library API
 export async function fetchMediaItems(type: MediaType, status?: string, page: number = 1, limit: number = 20, sort?: string, search?: string) {
     try {
@@ -223,7 +252,8 @@ export async function fetchMediaItems(type: MediaType, status?: string, page: nu
             url += `&status=${status}`;
         }
         if (sort) {
-            url += `&sort=${sort}`;
+            const backendSort = MEDIA_SORT_API_MAP[sort] ?? sort;
+            url += `&sort=${encodeURIComponent(backendSort)}`;
         }
         if (search) {
             url += `&search=${encodeURIComponent(search)}`;
