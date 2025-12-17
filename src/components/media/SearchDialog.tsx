@@ -2,12 +2,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Search, X, Loader2, Film, Tv, Book, Gamepad2, Plus, Mic, Video, Clapperboard } from 'lucide-react';
 import { searchTMDBWithLanguagePreference, getTMDBImageUrl, type TMDBLanguagePreference, type TMDBResult } from '../../lib/tmdb';
 import { searchNeoDBBooks, getNeoDBImageUrl, type NeoDBBookResult } from '../../lib/neodb';
+import { searchGoogleBooks, getGoogleBookImageUrl, type GoogleBookResult } from '../../lib/googleBooks';
 import { searchIGDB, getIGDBImageUrl, type IGDBGameResult } from '../../lib/igdb';
 import { searchPodcasts, type ITunesPodcastResult } from '../../lib/itunes';
 import { searchAnime, type AnilistResult } from '../../lib/anilist';
 import { toast } from '../ui/Toast';
 import { fetchIntegrationStatus } from '../../lib/api';
 import { clsx } from 'clsx';
+
+type BookSource = 'neodb' | 'google';
 
 type SearchType = 'movie' | 'tv' | 'book' | 'game' | 'podcast' | 'documentary' | 'anime';
 
@@ -37,6 +40,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
     const [gameYear, setGameYear] = useState('');
     const [debouncedGameYear, setDebouncedGameYear] = useState(gameYear);
     const [tmdbLanguagePreference, setTmdbLanguagePreference] = useState<TMDBLanguagePreference>('auto');
+    const [bookSource, setBookSource] = useState<BookSource>('neodb');
     const requestIdRef = useRef(0);
 
     useEffect(() => {
@@ -123,7 +127,11 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                         data = await searchTMDBWithLanguagePreference(debouncedQuery, 'tv', tmdbLanguagePreference);
                         break;
                     case 'book':
-                        data = await searchNeoDBBooks(debouncedQuery);
+                        if (bookSource === 'google') {
+                            data = await searchGoogleBooks(debouncedQuery);
+                        } else {
+                            data = await searchNeoDBBooks(debouncedQuery);
+                        }
                         break;
                     case 'game':
                         const y = Number.parseInt(debouncedGameYear, 10);
@@ -189,7 +197,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
         return () => {
             cancelled = true;
         };
-    }, [debouncedQuery, type, debouncedGameYear, tmdbLanguagePreference]);
+    }, [debouncedQuery, type, debouncedGameYear, tmdbLanguagePreference, bookSource]);
 
     if (!isOpen) return null;
 
@@ -219,6 +227,36 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                             min={1970}
                             max={new Date().getFullYear() + 2}
                         />
+                    )}
+                    {type === 'book' && (
+                        <div className="flex items-center gap-1 bg-zinc-800/60 border border-white/10 rounded-lg p-1">
+                            <button
+                                type="button"
+                                onClick={() => setBookSource('neodb')}
+                                className={clsx(
+                                    "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                                    bookSource === 'neodb'
+                                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                        : "text-zinc-400 hover:text-white"
+                                )}
+                                title="NeoDB - 中文書籍資料庫"
+                            >
+                                NeoDB
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setBookSource('google')}
+                                className={clsx(
+                                    "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                                    bookSource === 'google'
+                                        ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                        : "text-zinc-400 hover:text-white"
+                                )}
+                                title="Google Books - 英文書籍為主"
+                            >
+                                Google
+                            </button>
+                        </div>
                     )}
                     {(type === 'movie' || type === 'tv' || type === 'documentary') && (
                         <select
@@ -327,13 +365,26 @@ const ResultItem = ({ item, type, onSelect }: { item: any, type: SearchType, onS
             rating = tv.vote_average ? tv.vote_average.toFixed(1) : null;
             break;
         case 'book':
-            const book = item as NeoDBBookResult;
-            title = book.title || book.display_title;
-            image = getNeoDBImageUrl(book.cover_image_url);
-            const authorStr = book.author?.join(', ') || '';
-            const pubYear = book.pub_year ? String(book.pub_year) : '';
-            subtitle = authorStr && pubYear ? `${authorStr} · ${pubYear}` : (authorStr || pubYear || 'Unknown');
-            rating = book.rating;
+            // 支持 NeoDB 和 Google Books 兩種格式
+            if (item.volumeInfo) {
+                // Google Books 格式
+                const gbook = item as GoogleBookResult;
+                title = gbook.volumeInfo.title;
+                image = getGoogleBookImageUrl(gbook.volumeInfo.imageLinks?.thumbnail);
+                const gAuthors = gbook.volumeInfo.authors?.join(', ') || '';
+                const gPubYear = gbook.volumeInfo.publishedDate?.split('-')[0] || '';
+                subtitle = gAuthors && gPubYear ? `${gAuthors} · ${gPubYear}` : (gAuthors || gPubYear || 'Unknown');
+                rating = gbook.volumeInfo.averageRating ? gbook.volumeInfo.averageRating.toFixed(1) : null;
+            } else {
+                // NeoDB 格式
+                const book = item as NeoDBBookResult;
+                title = book.title || book.display_title;
+                image = getNeoDBImageUrl(book.cover_image_url);
+                const authorStr = book.author?.join(', ') || '';
+                const pubYear = book.pub_year ? String(book.pub_year) : '';
+                subtitle = authorStr && pubYear ? `${authorStr} · ${pubYear}` : (authorStr || pubYear || 'Unknown');
+                rating = book.rating;
+            }
             break;
         case 'game':
             const game = item as IGDBGameResult;

@@ -92,13 +92,38 @@ export const MediaManager: React.FC = () => {
                     }
                 }
             } else if (data.type === 'book') {
-                payload.google_books_id = data.item?.__manual ? null : data.item.id;
-                if (data.item?.__manual) {
+                const isManual = !!data.item?.__manual;
+                if (isManual) {
+                    payload.google_books_id = null;
                     payload.title = data.title;
                     payload.overview = data.overview ?? null;
+                } else if (data.item.volumeInfo) {
+                    // Google Books 格式
+                    payload.google_books_id = data.item.id;
+                    payload.title = data.item.volumeInfo.title;
+                    payload.authors = data.item.volumeInfo.authors?.join(', ') || null;
+                    payload.overview = data.item.volumeInfo.description || null;
+                    payload.isbn = data.item.volumeInfo.industryIdentifiers?.[0]?.identifier || null;
+                    payload.publication_date = data.item.volumeInfo.publishedDate || null;
+                    payload.page_count = data.item.volumeInfo.pageCount || null;
+                    payload.external_rating = data.item.volumeInfo.averageRating || null;
+                    if (!payload.cover_image_cdn && data.item.volumeInfo.imageLinks?.thumbnail) {
+                        payload.cover_image_cdn = data.item.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://');
+                    }
                 } else {
-                    payload.isbn = data.item.volumeInfo?.industryIdentifiers?.[0]?.identifier;
-                    payload.publication_date = data.item.volumeInfo?.publishedDate;
+                    // NeoDB 格式
+                    payload.neodb_id = data.item.uuid || data.item.id;
+                    payload.google_books_id = null; // NeoDB 沒有 Google Books ID
+                    payload.title = data.item.title || data.item.display_title;
+                    payload.authors = Array.isArray(data.item.author) ? data.item.author.join(', ') : (data.item.author || null);
+                    payload.overview = data.item.brief || data.item.description || null;
+                    payload.isbn = data.item.isbn || null;
+                    payload.publication_date = data.item.pub_year ? `${data.item.pub_year}-01-01` : null;
+                    payload.page_count = data.item.pages || null;
+                    payload.external_rating = data.item.rating || null;
+                    if (!payload.cover_image_cdn && data.item.cover_image_url) {
+                        payload.cover_image_cdn = data.item.cover_image_url;
+                    }
                 }
             } else if (data.type === 'game') {
                 if (!data.item?.__manual) {
@@ -180,6 +205,7 @@ export const MediaManager: React.FC = () => {
                 item={selectedItem}
                 type={selectedType}
                 onSave={handleSave}
+                saving={false}
             />
         </>
     );
