@@ -21,15 +21,8 @@ export const MediaManager: React.FC = () => {
 
     const handleSave = async (data: any) => {
         try {
-            // Map frontend type to API type
-            const apiType =
-                data.type === 'movie' ? 'movies' :
-                    data.type === 'tv' ? 'tv-shows' :
-                        data.type === 'documentary' ? 'documentaries' :
-                            data.type === 'podcast' ? 'podcasts' :
-                                data.type === 'anime' ? 'anime' :
-                                    data.type === 'book' ? 'books' :
-                                        'games';
+            // data.type 已經是正確的 API 類型（movies, tv-shows, books, games, podcasts, documentaries, anime）
+            const apiType = data.type;
 
             // Prepare payload based on type
             let payload: any = {
@@ -41,7 +34,7 @@ export const MediaManager: React.FC = () => {
             };
             if (data.customCoverUrl) payload.cover_image_cdn = data.customCoverUrl;
 
-            if (data.type === 'movie') {
+            if (data.type === 'movies') {
                 const isManual = !!data.item?.__manual;
                 payload.tmdb_id = isManual ? null : data.item.id;
                 if (data.item?.__manual) {
@@ -64,7 +57,7 @@ export const MediaManager: React.FC = () => {
                             : `https://image.tmdb.org/t/p/original${data.item.backdrop_path}`;
                     }
                 }
-            } else if (data.type === 'tv') {
+            } else if (data.type === 'tv-shows') {
                 const isManual = !!data.item?.__manual;
                 payload.tmdb_id = isManual ? null : data.item.id;
                 if (data.item?.__manual) {
@@ -91,7 +84,7 @@ export const MediaManager: React.FC = () => {
                             : `https://image.tmdb.org/t/p/original${data.item.backdrop_path}`;
                     }
                 }
-            } else if (data.type === 'book') {
+            } else if (data.type === 'books') {
                 const isManual = !!data.item?.__manual;
                 if (isManual) {
                     payload.google_books_id = null;
@@ -125,7 +118,7 @@ export const MediaManager: React.FC = () => {
                         payload.cover_image_cdn = data.item.cover_image_url;
                     }
                 }
-            } else if (data.type === 'game') {
+            } else if (data.type === 'games') {
                 if (!data.item?.__manual) {
                     payload.source = 'igdb';
                     payload.source_id = data.item.id;
@@ -142,7 +135,7 @@ export const MediaManager: React.FC = () => {
                     payload.overview = data.overview ?? null;
                 }
                 payload.playtime_hours = 0; // Default
-            } else if (data.type === 'documentary') {
+            } else if (data.type === 'documentaries') {
                 const isManual = !!data.item?.__manual;
                 payload.tmdb_id = isManual ? null : data.item.id;
                 if (isManual) {
