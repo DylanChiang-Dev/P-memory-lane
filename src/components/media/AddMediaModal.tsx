@@ -558,7 +558,7 @@ function getItemTitle(item: any, type: MediaType) {
     if (type === 'movies') return item.title;
     if (type === 'tv-shows' || type === 'documentaries') return item.name || item.title;
     if (type === 'anime') return item.title?.native || item.title?.romaji || item.title?.english || item.name;
-    if (type === 'books') return item.volumeInfo?.title || item.title;
+    if (type === 'books') return item.display_title || item.title;
     if (type === 'games') return item.name || item.title;
     if (type === 'podcasts') return item.collectionName || item.title;
     return item.title || item.name || 'Unknown Title';
@@ -569,21 +569,39 @@ function getItemSubtitle(item: any, type: MediaType) {
     if (type === 'tv-shows' || type === 'documentaries') return item.first_air_date || item.release_date;
     if (type === 'anime') return item.startDate?.year || item.release_date;
     if (type === 'books') {
-        const authors = item.authors || item.volumeInfo?.authors;
-        if (Array.isArray(authors)) return authors.join(', ');
-        if (typeof authors === 'string') {
-            // Handle "stringified" string or array
+        // NeoDB 使用 author 數組，同時顯示作者和出版年份
+        const authors = item.authors || item.author;
+        let authorStr = '';
+        if (Array.isArray(authors)) {
+            authorStr = authors.join(', ');
+        } else if (typeof authors === 'string') {
             try {
                 if (authors.startsWith('[')) {
                     const parsed = JSON.parse(authors);
-                    if (Array.isArray(parsed)) return parsed.join(', ');
+                    if (Array.isArray(parsed)) authorStr = parsed.join(', ');
+                } else {
+                    authorStr = authors.replace(/^"|"$/g, '');
                 }
-                // Remove surrounding quotes if it's like "\"Author\""
-                return authors.replace(/^"|"$/g, '');
             } catch (e) {
-                return authors;
+                authorStr = authors;
             }
         }
+
+        // 獲取出版年份
+        const pubDate = item.published_date || item.release_date || item.pub_year;
+        let year = '';
+        if (pubDate) {
+            if (typeof pubDate === 'number') {
+                year = String(pubDate);
+            } else if (typeof pubDate === 'string') {
+                year = pubDate.split('-')[0];
+            }
+        }
+
+        // 組合：作者 · 年份
+        if (authorStr && year) return `${authorStr} · ${year}`;
+        if (authorStr) return authorStr;
+        if (year) return year;
         return '';
     }
     if (type === 'games') return item.released || item.release_date;
@@ -605,7 +623,7 @@ function getItemImage(item: any, type: MediaType) {
         return '/placeholder.png';
     }
     if (type === 'anime') return item.coverImage?.large || item.coverImage?.medium || '/placeholder.png';
-    if (type === 'books') return item.volumeInfo?.imageLinks?.thumbnail || '/placeholder.png';
+    if (type === 'books') return item.cover_image_url || '/placeholder.png';
     if (type === 'games') {
         if (item.cover?.image_id) return getIGDBImageUrl(item.cover.image_id);
         return item.background_image || '/placeholder.png';

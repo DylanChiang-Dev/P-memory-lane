@@ -67,31 +67,48 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
         return null;
     };
 
+    // 生成詳情頁 URL
+    const getDetailUrl = () => {
+        const typeMap: Record<string, string> = {
+            'movie': 'movies',
+            'tv': 'tv',
+            'book': 'books',
+            'game': 'games',
+            'podcast': 'podcasts',
+            'documentary': 'documentaries',
+            'anime': 'anime',
+        };
+        const urlType = typeMap[type] || type;
+        return `/${urlType}/${item.id}`;
+    };
+
     if (viewMode === 'list') {
         return (
-            <div className="flex gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-white/5 hover:border-teal-500/50 transition-colors group cursor-pointer">
-                <div className="w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-800">
-                    <img src={image} alt={title} className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="flex-1 min-w-0 py-1">
-                    <div className="flex justify-between items-start">
-                        <h3 className="text-base font-bold text-zinc-900 dark:text-white truncate pr-4">{title}</h3>
-                        {rating && (
-                            <div className="flex items-center gap-1 text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded text-xs font-bold">
-                                <Star size={12} fill="currentColor" />
-                                {Number(rating).toFixed(1)}
-                            </div>
-                        )}
+            <a href={getDetailUrl()} className="block">
+                <div className="flex gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-white/5 hover:border-teal-500/50 transition-colors group cursor-pointer">
+                    <div className="w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-800">
+                        <img src={image} alt={title} className="w-full h-full object-cover" loading="lazy" />
                     </div>
-                    <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{year}</div>
-                    {renderExtraInfo()}
+                    <div className="flex-1 min-w-0 py-1">
+                        <div className="flex justify-between items-start">
+                            <h3 className="text-base font-bold text-zinc-900 dark:text-white truncate pr-4">{title}</h3>
+                            {rating && (
+                                <div className="flex items-center gap-1 text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded text-xs font-bold">
+                                    <Star size={12} fill="currentColor" />
+                                    {Number(rating).toFixed(1)}
+                                </div>
+                            )}
+                        </div>
+                        <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{year}</div>
+                        {renderExtraInfo()}
+                    </div>
                 </div>
-            </div>
+            </a>
         );
     }
 
     return (
-        <div className="flex-shrink-0 w-full group cursor-pointer">
+        <a href={getDetailUrl()} className="block flex-shrink-0 w-full group">
             <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg bg-zinc-800 ring-1 ring-white/10">
                 <img
                     src={image}
@@ -172,7 +189,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, type, viewMode = 'gr
             {type === 'podcast' && item.host && (
                 <p className="text-xs text-zinc-500 truncate">{item.host}</p>
             )}
-        </div>
+        </a>
     );
 };
 

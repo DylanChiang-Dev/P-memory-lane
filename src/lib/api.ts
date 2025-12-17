@@ -328,6 +328,20 @@ export async function deleteMediaItem(type: MediaType, id: number) {
     }
 }
 
+// Fetch a single media item by ID
+export async function fetchMediaItemById(type: MediaType, id: number) {
+    try {
+        const apiType = MEDIA_TYPE_API_MAP[type];
+        const response = await fetchWithAuth(`/api/library/${apiType}/${id}`);
+        if (!response.ok) return null;
+        const json = await response.json();
+        return json.success ? json.data : null;
+    } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') return null;
+        console.error(`Error fetching ${type} item:`, error);
+        return null;
+    }
+}
 
 export async function fetchUserSettings() {
     try {

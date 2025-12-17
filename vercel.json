@@ -1,0 +1,32 @@
+{
+    "rewrites": [
+        {
+            "source": "/books/:id",
+            "destination": "/book-detail?id=:id"
+        },
+        {
+            "source": "/movies/:id",
+            "destination": "/movie-detail?id=:id"
+        },
+        {
+            "source": "/games/:id",
+            "destination": "/game-detail?id=:id"
+        },
+        {
+            "source": "/anime/:id",
+            "destination": "/anime-detail?id=:id"
+        },
+        {
+            "source": "/tv/:id",
+            "destination": "/tv-detail?id=:id"
+        },
+        {
+            "source": "/podcasts/:id",
+            "destination": "/podcast-detail?id=:id"
+        },
+        {
+            "source": "/documentaries/:id",
+            "destination": "/documentary-detail?id=:id"
+        }
+    ]
+}

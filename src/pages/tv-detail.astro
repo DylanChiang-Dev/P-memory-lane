@@ -1,0 +1,8 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaDetailPage } from "../components/media/MediaDetailPage";
+---
+
+<Layout title="劇集詳情 - 記憶巷弄">
+    <MediaDetailPage client:load mediaType="tv-shows" />
+</Layout>

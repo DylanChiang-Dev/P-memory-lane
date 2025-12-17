@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Search, X, Loader2, Film, Tv, Book, Gamepad2, Plus, Mic, Video, Clapperboard } from 'lucide-react';
 import { searchTMDBWithLanguagePreference, getTMDBImageUrl, type TMDBLanguagePreference, type TMDBResult } from '../../lib/tmdb';
-import { searchGoogleBooks, getGoogleBookImageUrl, type GoogleBookResult } from '../../lib/googleBooks';
+import { searchNeoDBBooks, getNeoDBImageUrl, type NeoDBBookResult } from '../../lib/neodb';
 import { searchIGDB, getIGDBImageUrl, type IGDBGameResult } from '../../lib/igdb';
 import { searchPodcasts, type ITunesPodcastResult } from '../../lib/itunes';
 import { searchAnime, type AnilistResult } from '../../lib/anilist';
@@ -123,7 +123,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                         data = await searchTMDBWithLanguagePreference(debouncedQuery, 'tv', tmdbLanguagePreference);
                         break;
                     case 'book':
-                        data = await searchGoogleBooks(debouncedQuery);
+                        data = await searchNeoDBBooks(debouncedQuery);
                         break;
                     case 'game':
                         const y = Number.parseInt(debouncedGameYear, 10);
@@ -163,13 +163,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                                 return;
                             }
                         }
-                        if (type === 'book') {
-                            const status = await fetchIntegrationStatus();
-                            if (status?.google_books?.configured === false) {
-                                toast.warning('Google Books 未配置，請到 /admin/settings 設定後再試（或使用「手動新增」）', 6000);
-                                return;
-                            }
-                        }
+                        // NeoDB 不需要配置，跳過書籍檢查
                         if (type === 'game') {
                             const status = await fetchIntegrationStatus();
                             if (status?.igdb?.configured === false) {
@@ -333,11 +327,13 @@ const ResultItem = ({ item, type, onSelect }: { item: any, type: SearchType, onS
             rating = tv.vote_average ? tv.vote_average.toFixed(1) : null;
             break;
         case 'book':
-            const book = item as GoogleBookResult;
-            title = book.volumeInfo.title;
-            image = getGoogleBookImageUrl(book.volumeInfo.imageLinks?.thumbnail);
-            subtitle = book.volumeInfo.authors?.join(', ') || 'Unknown Author';
-            rating = book.volumeInfo.averageRating;
+            const book = item as NeoDBBookResult;
+            title = book.title || book.display_title;
+            image = getNeoDBImageUrl(book.cover_image_url);
+            const authorStr = book.author?.join(', ') || '';
+            const pubYear = book.pub_year ? String(book.pub_year) : '';
+            subtitle = authorStr && pubYear ? `${authorStr} · ${pubYear}` : (authorStr || pubYear || 'Unknown');
+            rating = book.rating;
             break;
         case 'game':
             const game = item as IGDBGameResult;

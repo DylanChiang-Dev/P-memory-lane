@@ -330,7 +330,7 @@ export const MediaTable: React.FC = () => {
                     ...(currentType === 'books' && {
                         ...(isManual
                             ? {
-                                google_books_id: null,
+                                neodb_id: null,
                                 title: data.title,
                                 original_title: null,
                                 cover_image_cdn: data.customCoverUrl || null,
@@ -345,19 +345,22 @@ export const MediaTable: React.FC = () => {
                                 isbn_13: null
                             }
                             : {
-                                google_books_id: data.item.id,
-                                title: data.item.volumeInfo?.title,
-                                original_title: data.item.volumeInfo?.title,
-                                cover_image_cdn: data.customCoverUrl || data.item.volumeInfo?.imageLinks?.thumbnail?.replace('http:', 'https:'),
-                                overview: data.item.volumeInfo?.description,
-                                genres: data.item.volumeInfo?.categories,
-                                external_rating: data.item.volumeInfo?.averageRating,
-                                release_date: data.item.volumeInfo?.publishedDate,
-                                authors: data.item.volumeInfo?.authors,
-                                publisher: data.item.volumeInfo?.publisher,
-                                page_count: data.item.volumeInfo?.pageCount,
-                                isbn_10: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_10')?.identifier,
-                                isbn_13: data.item.volumeInfo?.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier
+                                neodb_id: data.item.uuid,
+                                title: data.item.title || data.item.display_title,
+                                original_title: data.item.orig_title || data.item.title,
+                                cover_image_cdn: data.customCoverUrl || data.item.cover_image_url,
+                                overview: data.item.description || data.item.brief,
+                                // 過濾 NeoDB tags：移除純數字、過短標籤，保留合適的類別
+                                genres: data.item.tags?.filter((t: string) =>
+                                    t && t.length > 1 && !/^\d+$/.test(t) && !/^(kindle|epub|pdf|mobi)$/i.test(t)
+                                )?.slice(0, 5) || undefined,
+                                external_rating: data.item.rating,
+                                release_date: data.item.pub_year ? `${data.item.pub_year}-${String(data.item.pub_month || 1).padStart(2, '0')}-01` : null,
+                                authors: data.item.author,
+                                publisher: data.item.pub_house,
+                                page_count: data.item.pages,
+                                isbn_10: null,
+                                isbn_13: data.item.isbn
                             })
                     }),
                     ...(currentType === 'games' && {
@@ -475,7 +478,7 @@ export const MediaTable: React.FC = () => {
                                         if (currentType === 'anime') return i.anilist_id == targetId;
                                         if (currentType === 'podcasts') return i.itunes_id == targetId;
                                         if (currentType === 'games') return i.igdb_id == targetId;
-                                        if (currentType === 'books') return i.google_books_id == targetId;
+                                        if (currentType === 'books') return i.neodb_id == targetId;
                                         return false;
                                     });
 
@@ -602,6 +605,12 @@ export const MediaTable: React.FC = () => {
                             {activeTab === 'games' && (
                                 <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">平台</th>
                             )}
+                            {activeTab === 'books' && (
+                                <>
+                                    <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">作者</th>
+                                    <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">出版日期</th>
+                                </>
+                            )}
                             <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">評分</th>
                             <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">狀態</th>
                             <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">操作</th>
@@ -656,12 +665,32 @@ export const MediaTable: React.FC = () => {
                                             {item.platform || '-'}
                                         </td>
                                     )}
+                                    {activeTab === 'books' && (
+                                        <>
+                                            <td className="p-4 text-zinc-600 dark:text-zinc-400 text-sm max-w-[150px] truncate" title={(() => {
+                                                const authors = item.authors || item.author;
+                                                if (Array.isArray(authors)) return authors.join(', ');
+                                                if (typeof authors === 'string') return authors;
+                                                return '-';
+                                            })()}>
+                                                {(() => {
+                                                    const authors = item.authors || item.author;
+                                                    if (Array.isArray(authors)) return authors.join(', ');
+                                                    if (typeof authors === 'string') return authors;
+                                                    return '-';
+                                                })()}
+                                            </td>
+                                            <td className="p-4 text-zinc-600 dark:text-zinc-400 text-sm">
+                                                {item.published_date?.split('-')[0] || item.release_date?.split('-')[0] || '-'}
+                                            </td>
+                                        </>
+                                    )}
                                     <td className="p-4 text-zinc-600 dark:text-zinc-400">
                                         <span className="bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-2 py-1 rounded-md text-xs font-bold">
                                             {item.my_rating ? Number(item.my_rating).toFixed(1) : '-'}
                                         </span>
                                     </td>
-                                    <td className="p-4">
+                                    <td className="p-4 whitespace-nowrap min-w-[120px]">
                                         <span className="px-2 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-400">
                                             {(() => {
                                                 const statusMap: Record<string, string> = {
