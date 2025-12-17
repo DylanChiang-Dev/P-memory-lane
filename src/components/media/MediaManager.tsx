@@ -104,7 +104,7 @@ export const MediaManager: React.FC = () => {
                     payload.authors = data.item.volumeInfo.authors?.join(', ') || null;
                     payload.overview = data.item.volumeInfo.description || null;
                     payload.isbn = data.item.volumeInfo.industryIdentifiers?.[0]?.identifier || null;
-                    payload.publication_date = data.item.volumeInfo.publishedDate || null;
+                    payload.release_date = data.item.volumeInfo.publishedDate || null;
                     payload.page_count = data.item.volumeInfo.pageCount || null;
                     payload.external_rating = data.item.volumeInfo.averageRating || null;
                     if (!payload.cover_image_cdn && data.item.volumeInfo.imageLinks?.thumbnail) {
@@ -118,7 +118,7 @@ export const MediaManager: React.FC = () => {
                     payload.authors = Array.isArray(data.item.author) ? data.item.author.join(', ') : (data.item.author || null);
                     payload.overview = data.item.brief || data.item.description || null;
                     payload.isbn = data.item.isbn || null;
-                    payload.publication_date = data.item.pub_year ? `${data.item.pub_year}-01-01` : null;
+                    payload.release_date = data.item.pub_year ? `${data.item.pub_year}-01-01` : null;
                     payload.page_count = data.item.pages || null;
                     payload.external_rating = data.item.rating || null;
                     if (!payload.cover_image_cdn && data.item.cover_image_url) {
