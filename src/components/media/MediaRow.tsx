@@ -31,7 +31,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                                         type === 'documentary' ? 'documentaries' :
                                             'anime';
 
-                const result = await fetchMediaItems(apiType, undefined, 1, 20, 'completed_date_desc');
+                const result = await fetchMediaItems(apiType, undefined, 1, 10, 'completed_date_desc');
                 if (Array.isArray(result)) {
                     setItems(result);
                 } else {
@@ -70,7 +70,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                                                 'anime',
                         undefined,
                         1,
-                        20,
+                        10,
                         'completed_date_desc'
                     ).then(result => {
                         const items = Array.isArray(result) ? result : (result.items || []);
@@ -80,7 +80,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
                         }
                     });
                 }
-            }, 1000);
+            }, 500);
             return () => clearTimeout(timer);
         }
     }, [loading, items.length, type]);
@@ -96,10 +96,10 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, type, moreLink }) => 
     if (loading) {
         return (
             <div className="space-y-4 py-4">
-                <div className="h-8 bg-zinc-800/50 rounded-lg w-48 animate-pulse ml-4 md:ml-0"></div>
+                <div className="h-8 bg-zinc-200 dark:bg-zinc-800/50 rounded-lg w-48 animate-pulse ml-4 md:ml-0"></div>
                 <div className="flex gap-4 overflow-hidden px-4 md:px-0">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="w-[140px] md:w-[160px] aspect-[2/3] bg-zinc-800/50 rounded-xl animate-pulse flex-shrink-0"></div>
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="w-[140px] md:w-[160px] aspect-[2/3] bg-zinc-200 dark:bg-zinc-800/50 rounded-xl animate-pulse flex-shrink-0"></div>
                     ))}
                 </div>
             </div>
