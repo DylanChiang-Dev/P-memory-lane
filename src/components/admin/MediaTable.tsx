@@ -331,6 +331,7 @@ export const MediaTable: React.FC = () => {
                         ...(isManual
                             ? {
                                 neodb_id: null,
+                                google_books_id: null,
                                 title: data.title,
                                 original_title: null,
                                 cover_image_cdn: data.customCoverUrl || null,
@@ -344,24 +345,44 @@ export const MediaTable: React.FC = () => {
                                 isbn_10: null,
                                 isbn_13: null
                             }
-                            : {
-                                neodb_id: data.item.uuid,
-                                title: data.item.title || data.item.display_title,
-                                original_title: data.item.orig_title || data.item.title,
-                                cover_image_cdn: data.customCoverUrl || data.item.cover_image_url,
-                                overview: data.item.description || data.item.brief,
-                                // 過濾 NeoDB tags：移除純數字、過短標籤，保留合適的類別
-                                genres: data.item.tags?.filter((t: string) =>
-                                    t && t.length > 1 && !/^\d+$/.test(t) && !/^(kindle|epub|pdf|mobi)$/i.test(t)
-                                )?.slice(0, 5) || undefined,
-                                external_rating: data.item.rating,
-                                release_date: data.item.pub_year ? `${data.item.pub_year}-${String(data.item.pub_month || 1).padStart(2, '0')}-01` : null,
-                                authors: data.item.author,
-                                publisher: data.item.pub_house,
-                                page_count: data.item.pages,
-                                isbn_10: null,
-                                isbn_13: data.item.isbn
-                            })
+                            : data.item.volumeInfo
+                                ? {
+                                    // Google Books 格式
+                                    google_books_id: data.item.id,
+                                    neodb_id: null,
+                                    title: data.item.volumeInfo.title,
+                                    original_title: data.item.volumeInfo.title,
+                                    cover_image_cdn: data.customCoverUrl || (data.item.volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://') || null),
+                                    overview: data.item.volumeInfo.description || null,
+                                    genres: data.item.volumeInfo.categories?.slice(0, 5) || undefined,
+                                    external_rating: data.item.volumeInfo.averageRating || null,
+                                    release_date: data.item.volumeInfo.publishedDate || null,
+                                    authors: data.item.volumeInfo.authors || null,
+                                    publisher: data.item.volumeInfo.publisher || null,
+                                    page_count: data.item.volumeInfo.pageCount || null,
+                                    isbn_10: data.item.volumeInfo.industryIdentifiers?.find((i: any) => i.type === 'ISBN_10')?.identifier || null,
+                                    isbn_13: data.item.volumeInfo.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier || null
+                                }
+                                : {
+                                    // NeoDB 格式
+                                    neodb_id: data.item.uuid,
+                                    google_books_id: null,
+                                    title: data.item.title || data.item.display_title,
+                                    original_title: data.item.orig_title || data.item.title,
+                                    cover_image_cdn: data.customCoverUrl || data.item.cover_image_url,
+                                    overview: data.item.description || data.item.brief,
+                                    // 過濾 NeoDB tags：移除純數字、過短標籤，保留合適的類別
+                                    genres: data.item.tags?.filter((t: string) =>
+                                        t && t.length > 1 && !/^\d+$/.test(t) && !/^(kindle|epub|pdf|mobi)$/i.test(t)
+                                    )?.slice(0, 5) || undefined,
+                                    external_rating: data.item.rating,
+                                    release_date: data.item.pub_year ? `${data.item.pub_year}-${String(data.item.pub_month || 1).padStart(2, '0')}-01` : null,
+                                    authors: data.item.author,
+                                    publisher: data.item.pub_house,
+                                    page_count: data.item.pages,
+                                    isbn_10: null,
+                                    isbn_13: data.item.isbn
+                                })
                     }),
                     ...(currentType === 'games' && {
                         ...(data.item?.__manual
