@@ -13,6 +13,7 @@ export const HabitConsole: React.FC = () => {
     const [selectedType, setSelectedType] = useState('exercise');
     const [value, setValue] = useState('');
     const [notes, setNotes] = useState('');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(false);
 
     // Notification State
@@ -80,7 +81,7 @@ export const HabitConsole: React.FC = () => {
         try {
             const payload: any = {
                 activity_type: selectedType,
-                activity_date: new Date().toLocaleDateString('en-CA'),
+                activity_date: selectedDate,
                 notes
             };
 
@@ -196,7 +197,8 @@ export const HabitConsole: React.FC = () => {
                             </label>
                             <input
                                 type="date"
-                                defaultValue={new Date().toISOString().split('T')[0]}
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
                                 className="w-full min-w-[180px] px-4 py-3 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-teal-500 outline-none transition-all text-zinc-900 dark:text-white [&::-webkit-calendar-picker-indicator]:dark:invert"
                                 style={{ minWidth: '180px' }}
                             />
