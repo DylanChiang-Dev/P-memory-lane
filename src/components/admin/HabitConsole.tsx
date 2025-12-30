@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
-import { Dumbbell, BookOpen, Languages, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { submitCheckin } from '../../lib/api';
+import { getLocalDateString } from '../../lib/date';
+import { HABIT_TYPES } from '../../lib/habitConfig';
 import { Modal } from '../ui/Modal';
-
-const HABIT_TYPES = [
-    { id: 'exercise', label: '運動', icon: Dumbbell, color: 'bg-orange-500', unit: '分钟' },
-    { id: 'reading', label: '閱讀', icon: BookOpen, color: 'bg-blue-500', unit: '页' },
-    { id: 'duolingo', label: 'Duolingo', icon: Languages, color: 'bg-green-500', unit: 'XP' },
-];
 
 export const HabitConsole: React.FC = () => {
     const [selectedType, setSelectedType] = useState('exercise');
     const [value, setValue] = useState('');
     const [notes, setNotes] = useState('');
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(getLocalDateString());
     const [loading, setLoading] = useState(false);
 
     // Notification State
@@ -92,7 +88,7 @@ export const HabitConsole: React.FC = () => {
                 payload.duration_minutes = 30; // Default
                 payload.pages_read = parseInt(value) || 0;
             } else if (selectedType === 'duolingo') {
-                payload.xp_earned = parseInt(value) || 0;
+                payload.cumulative_xp = parseInt(value) || 0;  // 后端自动计算差值
             }
 
             await submitCheckin(payload);
@@ -107,8 +103,6 @@ export const HabitConsole: React.FC = () => {
             setLoading(false);
         }
     };
-
-    const currentType = HABIT_TYPES.find(t => t.id === selectedType) || HABIT_TYPES[0];
 
     return (
         <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 rounded-3xl p-6 md:p-8 relative overflow-hidden">
@@ -161,7 +155,7 @@ export const HabitConsole: React.FC = () => {
                                     : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20'
                                     }`}
                             >
-                                <div className={`w-10 h-10 rounded-xl ${type.color} flex items-center justify-center text-white shadow-md`}>
+                                <div className={`w-10 h-10 rounded-xl bg-${type.color}-500 flex items-center justify-center text-white shadow-md`}>
                                     <type.icon size={20} />
                                 </div>
                                 <div>
@@ -180,7 +174,7 @@ export const HabitConsole: React.FC = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                                 {selectedType === 'exercise' ? '運動時長 (分鐘)' :
-                                    selectedType === 'reading' ? '閱讀頁數' : '獲得 XP'}
+                                    selectedType === 'reading' ? '閱讀頁數' : '當前總經驗 (XP)'}
                             </label>
                             <input
                                 type="number"

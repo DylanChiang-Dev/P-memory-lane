@@ -2,8 +2,6 @@
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { HabitConsole } from "../../components/admin/HabitConsole";
 import { HabitTracker } from "../../components/habits/HabitTracker";
-
-const currentYear = new Date().getFullYear();
 ---
 
 <AdminLayout title="習慣管理 - 管理後台">
@@ -27,7 +25,7 @@ const currentYear = new Date().getFullYear();
             <h2 class="text-xl font-bold text-zinc-900 dark:text-white mb-6">
                 數據概覽
             </h2>
-            <HabitTracker initialYear={currentYear} client:load />
+            <HabitTracker client:load />
         </div>
     </div>
 </AdminLayout>

@@ -2,16 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Heatmap } from './Heatmap';
 import { StatsCard } from './StatsCard';
 import { fetchHeatmapData, fetchStats, type Activity, type Stats } from '../../lib/api';
+import { HABIT_TYPES, type ActivityType } from '../../lib/habitConfig';
 import { clsx } from 'clsx';
 import { Loader2 } from 'lucide-react';
 
-interface HabitTrackerProps {
-    initialYear: number;
-}
-
-type TabType = 'exercise' | 'reading' | 'duolingo';
-
-export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
+export const HabitTracker: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<{
         exercise: { stats: Stats; heatmap: Activity[] };
@@ -22,23 +17,41 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
     const loadData = async (retry = true) => {
         setLoading(true);
         try {
+            const currentYear = new Date().getFullYear();
+            const lastYear = currentYear - 1;
+
+            // Fetch data for both current year and last year to support rolling 365-day view
             const [
-                exerciseData, exerciseStats,
-                readingData, readingStats,
-                duolingoData, duolingoStats
+                exerciseDataCurrent, exerciseDataLast, exerciseStats,
+                readingDataCurrent, readingDataLast, readingStats,
+                duolingoDataCurrent, duolingoDataLast, duolingoStats
             ] = await Promise.all([
-                fetchHeatmapData('exercise', initialYear),
-                fetchStats('exercise', initialYear),
-                fetchHeatmapData('reading', initialYear),
-                fetchStats('reading', initialYear),
-                fetchHeatmapData('duolingo', initialYear),
-                fetchStats('duolingo', initialYear),
+                fetchHeatmapData('exercise', currentYear),
+                fetchHeatmapData('exercise', lastYear),
+                fetchStats('exercise', currentYear),
+                fetchHeatmapData('reading', currentYear),
+                fetchHeatmapData('reading', lastYear),
+                fetchStats('reading', currentYear),
+                fetchHeatmapData('duolingo', currentYear),
+                fetchHeatmapData('duolingo', lastYear),
+                fetchStats('duolingo', currentYear),
             ]);
 
+            // Merge data from both years
+            const mergeHeatmapData = (current: Activity[], last: Activity[]) => {
+                const merged = [...last, ...current];
+                // Remove duplicates (prefer current year data)
+                const dateMap = new Map<string, Activity>();
+                merged.forEach(item => {
+                    dateMap.set(item.date, item);
+                });
+                return Array.from(dateMap.values());
+            };
+
             setData({
-                exercise: { stats: exerciseStats, heatmap: exerciseData },
-                reading: { stats: readingStats, heatmap: readingData },
-                duolingo: { stats: duolingoStats, heatmap: duolingoData },
+                exercise: { stats: exerciseStats, heatmap: mergeHeatmapData(exerciseDataCurrent, exerciseDataLast) },
+                reading: { stats: readingStats, heatmap: mergeHeatmapData(readingDataCurrent, readingDataLast) },
+                duolingo: { stats: duolingoStats, heatmap: mergeHeatmapData(duolingoDataCurrent, duolingoDataLast) },
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'Unauthorized' && retry) {
@@ -59,13 +72,9 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
         const handleRefresh = () => loadData();
         window.addEventListener('habit-checkin-success', handleRefresh);
         return () => window.removeEventListener('habit-checkin-success', handleRefresh);
-    }, [initialYear]);
+    }, []);
 
-    const habitConfig: { id: TabType; label: string; color: string }[] = [
-        { id: 'exercise', label: '運動', color: 'orange' },
-        { id: 'reading', label: '閱讀', color: 'blue' },
-        { id: 'duolingo', label: 'Duolingo', color: 'green' },
-    ];
+
 
     if (loading || !data) {
         return (
@@ -76,30 +85,26 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialYear }) => {
     }
 
     return (
-        <div className="space-y-12">
-            {habitConfig.map((habit) => {
+        <div className="space-y-8">
+            {HABIT_TYPES.map((habit) => {
                 const currentStats = data[habit.id].stats;
                 const currentHeatmap = data[habit.id].heatmap;
 
                 return (
-                    <div key={habit.id} className="space-y-6">
-                        <div className="flex items-center gap-3">
-                            <div className={clsx("w-1.5 h-8 rounded-full", {
+                    <div key={habit.id} className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <div className={clsx("w-1 h-5 rounded-full", {
                                 'bg-orange-500': habit.id === 'exercise',
                                 'bg-blue-500': habit.id === 'reading',
                                 'bg-green-500': habit.id === 'duolingo',
                             })}></div>
-                            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">{habit.label}</h2>
+                            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{habit.label}</h2>
                         </div>
 
-                        <StatsCard stats={currentStats} />
+                        <StatsCard stats={currentStats} activityType={habit.id} />
 
-                        <div className="bento-card p-4 md:p-6 overflow-hidden">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-200">年度熱力圖</h3>
-                                <div className="text-xs text-zinc-500 font-mono">{initialYear}</div>
-                            </div>
-                            <Heatmap data={currentHeatmap} year={initialYear} color={habit.color} />
+                        <div className="bento-card p-3 md:p-4 overflow-hidden">
+                            <Heatmap data={currentHeatmap} color={habit.color} />
                         </div>
                     </div>
                 );

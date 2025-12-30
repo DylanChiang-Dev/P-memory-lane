@@ -40,14 +40,14 @@ const convertGenreIds = (genreIds: number[] | undefined): string[] | undefined =
 
 
 export const MediaTable: React.FC = () => {
-    const ADMIN_PAGE_LIMIT = 1000;
+    const ADMIN_PAGE_LIMIT = 10;
     const [activeTab, setActiveTab] = useState<MediaType>('books');
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [modalMediaType, setModalMediaType] = useState<MediaType>('books');
     const [page, setPage] = useState(1);
-    const [pagination, setPagination] = useState({ total: 0, total_pages: 0, limit: 20 });
+    const [pagination, setPagination] = useState({ total: 0, total_pages: 0, limit: 10 });
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
     const [saving, setSaving] = useState(false);
@@ -63,7 +63,7 @@ export const MediaTable: React.FC = () => {
     const loadItems = async () => {
         setLoading(true);
         try {
-            // Admin list should default to "completed date" ordering, not recently-updated ordering.
+            // Admin list should default to "completed date" ordering
             const sort = 'completed_date_desc';
             const result = await fetchMediaItems(activeTab, undefined, page, ADMIN_PAGE_LIMIT, sort, debouncedSearchQuery);
 
@@ -74,42 +74,16 @@ export const MediaTable: React.FC = () => {
             } else {
                 const apiItems = result.items || [];
                 const apiPagination = result.pagination || { total: 0, limit: ADMIN_PAGE_LIMIT };
-                const backendLimit = apiPagination.limit || ADMIN_PAGE_LIMIT;
                 const total = apiPagination.total || 0;
 
-                // If backend clamps limit (e.g. public max=100), auto-stitch pages so admin UI can still show 1000 items per page.
-                if (backendLimit < ADMIN_PAGE_LIMIT && total > backendLimit) {
-                    const factor = Math.ceil(ADMIN_PAGE_LIMIT / backendLimit);
-                    const startBackendPage = (page - 1) * factor + 1;
-
-                    const stitched: any[] = [];
-                    for (let i = 0; i < factor; i++) {
-                        const backendPage = startBackendPage + i;
-                        const pageResult = await fetchMediaItems(activeTab, undefined, backendPage, backendLimit, sort, debouncedSearchQuery);
-                        if (Array.isArray(pageResult)) {
-                            stitched.push(...pageResult);
-                        } else {
-                            stitched.push(...(pageResult.items || []));
-                        }
-                        if (stitched.length >= ADMIN_PAGE_LIMIT) break;
-                    }
-
-                    setItems(stitched.slice(0, ADMIN_PAGE_LIMIT));
-                    setPagination({
-                        total,
-                        total_pages: Math.max(1, Math.ceil(total / ADMIN_PAGE_LIMIT)),
-                        limit: ADMIN_PAGE_LIMIT
-                    });
-                } else {
-                    setItems(apiItems);
-                    // Calculate total_pages if not provided by API
-                    const totalPages = apiPagination.total_pages || Math.ceil(total / backendLimit);
-                    setPagination({
-                        total,
-                        total_pages: totalPages,
-                        limit: backendLimit
-                    });
-                }
+                setItems(apiItems);
+                // Calculate total_pages if not provided by API
+                const totalPages = apiPagination.total_pages || Math.ceil(total / ADMIN_PAGE_LIMIT);
+                setPagination({
+                    total,
+                    total_pages: totalPages,
+                    limit: ADMIN_PAGE_LIMIT
+                });
             }
         } catch (error) {
             console.error('Failed to load items:', error);

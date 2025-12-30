@@ -6,27 +6,43 @@ import type { Activity } from '../../lib/api';
 
 interface HeatmapProps {
     data: Activity[];
-    year: number;
     color?: string; // e.g., 'orange', 'blue', 'green'
 }
 
 const COLOR_SCALES: Record<string, { level1: string; level2: string; level3: string; level4: string; level5: string; level6: string }> = {
-    orange: { level1: '#ffedd5', level2: '#fed7aa', level3: '#fdba74', level4: '#fb923c', level5: '#f97316', level6: '#ea580c' }, // Orange 100-600
-    blue: { level1: '#dbeafe', level2: '#bfdbfe', level3: '#93c5fd', level4: '#60a5fa', level5: '#3b82f6', level6: '#2563eb' },   // Blue 100-600
-    green: { level1: '#dcfce7', level2: '#bbf7d0', level3: '#86efac', level4: '#4ade80', level5: '#22c55e', level6: '#16a34a' },  // Green 100-600
-    indigo: { level1: '#e0e7ff', level2: '#c7d2fe', level3: '#a5b4fc', level4: '#818cf8', level5: '#6366f1', level6: '#4f46e5' }, // Indigo 100-600
+    orange: { level1: '#ffedd5', level2: '#fed7aa', level3: '#fdba74', level4: '#fb923c', level5: '#f97316', level6: '#ea580c' },
+    blue: { level1: '#dbeafe', level2: '#bfdbfe', level3: '#93c5fd', level4: '#60a5fa', level5: '#3b82f6', level6: '#2563eb' },
+    green: { level1: '#dcfce7', level2: '#bbf7d0', level3: '#86efac', level4: '#4ade80', level5: '#22c55e', level6: '#16a34a' },
+    indigo: { level1: '#e0e7ff', level2: '#c7d2fe', level3: '#a5b4fc', level4: '#818cf8', level5: '#6366f1', level6: '#4f46e5' },
 };
 
-export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }) => {
-    const startDate = new Date(year, 0, 1);
-    const endDate = new Date(year, 11, 31);
+// Chinese month labels
+const MONTH_LABELS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+
+// GitHub-style rolling heatmap: shows ~54 weeks with aligned week boundaries
+export const Heatmap: React.FC<HeatmapProps> = ({ data, color = 'indigo' }) => {
+    const today = new Date();
+
+    // Calculate start date: go back ~54 weeks and align to the previous Sunday
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 378); // ~54 weeks
+    // Align to Sunday (day 0)
+    const startDayOfWeek = startDate.getDay();
+    startDate.setDate(startDate.getDate() - startDayOfWeek);
+
+    // Calculate end date: extend ~2 weeks into future and align to Saturday
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + 14);
+    // Align to Saturday (day 6)
+    const endDayOfWeek = endDate.getDay();
+    endDate.setDate(endDate.getDate() + (6 - endDayOfWeek));
+
     const theme = COLOR_SCALES[color] || COLOR_SCALES.indigo;
 
     const getIntensity = (val: Activity) => {
-        // Fallback logic if intensity is missing or we want to override based on value
         const v = val.value;
 
-        if (color === 'blue') { // Reading (Pages): 10, 20, 30, 40, 50, 60+
+        if (color === 'blue') { // Reading (Pages)
             if (v >= 60) return 'level6';
             if (v >= 50) return 'level5';
             if (v >= 40) return 'level4';
@@ -34,7 +50,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }
             if (v >= 20) return 'level2';
             return 'level1';
         }
-        if (color === 'green') { // Duolingo (XP): 20, 40, 60, 80, 100, 120+
+        if (color === 'green') { // Duolingo (XP)
             if (v >= 120) return 'level6';
             if (v >= 100) return 'level5';
             if (v >= 80) return 'level4';
@@ -42,7 +58,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }
             if (v >= 40) return 'level2';
             return 'level1';
         }
-        // Default / Exercise (Minutes): 10, 20, 30, 40, 50, 60+
+        // Default / Exercise (Minutes)
         if (v >= 60) return 'level6';
         if (v >= 50) return 'level5';
         if (v >= 40) return 'level4';
@@ -53,29 +69,23 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }
 
     const containerRef = React.useRef<HTMLDivElement>(null);
 
+    // Scroll to show recent data (right side)
     React.useEffect(() => {
-        if (containerRef.current && year === new Date().getFullYear()) {
-            const today = new Date();
-            const start = new Date(year, 0, 0);
-            const diff = today.getTime() - start.getTime();
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay);
-            const totalDays = 365; // Approximation is fine for scroll position
-
-            const scrollWidth = containerRef.current.scrollWidth;
-            const clientWidth = containerRef.current.clientWidth;
-
-            // Calculate position: (dayOfYear / totalDays) * scrollWidth
-            // Center it: - clientWidth / 2
-            const scrollPos = (dayOfYear / totalDays) * scrollWidth - clientWidth / 2;
-
-            containerRef.current.scrollLeft = scrollPos;
+        if (containerRef.current) {
+            containerRef.current.scrollLeft = containerRef.current.scrollWidth;
         }
-    }, [year, data]); // Re-run when year or data changes
+    }, [data]);
+
+    // Get unit label
+    const getUnitLabel = () => {
+        if (color === 'blue') return '頁';
+        if (color === 'green') return 'XP';
+        return '分鐘';
+    };
 
     return (
         <div ref={containerRef} className="w-full overflow-x-auto pb-2 no-scrollbar">
-            <div className="min-w-[800px]">
+            <div className="min-w-[700px] md:min-w-[800px]">
                 <CalendarHeatmap
                     startDate={startDate}
                     endDate={endDate}
@@ -88,14 +98,14 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }
                         if (!value || !value.date || value.value === 0) return null;
                         return {
                             'data-tooltip-id': 'heatmap-tooltip',
-                            'data-tooltip-content': `${value.date}: ${value.value} ${color === 'blue' ? 'pages' : color === 'green' ? 'XP' : 'min'}${value.notes ? ` - ${value.notes}` : ''}`,
+                            'data-tooltip-content': `${value.date}: ${value.value} ${getUnitLabel()}${value.notes ? ` - ${value.notes}` : ''}`,
                         };
                     }}
                     showWeekdayLabels
-                    gutterSize={4}
+                    gutterSize={3}
+                    monthLabels={MONTH_LABELS}
                     transformDayElement={(element, value, index) => {
                         if (!value || value.value === 0) {
-                            // Use light gray for light mode, dark gray for dark mode
                             return React.cloneElement(element, {
                                 style: { rx: 2 },
                                 className: 'fill-zinc-200 dark:fill-zinc-800'
@@ -114,11 +124,31 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, year, color = 'indigo' }
                 />
             </div>
             <style>{`
-                .react-calendar-heatmap text { font-size: 10px; fill: #71717a; font-family: 'Inter', sans-serif; }
-                .react-calendar-heatmap rect:hover { stroke: #fff; stroke-width: 1px; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
+                    .react-calendar-heatmap text { 
+                        font-size: 8px; 
+                        fill: #71717a; 
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+                    }
+                    .react-calendar-heatmap rect { 
+                        width: 10px !important; 
+                        height: 10px !important; 
+                    }
+                    .react-calendar-heatmap rect:hover { 
+                        stroke: #fff; 
+                        stroke-width: 1px; 
+                    }
+                    .no-scrollbar::-webkit-scrollbar { display: none; }
+                    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    
+                    /* Mobile optimization */
+                    @media (max-width: 768px) {
+                        .react-calendar-heatmap text { font-size: 7px; }
+                        .react-calendar-heatmap rect { 
+                            width: 8px !important; 
+                            height: 8px !important; 
+                        }
+                    }
+                `}</style>
         </div>
     );
 };

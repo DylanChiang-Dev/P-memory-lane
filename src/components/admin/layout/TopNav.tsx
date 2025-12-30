@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, List, Database, Settings, Menu, X, LogOut } from 'lucide-react';
+import { Home, List, Database, Settings, Menu, X, LogOut, Sparkles } from 'lucide-react';
 import { ThemeToggle } from '../../ui/ThemeToggle';
 
 interface TopNavProps {
@@ -20,6 +20,7 @@ export const TopNav: React.FC<TopNavProps> = ({ currentPath }) => {
         { href: '/admin', label: '概覽', icon: Home },
         { href: '/admin/habits', label: '習慣', icon: List },
         { href: '/admin/media', label: '媒體庫', icon: Database },
+        { href: '/yearly-review', label: '年度總結', icon: Sparkles },
         { href: '/admin/settings', label: '設定', icon: Settings },
     ];
 

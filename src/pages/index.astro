@@ -2,9 +2,6 @@
 import Layout from "../layouts/Layout.astro";
 import { HabitTracker } from "../components/habits/HabitTracker";
 import { MediaRow } from "../components/media/MediaRow";
-
-// Fetch data for the current year
-const currentYear = new Date().getFullYear();
 ---
 
 <Layout title="記憶巷弄">
@@ -31,7 +28,7 @@ const currentYear = new Date().getFullYear();
 
         <!-- Habits Section -->
         <section id="habits" class="px-4 md:px-0">
-            <HabitTracker initialYear={currentYear} client:load />
+            <HabitTracker client:load />
         </section>
 
         <!-- Media Library Section -->

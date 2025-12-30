@@ -10,6 +10,8 @@ export interface Activity {
 export interface Stats {
     total_days: number;
     total_minutes: number;
+    total_pages?: number;   // For reading
+    total_xp?: number;      // For duolingo
     current_streak: number;
     longest_streak: number;
     monthly_breakdown: { month: number; days: number; minutes: number }[];

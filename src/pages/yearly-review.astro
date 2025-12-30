@@ -1,0 +1,25 @@
+---
+import "../styles/global.css";
+import { YearlyReview as YearlyReviewApp } from "../components/yearlyReview/YearlyReview";
+
+const currentYear = new Date().getFullYear();
+const year = currentYear;
+---
+
+<!doctype html>
+<html lang="zh-CN" class="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>{year} 年度总结 | 记忆巷弄</title>
+        <meta name="theme-color" content="#020617" />
+    </head>
+    <body
+        class="bg-black text-white m-0 p-0 overflow-hidden w-full h-screen font-sans antialiased selection:bg-teal-500/30"
+    >
+        <YearlyReviewApp client:only="react" year={year} />
+    </body>
+</html>
