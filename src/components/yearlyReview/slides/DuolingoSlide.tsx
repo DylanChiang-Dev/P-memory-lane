@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Languages } from 'lucide-react';
 import type { YearlyReviewData } from '../../../lib/yearlyReview';
-import { Heatmap } from '../../habits/Heatmap';
+import { YearHeatmap } from '../../habits/YearHeatmap';
 
 interface DuolingoSlideProps {
     data: YearlyReviewData['habits']['duolingo'];
@@ -79,7 +79,7 @@ export const DuolingoSlide: React.FC<DuolingoSlideProps> = ({ data }) => {
                         className="space-y-4"
                     >
                         <h4 className="text-xs uppercase tracking-widest text-white/30">每日学习热力图</h4>
-                        <Heatmap data={data.heatmapData || []} color="green" />
+                        <YearHeatmap data={data.heatmapData || []} color="green" year={2025} />
                     </motion.div>
                 </div>
             </div>

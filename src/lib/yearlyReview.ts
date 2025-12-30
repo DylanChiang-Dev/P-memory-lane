@@ -10,6 +10,7 @@ export interface YearlyMediaItem {
     cover_image_cdn?: string;
     my_rating?: number;
     completed_date?: string;
+    status?: string; // 'completed', 'reading', 'want_to_read', etc.
 }
 
 /**
@@ -53,10 +54,11 @@ interface MediaCategorySummary {
 export async function fetchYearlyReviewData(year: number): Promise<YearlyReviewData> {
     try {
         // Fetch base data and heatmap data in parallel
-        const [response, exerciseHeatmap, duolingoHeatmap] = await Promise.all([
+        const [response, exerciseHeatmap, duolingoHeatmap, readingHeatmap] = await Promise.all([
             fetchWithAuth(`/api/activities/yearly-review?year=${year}`),
             fetchHeatmapData('exercise', year),
-            fetchHeatmapData('duolingo', year)
+            fetchHeatmapData('duolingo', year),
+            fetchHeatmapData('reading', year)
         ]);
 
         if (!response.ok) {
@@ -100,7 +102,7 @@ export async function fetchYearlyReviewData(year: number): Promise<YearlyReviewD
                         minutes: m.minutes || m.total_minutes || 0,
                         pages: m.pages || m.total_pages || 0
                     })),
-                    heatmapData: [], // Reading usually doesn't show heatmap in the same way, or can be added if needed
+                    heatmapData: readingHeatmap,
                 },
                 duolingo: {
                     totalDays: habits.duolingo.total_days,

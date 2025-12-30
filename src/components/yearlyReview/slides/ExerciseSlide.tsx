@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Dumbbell } from 'lucide-react';
 import type { YearlyReviewData } from '../../../lib/yearlyReview';
-import { Heatmap } from '../../habits/Heatmap';
+import { YearHeatmap } from '../../habits/YearHeatmap';
 
 interface ExerciseSlideProps {
     data: YearlyReviewData['habits']['exercise'];
@@ -56,7 +56,7 @@ export const ExerciseSlide: React.FC<ExerciseSlideProps> = ({ data }) => {
                         className="space-y-4"
                     >
                         <h4 className="text-xs uppercase tracking-widest text-white/30">每日运动热力图</h4>
-                        <Heatmap data={data.heatmapData || []} color="orange" />
+                        <YearHeatmap data={data.heatmapData || []} color="orange" year={2025} />
                     </motion.div>
 
                     <div className="grid grid-cols-2 gap-4">

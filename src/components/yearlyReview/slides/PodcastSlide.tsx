@@ -58,7 +58,7 @@ export const PodcastSlide: React.FC<PodcastSlideProps> = ({ data }) => {
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.4 + (i * 0.1), duration: 0.5 }}
-                                className="aspect-[1/1] bg-slate-800 rounded-lg overflow-hidden relative group shadow-lg"
+                                className="aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden relative group shadow-lg"
                             >
                                 {item.cover_image_cdn ? (
                                     <img
@@ -81,7 +81,7 @@ export const PodcastSlide: React.FC<PodcastSlideProps> = ({ data }) => {
                             </motion.div>
                         ))}
                         {Array.from({ length: Math.max(0, 6 - topItems.length) }).map((_, i) => (
-                            <div key={`empty-${i}`} className="aspect-[1/1] bg-white/5 rounded-lg" />
+                            <div key={`empty-${i}`} className="aspect-[2/3] bg-white/5 rounded-lg" />
                         ))}
                     </div>
 

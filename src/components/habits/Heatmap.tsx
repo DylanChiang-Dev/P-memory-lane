@@ -7,6 +7,7 @@ import type { Activity } from '../../lib/api';
 interface HeatmapProps {
     data: Activity[];
     color?: string; // e.g., 'orange', 'blue', 'green'
+    year?: number; // If provided, show full year (Jan 1 - Dec 31) instead of rolling view
 }
 
 const COLOR_SCALES: Record<string, { level1: string; level2: string; level3: string; level4: string; level5: string; level6: string }> = {
@@ -20,22 +21,43 @@ const COLOR_SCALES: Record<string, { level1: string; level2: string; level3: str
 const MONTH_LABELS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
 // GitHub-style rolling heatmap: shows ~54 weeks with aligned week boundaries
-export const Heatmap: React.FC<HeatmapProps> = ({ data, color = 'indigo' }) => {
-    const today = new Date();
+export const Heatmap: React.FC<HeatmapProps> = ({ data, color = 'indigo', year }) => {
+    let startDate: Date;
+    let endDate: Date;
 
-    // Calculate start date: go back ~54 weeks and align to the previous Sunday
-    const startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 378); // ~54 weeks
-    // Align to Sunday (day 0)
-    const startDayOfWeek = startDate.getDay();
-    startDate.setDate(startDate.getDate() - startDayOfWeek);
+    if (year) {
+        // Full year mode: show Jan 1 - Dec 31 of the specified year
+        startDate = new Date(year, 0, 1); // Jan 1
+        // Align to previous Sunday if Jan 1 isn't Sunday
+        const janFirstDay = startDate.getDay();
+        if (janFirstDay !== 0) {
+            startDate.setDate(startDate.getDate() - janFirstDay);
+        }
 
-    // Calculate end date: extend ~2 weeks into future and align to Saturday
-    const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + 14);
-    // Align to Saturday (day 6)
-    const endDayOfWeek = endDate.getDay();
-    endDate.setDate(endDate.getDate() + (6 - endDayOfWeek));
+        endDate = new Date(year, 11, 31); // Dec 31
+        // Align to next Saturday if Dec 31 isn't Saturday
+        const decLastDay = endDate.getDay();
+        if (decLastDay !== 6) {
+            endDate.setDate(endDate.getDate() + (6 - decLastDay));
+        }
+    } else {
+        // Rolling view mode (default): ~54 weeks ending around today
+        const today = new Date();
+
+        // Calculate start date: go back ~54 weeks and align to the previous Sunday
+        startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - 378); // ~54 weeks
+        // Align to Sunday (day 0)
+        const startDayOfWeek = startDate.getDay();
+        startDate.setDate(startDate.getDate() - startDayOfWeek);
+
+        // Calculate end date: extend ~2 weeks into future and align to Saturday
+        endDate = new Date(today);
+        endDate.setDate(endDate.getDate() + 14);
+        // Align to Saturday (day 6)
+        const endDayOfWeek = endDate.getDay();
+        endDate.setDate(endDate.getDate() + (6 - endDayOfWeek));
+    }
 
     const theme = COLOR_SCALES[color] || COLOR_SCALES.indigo;
 
@@ -69,12 +91,18 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, color = 'indigo' }) => {
 
     const containerRef = React.useRef<HTMLDivElement>(null);
 
-    // Scroll to show recent data (right side)
+    // Scroll behavior: year mode shows from start (left), rolling mode shows recent (right)
     React.useEffect(() => {
         if (containerRef.current) {
-            containerRef.current.scrollLeft = containerRef.current.scrollWidth;
+            if (year) {
+                // Year mode: scroll to beginning to show January first
+                containerRef.current.scrollLeft = 0;
+            } else {
+                // Rolling mode: scroll to end to show recent data
+                containerRef.current.scrollLeft = containerRef.current.scrollWidth;
+            }
         }
-    }, [data]);
+    }, [data, year]);
 
     // Get unit label
     const getUnitLabel = () => {
@@ -83,9 +111,12 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, color = 'indigo' }) => {
         return '分鐘';
     };
 
+    // For year mode, use compact sizing to fit full year
+    const isYearMode = !!year;
+
     return (
-        <div ref={containerRef} className="w-full overflow-x-auto pb-2 no-scrollbar">
-            <div className="min-w-[700px] md:min-w-[800px]">
+        <div ref={containerRef} className={`w-full pb-2 ${isYearMode ? '' : 'overflow-x-auto no-scrollbar'}`}>
+            <div className={isYearMode ? 'heatmap-year-mode' : 'min-w-[700px] md:min-w-[800px]'}>
                 <CalendarHeatmap
                     startDate={startDate}
                     endDate={endDate}
@@ -140,12 +171,32 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, color = 'indigo' }) => {
                     .no-scrollbar::-webkit-scrollbar { display: none; }
                     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                     
+                    /* Year mode: compact sizing to fit full 12 months */
+                    .heatmap-year-mode .react-calendar-heatmap text {
+                        font-size: 6px;
+                    }
+                    .heatmap-year-mode .react-calendar-heatmap rect {
+                        width: 5px !important;
+                        height: 5px !important;
+                    }
+                    .heatmap-year-mode .react-calendar-heatmap {
+                        width: 100%;
+                    }
+                    
                     /* Mobile optimization */
                     @media (max-width: 768px) {
                         .react-calendar-heatmap text { font-size: 7px; }
                         .react-calendar-heatmap rect { 
                             width: 8px !important; 
                             height: 8px !important; 
+                        }
+                        
+                        .heatmap-year-mode .react-calendar-heatmap text {
+                            font-size: 5px;
+                        }
+                        .heatmap-year-mode .react-calendar-heatmap rect {
+                            width: 4px !important;
+                            height: 4px !important;
                         }
                     }
                 `}</style>
