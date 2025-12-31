@@ -7,6 +7,7 @@ import { ReadingSlide } from './slides/ReadingSlide';
 import { DuolingoSlide } from './slides/DuolingoSlide';
 import { MediaOverviewSlide } from './slides/MediaOverviewSlide';
 import { MovieSlide } from './slides/MovieSlide';
+import { MovieMoreSlide } from './slides/MovieMoreSlide';
 import { TvSlide } from './slides/TvSlide';
 import { GameSlide } from './slides/GameSlide';
 import { AnimeSlide } from './slides/AnimeSlide';
@@ -115,6 +116,7 @@ export const YearlyReview: React.FC<YearlyReviewProps> = ({ year }) => {
 
                             {/* Detailed Media Slides - Render only if exists */}
                             {data.media.movies.total > 0 && <MovieSlide data={data.media.movies} />}
+                            {data.media.movies.items.length > 9 && <MovieMoreSlide data={data.media.movies} />}
                             {data.media.tvShows.total > 0 && <TvSlide data={data.media.tvShows} />}
                             {data.media.anime.total > 0 && <AnimeSlide data={data.media.anime} />}
                             {data.media.games.total > 0 && <GameSlide data={data.media.games} />}

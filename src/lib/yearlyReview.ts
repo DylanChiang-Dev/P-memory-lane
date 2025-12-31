@@ -1,4 +1,4 @@
-import { fetchWithAuth, fetchHeatmapData, type Activity } from './api';
+import { fetchWithAuth, fetchHeatmapData, fetchMediaItems, type Activity } from './api';
 
 /**
  * 年度总结媒体项类型
@@ -48,18 +48,62 @@ interface MediaCategorySummary {
     items: YearlyMediaItem[];
 }
 
+// Helper to fetch all media items with pagination
+async function fetchAllMediaItems(type: 'movies' | 'tv-shows' | 'books' | 'games' | 'podcasts' | 'documentaries' | 'anime', year: number): Promise<YearlyMediaItem[]> {
+    const allItems: YearlyMediaItem[] = [];
+    let page = 1;
+    const limit = 100; // Larger limit to reduce requests
+
+    while (true) {
+        const result = await fetchMediaItems(type, undefined, page, limit, 'rating_desc');
+        if (!result.items || result.items.length === 0) break;
+
+        // Filter by year (completed_date or created_at starts with the year)
+        const yearStr = String(year);
+        const yearItems = result.items.filter((item: any) => {
+            const date = item.completed_date || item.created_at || '';
+            return date.startsWith(yearStr);
+        });
+
+        allItems.push(...yearItems.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            cover_image: item.cover_image,
+            cover_image_cdn: item.cover_image_cdn,
+            my_rating: item.my_rating,
+            completed_date: item.completed_date,
+            status: item.status,
+        })));
+
+        // Check if there are more pages
+        if (page >= result.pagination.total_pages) break;
+        page++;
+    }
+
+    // Sort by rating descending
+    return allItems.sort((a, b) => (b.my_rating || 0) - (a.my_rating || 0));
+}
+
 /**
- * 获取年度总结数据 (使用后端聚合接口)
+ * 获取年度总结数据 (使用后端聚合接口 + 完整媒体列表)
  */
 export async function fetchYearlyReviewData(year: number): Promise<YearlyReviewData> {
     try {
         // Fetch base data and heatmap data in parallel
-        const [response, exerciseHeatmap, duolingoHeatmap, readingHeatmap] = await Promise.all([
-            fetchWithAuth(`/api/activities/yearly-review?year=${year}`),
-            fetchHeatmapData('exercise', year),
-            fetchHeatmapData('duolingo', year),
-            fetchHeatmapData('reading', year)
-        ]);
+        const [response, exerciseHeatmap, duolingoHeatmap, readingHeatmap,
+            allMovies, allTvShows, allBooks, allGames, allAnime, allPodcasts, allDocs] = await Promise.all([
+                fetchWithAuth(`/api/activities/yearly-review?year=${year}`),
+                fetchHeatmapData('exercise', year),
+                fetchHeatmapData('duolingo', year),
+                fetchHeatmapData('reading', year),
+                fetchAllMediaItems('movies', year),
+                fetchAllMediaItems('tv-shows', year),
+                fetchAllMediaItems('books', year),
+                fetchAllMediaItems('games', year),
+                fetchAllMediaItems('anime', year),
+                fetchAllMediaItems('podcasts', year),
+                fetchAllMediaItems('documentaries', year),
+            ]);
 
         if (!response.ok) {
             throw new Error(`Failed to fetch yearly review data: ${response.status}`);
@@ -73,9 +117,8 @@ export async function fetchYearlyReviewData(year: number): Promise<YearlyReviewD
 
         const data = json.data;
         const habits = data.habits;
-        const media = data.media;
 
-        // 适配前端数据结构
+        // 适配前端数据结构，使用完整媒体列表
         return {
             year,
             habits: {
@@ -119,34 +162,13 @@ export async function fetchYearlyReviewData(year: number): Promise<YearlyReviewD
                 },
             },
             media: {
-                movies: {
-                    total: media.summary.movies_count,
-                    items: media.top_items.movies || [],
-                },
-                books: {
-                    total: media.summary.books_count,
-                    items: media.top_items.books || [],
-                },
-                games: {
-                    total: media.summary.games_count,
-                    items: media.top_items.games || [],
-                },
-                anime: {
-                    total: media.summary.anime_count,
-                    items: media.top_items.anime || [],
-                },
-                tvShows: {
-                    total: media.summary.tv_shows_count,
-                    items: media.top_items.tv_shows || [], // 注意后端字段映射
-                },
-                documentaries: {
-                    total: media.summary.documentaries_count,
-                    items: media.top_items.documentaries || [],
-                },
-                podcasts: {
-                    total: media.summary.podcasts_count,
-                    items: media.top_items.podcasts || [],
-                },
+                movies: { total: allMovies.length, items: allMovies },
+                books: { total: allBooks.length, items: allBooks },
+                games: { total: allGames.length, items: allGames },
+                anime: { total: allAnime.length, items: allAnime },
+                tvShows: { total: allTvShows.length, items: allTvShows },
+                documentaries: { total: allDocs.length, items: allDocs },
+                podcasts: { total: allPodcasts.length, items: allPodcasts },
             },
         };
 
@@ -174,4 +196,3 @@ export async function fetchYearlyReviewData(year: number): Promise<YearlyReviewD
         };
     }
 }
-
