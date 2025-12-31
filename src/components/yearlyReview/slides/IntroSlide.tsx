@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-import { ShareButton } from '../ShareButton';
 
 interface IntroSlideProps {
     year: number;
@@ -9,14 +8,12 @@ interface IntroSlideProps {
 }
 
 export const IntroSlide: React.FC<IntroSlideProps> = ({ year, username = 'My' }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-
     return (
-        <div ref={containerRef} className="w-full h-full relative snap-start flex flex-col items-center justify-center overflow-hidden bg-slate-950 text-white">
+        <div className="w-full h-full relative snap-start flex flex-col items-center justify-center overflow-hidden bg-slate-950 text-white">
             {/* Background Atmosphere */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/40 via-slate-950 to-slate-950" />
 
-            <div className="relative z-10 flex flex-col items-center space-y-8 animate-fade-in px-8 text-center uppercase tracking-widest text-white/30">
+            <div className="relative z-10 flex flex-col items-center space-y-8 animate-fade-in px-8 text-center">
                 {/* Visual Icon */}
                 <motion.div
                     initial={{ scale: 0, rotate: -180 }}
@@ -56,8 +53,6 @@ export const IntroSlide: React.FC<IntroSlideProps> = ({ year, username = 'My' })
                     <p className="text-white/30 text-xs tracking-widest uppercase">Swipe Up to Begin</p>
                 </motion.div>
             </div>
-
-            <ShareButton targetRef={containerRef} fileName={`intro-${year}`} />
         </div>
     );
 };
