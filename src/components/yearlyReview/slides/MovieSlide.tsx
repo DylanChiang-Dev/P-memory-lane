@@ -1,122 +1,112 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Film, Star } from 'lucide-react';
 import type { YearlyReviewData } from '../../../lib/yearlyReview';
+import { ShareButton } from '../ShareButton';
 
 interface MovieSlideProps {
     data: YearlyReviewData['media']['movies'];
 }
 
 export const MovieSlide: React.FC<MovieSlideProps> = ({ data }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
     // Take top 6 items for the grid
     const topItems = data.items.slice(0, 6);
     // Remaining items for the scrolling list
     const remainingItems = data.items.slice(6);
 
     return (
-        <div className="w-full h-full relative snap-start flex flex-col overflow-hidden bg-slate-950 text-white">
+        <div ref={containerRef} className="w-full h-full relative snap-start flex flex-col overflow-hidden bg-slate-950 text-white pb-safe">
             {/* Background Gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-slate-950 to-slate-950" />
 
-            <div className="relative z-10 flex flex-col h-full p-8 pt-16">
+            <div className="relative z-10 flex flex-col h-full p-6 pt-10 pb-safe">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8 }}
-                    className="flex items-center space-x-4 mb-8"
+                    className="flex items-center justify-between mb-6"
                 >
-                    <div className="p-3 bg-purple-500/20 rounded-2xl">
-                        <Film className="w-8 h-8 text-purple-400" />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold">观影</h2>
-                        <p className="text-white/40 text-sm">Cinematic Journey</p>
+                    <div className="flex items-center space-x-4">
+                        <div className="p-2 bg-purple-500/20 rounded-xl">
+                            <Film className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold">电影</h2>
+                            <p className="text-white/40 text-xs uppercase tracking-wider">Cinematic Journey</p>
+                        </div>
                     </div>
                 </motion.div>
 
-                {/* Main Stats */}
-                <div className="flex-1 flex flex-col space-y-6">
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col space-y-6 overflow-hidden">
+                    {/* Stats Group */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.8 }}
                     >
-                        <h3 className="text-lg text-white/60 mb-2">光影交错的梦境</h3>
+                        <h3 className="text-base text-white/60 mb-1">灯光亮起，故事开始</h3>
                         <div className="flex items-baseline space-x-2">
-                            <span className="text-6xl font-black text-purple-400">
-                                {data.total}
-                            </span>
-                            <span className="text-xl font-medium text-purple-400/60">部电影</span>
+                            <span className="text-5xl font-black text-purple-400">{data.total}</span>
+                            <span className="text-lg font-medium text-purple-400/60">部电影</span>
                         </div>
-                        <p className="text-white/40 text-sm mt-2">感受了 {data.total} 个不同的人生命运</p>
                     </motion.div>
 
-                    {/* Grid */}
-                    <div className="grid grid-cols-3 gap-3">
+                    {/* Top Picks Grid - Smaller for mobile */}
+                    <div className="grid grid-cols-3 gap-2">
                         {topItems.map((item, i) => (
                             <motion.div
                                 key={item.id}
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.4 + (i * 0.1), duration: 0.5 }}
-                                className="flex flex-col"
+                                transition={{ delay: 0.3 + (i * 0.1), duration: 0.5 }}
+                                className="group relative"
                             >
-                                <div className="aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden relative group shadow-lg">
+                                <div className="aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden shadow-lg border border-white/5 relative">
                                     {item.cover_image_cdn ? (
                                         <img
                                             src={item.cover_image_cdn}
                                             alt={item.title}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center p-2 text-center text-xs text-white/50 bg-slate-800">
+                                        <div className="w-full h-full flex items-center justify-center p-2 text-center text-[8px] text-white/30">
                                             {item.title}
                                         </div>
                                     )}
-                                    {/* Rating Badge */}
                                     {item.my_rating && (
-                                        <div className="absolute top-1 right-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] text-yellow-400 font-bold">
-                                            <Star className="w-2 h-2 inline-block mr-0.5 fill-current" />
+                                        <div className="absolute top-1 right-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] text-yellow-500 font-bold z-10 flex items-center">
+                                            <Star size={8} className="mr-0.5 fill-current" />
                                             {item.my_rating}
                                         </div>
                                     )}
                                 </div>
-                                {/* Title below poster */}
-                                <p className="mt-1 text-xs text-white/60 text-center line-clamp-2 leading-tight">
-                                    {item.title}
-                                </p>
+                                <div className="mt-1">
+                                    <p className="text-[8px] text-white/60 truncate leading-tight">{item.title}</p>
+                                </div>
                             </motion.div>
-                        ))}
-                        {/* Fallback Empty States */}
-                        {Array.from({ length: Math.max(0, 6 - topItems.length) }).map((_, i) => (
-                            <div key={`empty-${i}`} className="aspect-[2/3] bg-white/5 rounded-lg" />
                         ))}
                     </div>
 
-                    {/* Remaining items - static list */}
+                    {/* Infinite Scrolling List - Compact */}
                     {remainingItems.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            transition={{ delay: 0.8, duration: 0.8 }}
-                            className="mt-auto pt-4"
-                        >
-                            <h4 className="text-xs uppercase tracking-widest text-white/30 mb-2">还看了</h4>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1">
-                                {remainingItems.map((item) => (
-                                    <span key={item.id} className="inline-flex items-center text-sm text-white/60">
-                                        {item.my_rating && (
-                                            <span className="text-yellow-400 mr-1">★{item.my_rating}</span>
-                                        )}
-                                        <span>{item.title}</span>
+                        <div className="relative mt-auto">
+                            <h4 className="text-[10px] uppercase tracking-widest text-white/30 mb-2">还看了</h4>
+                            <div className="flex flex-wrap gap-1.5 opacity-40 grayscale pointer-events-none">
+                                {remainingItems.slice(0, 15).map((item) => (
+                                    <span key={item.id} className="text-[10px] px-1.5 py-0.5 bg-white/5 rounded-full whitespace-nowrap">
+                                        {item.title}
                                     </span>
                                 ))}
                             </div>
-                        </motion.div>
+                        </div>
                     )}
                 </div>
             </div>
+
+            <ShareButton targetRef={containerRef} fileName="movies-stats" />
         </div>
     );
 };
