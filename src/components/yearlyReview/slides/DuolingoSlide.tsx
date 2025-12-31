@@ -14,7 +14,7 @@ export const DuolingoSlide: React.FC<DuolingoSlideProps> = ({ data }) => {
             {/* Background Gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-slate-950 to-slate-950" />
 
-            <div className="relative z-10 flex flex-col h-full p-8 pt-16">
+            <div className="relative z-10 flex flex-col h-full p-8 pt-16 pb-safe">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -48,39 +48,31 @@ export const DuolingoSlide: React.FC<DuolingoSlideProps> = ({ data }) => {
                         <p className="text-white/40 text-sm mt-2">打卡 {data.totalDays} 天</p>
                     </motion.div>
 
-                    {/* Streak Visualization */}
-                    <div className="flex items-center justify-center py-8">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-green-500 blur-2xl opacity-20 animate-pulse rounded-full" />
-                            <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                whileInView={{ scale: 1, opacity: 1 }}
-                                transition={{ delay: 0.5, type: "spring" }}
-                                className="relative flex flex-col items-center"
-                            >
-                                <Flame className="w-24 h-24 text-orange-500 drop-shadow-[0_0_15px_rgba(249,115,22,0.5)] fill-orange-500 animate-pulse" />
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center mt-2">
-                                    <span className="block text-2xl font-black text-white drop-shadow-md">
-                                        {data.currentStreak > 0 ? data.currentStreak : data.longestStreak}
-                                    </span>
-                                    <span className="text-[10px] uppercase font-bold text-white/80">
-                                        {data.currentStreak > 0 ? 'Current Streak' : 'Longest Streak'}
-                                    </span>
-                                </div>
-                            </motion.div>
-                        </div>
-                    </div>
-
-                    {/* Heatmap */}
+                    {/* Heatmap - moved before stats for better mobile layout */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6, duration: 0.8 }}
+                        transition={{ delay: 0.4, duration: 0.8 }}
                         className="space-y-4"
                     >
                         <h4 className="text-xs uppercase tracking-widest text-white/30">每日学习热力图</h4>
                         <YearHeatmap data={data.heatmapData || []} color="green" year={2025} />
                     </motion.div>
+
+                    {/* Streak Stats - compact grid like Exercise page */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white/5 p-4 rounded-2xl flex items-center space-x-3">
+                            <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
+                            <div>
+                                <div className="text-2xl font-bold">{data.currentStreak}</div>
+                                <div className="text-xs text-white/40">当前连胜 (天)</div>
+                            </div>
+                        </div>
+                        <div className="bg-white/5 p-4 rounded-2xl">
+                            <div className="text-2xl font-bold">{data.longestStreak}</div>
+                            <div className="text-xs text-white/40">最长连续 (天)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

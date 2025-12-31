@@ -10,13 +10,8 @@ interface ReadingSlideProps {
 }
 
 export const ReadingSlide: React.FC<ReadingSlideProps> = ({ data, books }) => {
-    // Only show books that were actually completed
-    // A book is considered "completed" if it has a rating (my_rating > 0)
-    // Books without rating are likely "want to read" or "currently reading"
-    const completedBooks = books.filter(book => {
-        // Must have a rating to be considered completed
-        return book.my_rating && book.my_rating > 0;
-    });
+    // Only show books that were actually completed (has rating > 0)
+    const completedBooks = books.filter(book => book.my_rating && book.my_rating > 0);
     const completedCount = completedBooks.length;
 
     return (
@@ -24,7 +19,7 @@ export const ReadingSlide: React.FC<ReadingSlideProps> = ({ data, books }) => {
             {/* Background Gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-slate-950 to-slate-950" />
 
-            <div className="relative z-10 flex flex-col h-full p-8 pt-16">
+            <div className="relative z-10 flex flex-col h-full p-8 pt-16 pb-safe">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -42,7 +37,7 @@ export const ReadingSlide: React.FC<ReadingSlideProps> = ({ data, books }) => {
                 </motion.div>
 
                 {/* Main Stats */}
-                <div className="flex-1 flex flex-col space-y-6 overflow-y-auto">
+                <div className="flex-1 flex flex-col space-y-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -60,22 +55,22 @@ export const ReadingSlide: React.FC<ReadingSlideProps> = ({ data, books }) => {
                         </p>
                     </motion.div>
 
-                    {/* Completed Books - Dynamic grid based on count */}
+                    {/* Completed Books - Smaller and compact */}
                     {completedCount > 0 && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3, duration: 0.8 }}
                         >
-                            <h4 className="text-xs uppercase tracking-widest text-white/30 mb-3">今年读完的书</h4>
-                            <div className={`grid gap-3 ${completedCount === 1 ? 'grid-cols-1 max-w-[120px]' : completedCount <= 3 ? 'grid-cols-3' : 'grid-cols-3'}`}>
-                                {completedBooks.slice(0, 6).map((book, i) => (
+                            <h4 className="text-xs uppercase tracking-widest text-white/30 mb-2">今年读完的书</h4>
+                            <div className="flex gap-2">
+                                {completedBooks.slice(0, 4).map((book, i) => (
                                     <motion.div
                                         key={book.id}
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.4 + (i * 0.1), duration: 0.5 }}
-                                        className="aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden relative group shadow-lg"
+                                        className="w-20 aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden relative shadow-lg flex-shrink-0"
                                     >
                                         {book.cover_image_cdn ? (
                                             <img
@@ -84,14 +79,13 @@ export const ReadingSlide: React.FC<ReadingSlideProps> = ({ data, books }) => {
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center p-2 text-center text-xs text-white/50 bg-slate-800">
+                                            <div className="w-full h-full flex items-center justify-center p-1 text-center text-[8px] text-white/50 bg-slate-800">
                                                 {book.title}
                                             </div>
                                         )}
-                                        {/* Rating Badge */}
                                         {book.my_rating && (
-                                            <div className="absolute top-1 right-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] text-yellow-400 font-bold">
-                                                ★ {book.my_rating}
+                                            <div className="absolute top-0.5 right-0.5 bg-black/60 px-1 py-0.5 rounded text-[8px] text-yellow-400 font-bold">
+                                                ★{book.my_rating}
                                             </div>
                                         )}
                                     </motion.div>
@@ -105,7 +99,7 @@ export const ReadingSlide: React.FC<ReadingSlideProps> = ({ data, books }) => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.8 }}
-                        className="space-y-3"
+                        className="space-y-4"
                     >
                         <h4 className="text-xs uppercase tracking-widest text-white/30">每日阅读热力图</h4>
                         <YearHeatmap data={data.heatmapData || []} color="blue" year={2025} />
